@@ -155,6 +155,7 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
 .lth{width:132px;aspect-ratio:16/10;background:var(--line);border-radius:3px;overflow:hidden;max-width:100%}.lth img{width:100%;height:100%;object-fit:cover;display:block}
 .linfo{display:flex;flex-direction:column;gap:4px;min-width:0}.linfo b{font-size:14px;overflow-wrap:anywhere}
 .primary.sm{font-size:12px;padding:4px 12px}
+#snapTip{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);background:#1e88e5;color:#fff;font-size:12.5px;padding:5px 12px;border-radius:12px;z-index:6;pointer-events:none}
 #boxSel{position:fixed;border:1.5px dashed var(--accent);background:var(--accent-soft);z-index:6;pointer-events:none}
 #toast{position:absolute;left:50%;bottom:74px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:4px;font-size:13px;z-index:30}
 #xBusy{color:var(--accent);font-weight:500}
@@ -201,6 +202,7 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
   <div id="tfMenu" hidden></div>
   <div id="toast" hidden></div>
   <div id="boxSel" hidden></div>
+  <div id="snapTip" hidden></div>
   <div id="libDlg" class="dlg" hidden role="dialog" aria-label="我的配置">
     <div class="xcard">
       <header><h2>我的配置</h2><button class="hbtn" id="libClose" type="button">關閉 ✕</button></header>
@@ -236,7 +238,7 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
         <details><summary>2. 選取、移動、參數</summary><ul>
           <li><b>點一下</b>設備：選取，上方出現「⚙ 參數／📌 固定／✕ 刪除」。</li>
           <li><b>點兩下</b>設備：直接打開右邊參數欄，用 −／＋ 或輸入數字調整。</li>
-          <li><b>拖曳</b>設備：移動位置；📌 固定後就不會被拖動。</li>
+          <li><b>拖曳</b>設備：移動位置；靠近其他設備（水泥桶優先對其他水泥桶）的中心線時會自動對齊並出現藍色虛線，按住 Alt 可暫時不對齊。📌 固定後就不會被拖動。</li>
           <li><b>多選</b>：按「框選」後在空白處拉框，或按住 Shift 點設備；拖曳其中一個整組移動，或在參數欄輸入 ΔX／ΔY。按 Esc 取消選取。</li>
           <li>旋轉：↺ ↻ 按鈕或鍵盤 Q／E；每次角度在「場地 → 旋轉按鈕每次」設定。</li>
           <li>水泥桶參數會顯示「相對主機樓中心 ΔX／ΔY」。</li></ul></details>
@@ -284,9 +286,17 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
           <label><input type="checkbox" data-xv="NE" checked> 東北等角</label><label><input type="checkbox" data-xv="NW" checked> 西北等角</label>
         </div>
         <div class="iacts"><button class="primary" id="xPdf" type="button">下載 PDF 圖集（A3）</button><button class="hbtn" id="xPng" type="button">下載 PNG 圖片（zip）</button></div>
-        <div class="isect">3D 模型與 CAD</div>
-        <p class="note">一個 zip：3D 模型 .glb（Windows 3D 檢視器、Blender、SketchUp 外掛可開）＋ 平面配置 .dxf（AutoCAD，單位 mm，含圖層）。</p>
-        <div class="iacts"><button class="hbtn" id="x3d" type="button">下載 3D 模型 ＋ DXF（zip）</button></div>
+        <div class="isect">CAD 圖面（DXF）</div>
+        <div class="xviews">
+          <label><input type="checkbox" data-xd="plan" checked> 俯視配置圖</label>
+          <label><input type="checkbox" data-xd="S" checked> 南向立面</label><label><input type="checkbox" data-xd="N" checked> 北向立面</label>
+          <label><input type="checkbox" data-xd="E" checked> 東向立面</label><label><input type="checkbox" data-xd="W" checked> 西向立面</label>
+        </div>
+        <p class="note">AutoCAD 可開，單位 mm，含圖層。勾一張直接下載 .dxf，勾多張打包成 zip。</p>
+        <div class="iacts"><button class="hbtn" id="xDxf" type="button">下載 DXF</button></div>
+        <div class="isect">3D 模型</div>
+        <p class="note">.glb 檔，可用 Windows「3D 檢視器」、Blender、SketchUp（外掛）開啟，單位公尺。</p>
+        <div class="iacts"><button class="hbtn" id="x3d" type="button">下載 3D 模型 .glb</button></div>
         <p class="note" id="xBusy" hidden></p>
       </div>
     </div>
@@ -4777,7 +4787,7 @@ delEl.addEventListener('click',e=>{e.stopPropagation();const b=e.target.closest(
 const delObj=new THREE.CSS2DObject(delEl);delObj.visible=false;scene.add(delObj);
 function toggleLock(){const i=byId(selected);if(!i)return;i.locked=!i.locked;toast(i.locked?'已固定「'+nm(i)+'」，不能拖曳或旋轉':'已解除固定');renderInspector();update();}
 function placeDel(){const i=selSet.size>1?null:byId(selected);delObj.visible=!!i;delEl.style.display=i?'':'none';if(!i)return;const pb=delEl.querySelector('.pin');pb.textContent=i.locked?'📌 已固定':'📌 固定';pb.classList.toggle('on',!!i.locked);
-  const y=i.type==='zone'?1.5:labelY(i)+3.2;delObj.position.set(i.x,y,i.z);}
+  const y=i.type==='zone'?1.5:labelY(i)+3.2;if(topMode)delObj.position.set(i.x,.5,i.z-(i.type==='zone'?i.d/2:radiusOf(i))-2.5);else delObj.position.set(i.x,y,i.z);}
 /* ---------- main update ---------- */
 let selected=null,showDims=true,tmpL=[];
 const discs={};
@@ -5024,9 +5034,18 @@ renderer.domElement.addEventListener('pointerdown',e=>{setPtr(e);const k=pick();
 renderer.domElement.addEventListener('pointermove',e=>{if(boxS){const b=$('boxSel');b.style.left=Math.min(e.clientX,boxS.x)+'px';b.style.top=Math.min(e.clientY,boxS.y)+'px';b.style.width=Math.abs(e.clientX-boxS.x)+'px';b.style.height=Math.abs(e.clientY-boxS.y)+'px';return;}
   if(!drag)return;setPtr(e);const hit=V();if(!ray.ray.intersectPlane(gplane,hit))return;
   if(drag.group){const dx=Math.round((hit.x-drag.lx)*2)/2,dz=Math.round((hit.z-drag.lz)*2)/2;if(dx||dz){moveGroup(dx,dz);drag.lx+=dx;drag.lz+=dz;update();}return;}
-  const i=byId(drag.k);
-  moveItem(i,Math.round((hit.x+drag.dx)*2)/2-i.x,Math.round((hit.z+drag.dz)*2)/2-i.z);update();});
-const endDrag=e=>{if(boxS){const r=renderer.domElement.getBoundingClientRect(),x0=Math.min(e.clientX,boxS.x),x1=Math.max(e.clientX,boxS.x),y0=Math.min(e.clientY,boxS.y),y1=Math.max(e.clientY,boxS.y);
+  const i=byId(drag.k);let nx=Math.round((hit.x+drag.dx)*2)/2,nz=Math.round((hit.z+drag.dz)*2)/2;
+  // alignment snap: centre lines up with another item's centre (silos snap to silos first); hold Alt to turn off
+  clearGroup(snapG);if(!e.altKey&&i.type!=='zone'){const pool=S.items.filter(o=>o!==i&&o.type!=='zone'&&(i.type!=='silo'||o.type==='silo'||o.type==='tower'));
+    const mpp=2*camera.position.distanceTo(controls.target)*Math.tan(camera.fov/2*D2R)/Math.max(1,view.clientHeight),TH=Math.min(3,Math.max(.3,14*mpp));let bx=null,bz=null;
+    pool.forEach(o=>{const dx=Math.abs((hit.x+drag.dx)-o.x),dz=Math.abs((hit.z+drag.dz)-o.z);if(dx<TH&&(!bx||dx<bx.d))bx={d:dx,o};if(dz<TH&&(!bz||dz<bz.d))bz={d:dz,o};});
+    const gl=(a,b)=>{const ln=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),new THREE.LineDashedMaterial({color:'#1e88e5',dashSize:1,gapSize:.6,depthTest:false}));ln.computeLineDistances();ln.renderOrder=10;snapG.add(ln);};
+    if(bx){nx=bx.o.x;gl(V(nx,.25,Math.min(nz,bx.o.z)-6),V(nx,.25,Math.max(nz,bx.o.z)+6));}
+    if(bz){nz=bz.o.z;gl(V(Math.min(nx,bz.o.x)-6,.25,nz),V(Math.max(nx,bz.o.x)+6,.25,nz));}
+    $('snapTip').hidden=!(bx||bz);if(bx||bz)$('snapTip').textContent='對齊 '+[bx&&('X＝'+nm(bx.o)),bz&&('Y＝'+nm(bz.o))].filter(Boolean).join('、')+'（按住 Alt 不對齊）';}
+  moveItem(i,nx-i.x,nz-i.z);update();});
+const snapG=new THREE.Group();scene.add(snapG);
+const endDrag=e=>{clearGroup(snapG);$('snapTip').hidden=true;if(boxS){const r=renderer.domElement.getBoundingClientRect(),x0=Math.min(e.clientX,boxS.x),x1=Math.max(e.clientX,boxS.x),y0=Math.min(e.clientY,boxS.y),y1=Math.max(e.clientY,boxS.y);
     const ids=new Set(boxS.add?[...selSet,...(selected?[selected]:[])]:[]);if(x1-x0>4||y1-y0>4)S.items.concat(S.zones).forEach(i=>{const p=V(i.x,0,i.z).project(camera);const sx=r.left+(p.x+1)/2*r.width,sy=r.top+(1-p.y)/2*r.height;if(sx>=x0&&sx<=x1&&sy>=y0&&sy<=y1)ids.add(i.id);});
     boxS=null;$('boxSel').hidden=true;controls.enabled=true;setGroup([...ids]);if(boxMode){boxMode=false;$('bBox').classList.remove('on');}return;}
   if(!drag)return;drag=null;controls.enabled=true;renderer.domElement.style.cursor='';};
@@ -5043,7 +5062,7 @@ $('tCheck').addEventListener('click',()=>setSheet('check',$('check').classList.c
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>setSheet(b.dataset.close,false)));
 if(matchMedia('(max-width:900px)').matches){setSheet('params',false);setSheet('check',false);}
 let fly=null;function flyTo(t,p){fly={t0:controls.target.clone(),p0:camera.position.clone(),t1:t,p1:p,k:0,lt:0};}
-function setTop(on){topMode=on;$('vTop').classList.toggle('on',on);
+function setTop(on){topMode=on;$('vTop').classList.toggle('on',on);try{placeDel();}catch(e){}
   if(on){camera.fov=4;camera.near=20;controls.minPolarAngle=0;controls.maxPolarAngle=1e-4;controls.minAzimuthAngle=0;controls.maxAzimuthAngle=0;controls.maxDistance=12000;controls.minDistance=150;
     controls.mouseButtons.LEFT=THREE.MOUSE.PAN;controls.touches.ONE=THREE.TOUCH.PAN;scene.fog=null;}
   else{camera.fov=40;camera.near=.5;controls.minPolarAngle=0;controls.maxPolarAngle=Math.PI*.495;controls.minAzimuthAngle=-Infinity;controls.maxAzimuthAngle=Infinity;controls.maxDistance=900;controls.minDistance=8;
@@ -5200,10 +5219,44 @@ function dxf(){const L=[],Y=z=>(S.L-z)*1000,X=x=>x*1000;const layers={SITE:7,EQU
   const head=['0','SECTION','2','HEADER','9','$ACADVER','1','AC1009','9','$INSUNITS','70','4','0','ENDSEC','0','SECTION','2','TABLES','0','TABLE','2','LAYER','70',String(Object.keys(layers).length)];
   Object.entries(layers).forEach(([n,c])=>head.push('0','LAYER','2',n,'70','0','62',String(c),'6','CONTINUOUS'));head.push('0','ENDTAB','0','ENDSEC','0','SECTION','2','ENTITIES');
   return head.concat(L,['0','ENDSEC','0','EOF']).join('\r\n');}
-$('x3d').addEventListener('click',async()=>{if(!window.JSZip||!THREE.GLTFExporter){toast('元件尚未載入，請稍候再試');return;}busy(true,'產生 3D 模型與 CAD…');
-  try{const zip=new JSZip();zip.file(projName()+'_3D模型.glb',await glb());zip.file(projName()+'_平面配置.dxf',dxf());
-    zip.file('說明.txt','3D模型.glb：可用 Windows「3D 檢視器」、Blender、SketchUp（外掛）等開啟，單位公尺。\r\n平面配置.dxf：AutoCAD 可開啟，單位 mm，原點為場地左下角、上方為北。圖層：SITE 場地、EQUIP 設備、SILO 水泥桶、BELT 輸送帶、ROUTE 動線、ZONE 限制區、PARK 停車格、TEXT 文字。\r\n本檔為配置示意，非施工圖。');
-    await saveFile(projName()+'_3D模型與CAD.zip',await zip.generateAsync({type:'blob'}));}catch(e){toast('輸出失敗：'+e.message);}busy(false);});
+$('x3d').addEventListener('click',async()=>{if(!THREE.GLTFExporter){toast('元件尚未載入，請稍候再試');return;}busy(true,'產生 3D 模型…');
+  try{await saveFile(projName()+'_3D模型.glb',new Blob([await glb()]));}catch(e){toast('輸出失敗：'+e.message);}busy(false);});
+/* ---- elevation DXF: project mesh feature edges onto the view plane ---- */
+const EDGE_CACHE=new Map();
+function edgesOf(geo){let e=EDGE_CACHE.get(geo);if(!e){e=new THREE.EdgesGeometry(geo,28).attributes.position.array;EDGE_CACHE.set(geo,e);}return e;}
+const ELEV={S:{t:'南向立面圖（由南往北看）',h:p=>p.x},N:{t:'北向立面圖（由北往南看）',h:p=>-p.x},E:{t:'東向立面圖（由東往西看）',h:p=>-p.z},W:{t:'西向立面圖（由西往東看）',h:p=>p.z}};
+const LAYER_OF={tower:'TOWER',silo:'SILO',bins:'BINS',hopper:'HOPPER',transfer:'BELT',yard:'YARD',parking:'PARK',gate:'SITE',scale:'SITE',wash:'SITE',zone:'ZONE'};
+function dxfWrite(layers,ents){const head=['0','SECTION','2','HEADER','9','$ACADVER','1','AC1009','9','$INSUNITS','70','4','0','ENDSEC','0','SECTION','2','TABLES','0','TABLE','2','LAYER','70',String(Object.keys(layers).length)];
+  Object.entries(layers).forEach(([n,c])=>head.push('0','LAYER','2',n,'70','0','62',String(c),'6','CONTINUOUS'));head.push('0','ENDTAB','0','ENDSEC','0','SECTION','2','ENTITIES');
+  return head.concat(ents,['0','ENDSEC','0','EOF']).join('\r\n');}
+const dxfU=t=>[...t].map(ch=>ch.charCodeAt(0)>126?'\\U+'+ch.charCodeAt(0).toString(16).toUpperCase().padStart(4,'0'):ch).join('');
+function dxfElevation(key){const E=ELEV[key],ents=[],seen=new Set(),v=new THREE.Vector3();let hmin=1e9,hmax=-1e9;
+  const line=(a,b,ly)=>{const k=ly+Math.round(a[0]*20)+','+Math.round(a[1]*20)+','+Math.round(b[0]*20)+','+Math.round(b[1]*20);if(seen.has(k))return;seen.add(k);
+    if(Math.abs(a[0]-b[0])<1e-3&&Math.abs(a[1]-b[1])<1e-3)return;hmin=Math.min(hmin,a[0],b[0]);hmax=Math.max(hmax,a[0],b[0]);
+    ents.push('0','LINE','8',ly,'10',(a[0]*1000).toFixed(0),'20',(a[1]*1000).toFixed(0),'30','0','11',(b[0]*1000).toFixed(0),'21',(b[1]*1000).toFixed(0),'31','0');};
+  const walk=(root,ly0)=>{root.updateMatrixWorld(true);root.traverse(o=>{if(!o.isMesh||!o.visible||o.geometry===MOUND)return;const m=o.material;if(m&&m.visible===false)return;
+      const ly=ly0||LAYER_OF[(byId(o.userData.key)||{}).type]||'EQUIP',arr=edgesOf(o.geometry),mw=o.matrixWorld;
+      for(let i=0;i<arr.length;i+=6){v.set(arr[i],arr[i+1],arr[i+2]).applyMatrix4(mw);const a=[E.h(v),Math.max(v.y,-4)];v.set(arr[i+3],arr[i+4],arr[i+5]).applyMatrix4(mw);line(a,[E.h(v),Math.max(v.y,-4)],ly);}
+      const gp=o.geometry.parameters,gt=o.geometry.type;   // silhouette of vertical cylinders / cones (smooth sides have no feature edges)
+      if(gp&&(gt==='CylinderGeometry'||gt==='ConeGeometry')){const ax=new THREE.Vector3(0,1,0).transformDirection(mw);if(Math.abs(ax.y)>.98){
+        const sc=new THREE.Vector3().setFromMatrixScale(mw),rT=(gt==='ConeGeometry'?0:gp.radiusTop)*sc.x,rB=(gt==='ConeGeometry'?gp.radius:gp.radiusBottom)*sc.x,hh=gp.height/2;
+        const top=new THREE.Vector3(0,hh,0).applyMatrix4(mw),bot=new THREE.Vector3(0,-hh,0).applyMatrix4(mw);
+        [-1,1].forEach(sg=>line([E.h(top)+sg*rT,top.y],[E.h(bot)+sg*rB,Math.max(bot.y,-4)],ly));
+        if(rT>0)line([E.h(top)-rT,top.y],[E.h(top)+rT,top.y],ly);line([E.h(bot)-rB,Math.max(bot.y,-4)],[E.h(bot)+rB,Math.max(bot.y,-4)],ly);}}});};
+  Object.values(OBJ).forEach(o=>walk(o.g));walk(beltG,'BELT');
+  if(hmin>hmax){hmin=0;hmax=10;}
+  ents.push('0','LINE','8','GL','10',((hmin-5)*1000).toFixed(0),'20','0','30','0','11',((hmax+5)*1000).toFixed(0),'21','0','31','0');
+  const txt=(x,y,h,t,ly='TEXT')=>ents.push('0','TEXT','8',ly,'10',(x*1000).toFixed(0),'20',(y*1000).toFixed(0),'30','0','40',(h*1000).toFixed(0),'1',dxfU(t));
+  txt(hmax+1,.3,.8,'GL ±0');txt(hmin,-4,1.6,($('xName').value||'預拌廠配置')+'　'+E.t);
+  S.items.forEach(i=>{if(['zone','parking','gate'].includes(i.type))return;const p=V(i.x,0,i.z);txt(E.h(p),labelY(i)+1,.9,labelText(i));});
+  return dxfWrite({GL:7,TOWER:5,SILO:1,BINS:4,HOPPER:8,BELT:3,YARD:140,PARK:8,SITE:7,ZONE:30,EQUIP:5,TEXT:7},ents);}
+$('xDxf').addEventListener('click',async()=>{const keys=[...document.querySelectorAll('[data-xd]')].filter(c=>c.checked).map(c=>c.dataset.xd);
+  if(!keys.length){toast('請至少勾選一張');return;}busy(true,'產生 DXF…');await new Promise(r=>setTimeout(r,30));
+  try{const name={plan:'俯視配置',S:'南向立面',N:'北向立面',E:'東向立面',W:'西向立面'};const files=keys.map(k=>[projName()+'_'+name[k]+'.dxf',k==='plan'?dxf():dxfElevation(k)]);
+    if(files.length===1)await saveFile(files[0][0],files[0][1]);
+    else{if(!window.JSZip){toast('壓縮元件尚未載入，請稍候再試');busy(false);return;}const zip=new JSZip();files.forEach(([n,d])=>zip.file(n,d));
+      zip.file('說明.txt','AutoCAD 可開啟，單位 mm。\r\n俯視配置：原點為場地左下角、上方為北；圖層 SITE 場地、EQUIP 設備、SILO 水泥桶、BELT 輸送帶、ROUTE 動線、ZONE 限制區、PARK 停車格、TEXT 文字。\r\n立面：水平為該方向看過去的寬度，垂直為高度，GL 圖層為地面線；為 3D 模型的邊線投影，未做隱藏線處理。\r\n本檔為配置示意，非施工圖。');
+      await saveFile(projName()+'_DXF圖面.zip',await zip.generateAsync({type:'blob'}));}}catch(e){toast('輸出失敗：'+e.message);}busy(false);});
 $('bExport').addEventListener('click',()=>{$('exportDlg').hidden=false;});
 $('xToLib').addEventListener('click',()=>{$('exportDlg').hidden=true;$('bLib').click();setTimeout(()=>$('libName').focus(),50);});
 $('xClose').addEventListener('click',()=>{$('exportDlg').hidden=true;});
