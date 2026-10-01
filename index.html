@@ -135,6 +135,7 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
 .silorow .unit{font-family:var(--f-mono)}
 .chk.sm{font-size:12px;color:var(--muted)}
 .lbl.zone{background:rgba(107,79,163,.85);color:#fff}
+.lbl.room{font-size:10.5px;background:rgba(60,66,72,.78);color:#fff;padding:2px 5px}
 #hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 22px;
   width:min(380px,calc(100% - 32px));z-index:2;display:flex;flex-direction:column;gap:10px}
 #hint h3{margin:0;font-size:16px}
@@ -192,7 +193,8 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
     <button class="btn add" data-add="parking" type="button">停車區</button>
     <button class="btn add" data-add="yard" type="button">洗車場</button>
     <span class="sep"></span>
-    <button class="btn" id="bExample" type="button">載入範例</button>
+    <button class="btn" id="bExample2" type="button">範例：半高塔</button>
+    <button class="btn" id="bExample" type="button">範例：舊廠</button>
     <button class="btn" id="bClear" type="button">清空</button>
     <button class="btn" id="bHelp" type="button">操作說明</button>
     <button class="btn on" id="bLib" type="button">我的配置</button>
@@ -241,7 +243,7 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
           <li><b>拖曳</b>設備：移動位置；靠近其他設備（水泥桶優先對其他水泥桶）的中心線時會自動對齊並出現藍色虛線，按住 Alt 可暫時不對齊。📌 固定後就不會被拖動。</li>
           <li><b>多選</b>：按「框選」後在空白處拉框，或按住 Shift 點設備；拖曳其中一個整組移動，或在參數欄輸入 ΔX／ΔY。按 Esc 取消選取。</li>
           <li>旋轉：↺ ↻ 按鈕或鍵盤 Q／E；每次角度在「場地 → 旋轉按鈕每次」設定。</li>
-          <li>水泥桶參數會顯示「相對主機樓中心 ΔX／ΔY」。</li></ul></details>
+          <li>水泥桶參數會顯示「相對主機樓中心 ΔX／ΔY」。</li><li><b>主機樓型式</b>：新增預設為半高塔（7.15×7.05 m，1F RC），也可改回 6 層舊廠塔。主帶運機入料點固定在入料面內 3.0 m、高 15.2 m；料倉與主機樓沒對正時，輸送帶會斜著進去，參數裡會顯示夾角（90° = 垂直進入）。</li><li><b>水泥桶支撐</b>：全鋼構／RC 柱＋鋼構腳柱／<b>RC 建物</b>。RC 建物選 3F（17.9 m）筒倉直接坐在 RC 頂、沒有腳柱；2F（11.0 m）露出一節短腳柱；1F（7.3 m）腳柱更長。下方可填房間用途（電器室、空壓機室…）。預設 Ø4370，可改其他直徑。</li><li><b>砂石料倉結構</b>：RC 倉體＋鋼構錐斗（預設），或全鋼構。主帶運機尾端固定在料倉軸線上、離遠端 3.3 m。</li></ul></details>
         <details><summary>3. 範本</summary><ul>
           <li>設備參數改好後，在參數欄「範本」輸入名稱 →「儲存目前參數為範本」。</li>
           <li>之後同類設備選範本 →「套用」；按「設為新增預設 ★」，新加入的設備會自動套用。</li>
@@ -4356,6 +4358,34 @@ function buildTower(face){
   box(g,4.2,1.6,2.6,M.equip,cx,FL['4F']+2.3,0);cyl(g,1.1,1.2,M.tank,cx-2.2,FL['3F']+2.7,-1.6);cyl(g,1.1,1.2,M.tank,cx-2.2,FL['3F']+2.7,1.6);
   return g;
 }
+/* ---------- HALF-HEIGHT TOWER (standard type, from 3M3 半高塔 drawings) ----------
+   plan 7.15 x 7.05 m; 1F RC (truck reverses in under the concrete hopper); steel above:
+   2F 7.1 mixer, 3F 11.0 weighing (aggregate + 3 powder + water), 4F 16.0 dust collector, roof 20.3.
+   main belt inlet fixed: 3.0 m from centre toward the inlet face, at 15.2 m */
+const HT={hx:3.575,hz:3.525,f2:7.1,f3:11,f4:16,roof:20.3,head:15.2,headIn:3.0};
+function buildTowerHalf(face,inl){
+  const g=new THREE.Group(),X0=-HT.hx,X1=HT.hx,Z0=-HT.hz,Z1=HT.hz;face=face||'+z';inl=inl||'+z';
+  const alongZ=face==='+z'||face==='-z';
+  [[X0,Z0],[X1,Z0],[X1,Z1],[X0,Z1]].forEach(([x,z])=>box(g,.7,HT.f2,.7,M.rc,x,HT.f2/2,z));
+  if(alongZ){[X0,X1].forEach(x=>box(g,.3,HT.f2,Z1-Z0,M.rc,x,HT.f2/2,0));box(g,X1-X0,HT.f2,.3,M.rc,0,HT.f2/2,face==='+z'?Z0:Z1);}
+  else{[Z0,Z1].forEach(z=>box(g,X1-X0,HT.f2,.3,M.rc,0,HT.f2/2,z));box(g,.3,HT.f2,Z1-Z0,M.rc,face==='+x'?X0:X1,HT.f2/2,0);}
+  box(g,X1-X0+.5,.45,Z1-Z0+.5,M.rc,0,HT.f2-.22,0);
+  const lv=[HT.f2,HT.f3,HT.f4,HT.roof];steelFrame(g,X0,X1,Z0,Z1,lv,2,2,{col:.36});
+  [HT.f3,HT.f4].forEach(y=>{box(g,X1-X0-.3,.08,Z1-Z0-.3,M.grate,0,y,0).castShadow=false;});
+  const rw=(X1-X0)/2+.4,sl=Math.hypot(rw,1.1);[-1,1].forEach(sg=>{const r=mesh(UB,M.roof);r.scale.set(sl,.12,Z1-Z0+.8);r.position.set(sg*rw/2,HT.roof+.55,0);r.rotation.z=-sg*Math.atan2(1.1,rw);g.add(r);});
+  const hC=HT.roof-HT.f2,yC=(HT.roof+HT.f2)/2;
+  [Z0,Z1].forEach(z=>box(g,X1-X0,hC,.05,M.clad,0,yC,z).castShadow=false);[X0,X1].forEach(x=>box(g,.05,hC,Z1-Z0,M.clad,x,yC,0).castShadow=false);
+  // equipment
+  cone(g,1.25,.35,1.9,M.equip,0,HT.f2-2.4,0);                                    // concrete hopper (hangs in 1F)
+  box(g,3.2,1.5,2.0,M.equip,0,HT.f2+1.0,0);box(g,.8,.8,.8,M.tank,1.9,HT.f2+1.1,.6); // twin-shaft mixer + motor
+  cone(g,1.35,.35,1.7,M.silo2,1.2,HT.f3-1.7,0);box(g,2.7,.6,2.7,M.silo2,1.2,HT.f3+.3,0); // aggregate weigh hopper
+  [-2.05,-.75,.55].forEach(z=>cone(g,.55,.18,1.3,M.equip,-1.7,HT.f3-1.3,z));     // 3 powder weigh hoppers
+  cyl(g,.65,1.3,M.tank,-1.7,HT.f3+.75,2.1,20);                                    // water buffer tank
+  box(g,2.4,2.2,1.5,M.equip,-1,HT.f4+1.1,-1.6);                                  // dust collector
+  const [nx,nz]=faceVec(inl);box(g,.9,1.2,.9,M.silo2,nx*HT.headIn*.82,HT.head-.9,nz*HT.headIn*.82); // head chute
+  const op=box(g,Math.abs(nz)?2.2:.08,1.6,Math.abs(nx)?2.2:.08,M.pit,nx*(HT.hx+.03),HT.head+.2,nz*(HT.hz+.03));op.castShadow=false; // belt opening
+  return g;
+}
 /* ---------- BINS GROUP (4-cell aggregate bins + rotating distributor) ---------- */
 let spreadArm=null;
 /* ---------- HOPPER GROUP (underground receiving pit; trucks back in from local +z) ---------- */
@@ -4386,20 +4416,29 @@ function buildBinsP(b){
   const xs=[],zs=[];for(let i=0;i<=NX;i++)xs.push(-hx+b.L*i/NX);for(let j=0;j<=NZ;j++)zs.push(-hz_+b.W*j/NZ);
   const tiers=Math.max(2,Math.round((b.legH-PED)/3.2)),lv=[];for(let k=0;k<=tiers;k++)lv.push(PED+(b.legH-PED)*k/tiers);
   const YB=b.legH+b.hopH;
+  const RC=b.st==='rc';
+  if(RC){const C=.8,yW=b.legH+b.hopH*.6;
+    xs.forEach(x=>zs.forEach(z=>box(g,C,yW,C,M.rc,x,yW/2,z)));
+    [b.legH,yW-.4].forEach(y=>{xs.forEach(x=>box(g,.5,.7,b.W,M.rc,x,y,0));zs.forEach(z=>box(g,b.L,.7,.5,M.rc,0,y,z));});
+    box(g,b.L+C,top-yW,b.W+C,M.rc,0,(yW+top)/2,0);
+    for(let y=yW+3;y<top-.5;y+=3)box(g,b.L+C+.08,.1,b.W+C+.08,M.binBand,0,y,0).castShadow=false;
+  }
+  if(!RC){
   xs.forEach(x=>zs.forEach(z=>{box(g,1.3,PED,1.3,M.rc,x,PED/2,z);member(g,V(x,PED,z),V(x,YB,z),.55,M.steel);}));
   [YB-.2].forEach(y=>{xs.forEach(x=>member(g,V(x,y,-hz_),V(x,y,hz_),.4,M.steel));zs.forEach(z=>member(g,V(-hx,y,z),V(hx,y,z),.4,M.steel));});
   lv.forEach((y,k)=>{if(k===0)return;xs.forEach(x=>member(g,V(x,y,-hz_),V(x,y,hz_),.3,M.steel));zs.forEach(z=>member(g,V(-hx,y,z),V(hx,y,z),.3,M.steel));});
   for(let k=0;k<tiers;k++){const y0=lv[k],y1=lv[k+1];
     for(let i=0;i<NX;i++)[-hz_,hz_].forEach(z=>{member(g,V(xs[i],y0,z),V(xs[i+1],y1,z),.16,M.brace);member(g,V(xs[i+1],y0,z),V(xs[i],y1,z),.16,M.brace);});
     for(let j=0;j<NZ;j++)[-hx,hx].forEach(x=>{member(g,V(x,y0,zs[j]),V(x,y1,zs[j+1]),.16,M.brace);member(g,V(x,y0,zs[j+1]),V(x,y1,zs[j]),.16,M.brace);});}
+  }
   const cd=b.W/NZ,cells=[];
   const pg=new THREE.CylinderGeometry(Math.SQRT1_2,.09,1,4,1);pg.rotateY(Math.PI/4);
   for(let j=0;j<NZ;j++){const cw=b.L/LAY[j];for(let i=0;i<LAY[j];i++){const x=-hx+cw*(i+.5),z=-hz_+cd*(j+.5);cells.push([x,z]);
     const h=mesh(pg,M.silo2);h.scale.set(cw,b.hopH,cd);h.position.set(x,b.legH+b.hopH/2,z);g.add(h);box(g,.9,.5,.9,M.binBand,x,b.legH-.25,z);}}
-  const yb=b.legH+b.hopH;box(g,b.L,b.boxH,b.W,M.binBody,0,yb+b.boxH/2,0);
+  const yb=b.legH+b.hopH;if(!RC){box(g,b.L,b.boxH,b.W,M.binBody,0,yb+b.boxH/2,0);
   for(let x=-hx+1;x<hx;x+=1){box(g,.08,b.boxH,.12,M.binBand,x,yb+b.boxH/2,-hz_-.05).castShadow=false;box(g,.08,b.boxH,.12,M.binBand,x,yb+b.boxH/2,hz_+.05).castShadow=false;}
   for(let z=-hz_+1;z<hz_;z+=1){box(g,.12,b.boxH,.08,M.binBand,-hx-.05,yb+b.boxH/2,z).castShadow=false;box(g,.12,b.boxH,.08,M.binBand,hx+.05,yb+b.boxH/2,z).castShadow=false;}
-  for(let y=yb+1.2;y<top-.2;y+=1.2)box(g,b.L+.14,.08,b.W+.14,M.binBand,0,y,0).castShadow=false;
+  for(let y=yb+1.2;y<top-.2;y+=1.2)box(g,b.L+.14,.08,b.W+.14,M.binBand,0,y,0).castShadow=false;}
   box(g,b.L,.2,b.W,M.grate,0,top+.1,0);box(g,1.2,.3,b.W+2,M.belt,0,OUT_Y,0);
   // steel house on the roof (translucent like the main tower)
   const HH=4.2;box(g,b.L+.2,HH,b.W+.2,M.clad,0,top+HH/2,0).castShadow=false;
@@ -4412,13 +4451,23 @@ function buildBinsP(b){
   const stops=ang.length>1?ang.concat(ang.slice(1,-1).reverse()):[0];
   g.userData={arm,stops,top};return g;
 }
-function buildSilo(s){ // s.base = RC height (0 = steel legs to the ground)
+const RCH={1:7.3,2:11.0,3:17.9};   // RC building heights by floor count (3F reaches the cone top -> no legs)
+function doorOf(s){const t=towerFor(s);if(!t)return '+z';const dx=s.x-t.x,dz=s.z-t.z;return Math.abs(dx)>Math.abs(dz)?(dx>0?'+x':'-x'):(dz>0?'+z':'-z');}
+function buildSilo(s,door){ // s.base = RC height (0 = steel legs to the ground); s.sup==='bldg': RC building underneath (rooms)
   const g=new THREE.Group(),r=s.D/2,lr=r*.92,cb=s.base+s.bottom,ct=cb+s.cone,top=ct+s.cyl;
-  if(s.base>0){const cr=r*.92;const P4=[0,1,2,3].map(i=>{const a=Math.PI/4+i*Math.PI/2;return [cr*Math.cos(a),cr*Math.sin(a)];});
+  if(s.sup==='bldg'&&s.base>0){const c=s.cell||5.4,H=s.base,lvs=[0,RCH[1],RCH[2],RCH[3]].filter(y=>y<H-.5).concat([H]);
+    box(g,c,H,c,M.rc,0,H/2,0);box(g,c+.3,.35,c+.3,M.rc,0,H+.05,0);
+    lvs.slice(1,-1).forEach(y=>box(g,c+.14,.3,c+.14,M.binBand,0,y,0).castShadow=false);
+    for(let k=0;k<lvs.length-1;k++){const y=(lvs[k]+lvs[k+1])/2+(k?0:.6);if(k===0)continue;
+      [[0,c/2+.03,1],[0,-c/2-.03,1],[c/2+.03,0,0],[-c/2-.03,0,0]].forEach(([x,z,f])=>box(g,f?1.6:.06,1.1,f?.06:1.6,M.glass,x,y,z).castShadow=false);}
+    const [dx,dz]=faceVec(door||'+z');box(g,dz?2.6:.08,3.2,dx?2.6:.08,M.door,dx*(c/2+.04),1.6,dz*(c/2+.04)).castShadow=false;
+    if(s.room)label(g,s.room,V(dx*(c/2+.3),3.9,dz*(c/2+.3)),'room');}
+  else if(s.base>0){const cr=r*.92;const P4=[0,1,2,3].map(i=>{const a=Math.PI/4+i*Math.PI/2;return [cr*Math.cos(a),cr*Math.sin(a)];});
     P4.forEach(([x,z])=>box(g,.9,s.base,.9,M.rc,x,s.base/2,z));P4.forEach(([x,z],k)=>{const [x2,z2]=P4[(k+1)%4];const bm=member(g,V(x,s.base-.35,z),V(x2,s.base-.35,z2),.7,M.rc);});}
+  if(s.base<ct-.05){
   for(let i=0;i<4;i++){const a=Math.PI/4+i*Math.PI/2;member(g,V(lr*Math.cos(a),s.base,lr*Math.sin(a)),V(lr*Math.cos(a),ct,lr*Math.sin(a)),.4,M.steel);}
-  for(let i=0;i<4;i++){const a=Math.PI/4+i*Math.PI/2,b=a+Math.PI/2,mid=(s.base+cb)/2;
-    member(g,V(lr*Math.cos(a),s.base+.5,lr*Math.sin(a)),V(lr*Math.cos(b),mid,lr*Math.sin(b)),.1,M.brace);member(g,V(lr*Math.cos(b),s.base+.5,lr*Math.sin(b)),V(lr*Math.cos(a),mid,lr*Math.sin(a)),.1,M.brace);}
+  if(cb-s.base>1.5)for(let i=0;i<4;i++){const a=Math.PI/4+i*Math.PI/2,b=a+Math.PI/2,mid=(s.base+cb)/2;
+    member(g,V(lr*Math.cos(a),s.base+.5,lr*Math.sin(a)),V(lr*Math.cos(b),mid,lr*Math.sin(b)),.1,M.brace);member(g,V(lr*Math.cos(b),s.base+.5,lr*Math.sin(b)),V(lr*Math.cos(a),mid,lr*Math.sin(a)),.1,M.brace);}}
   cone(g,r,.3,s.cone,M.red,0,cb,0);cyl(g,r,s.cyl,M.silo,0,ct+s.cyl/2,0,32);
   const band=Math.min(3.2,s.cyl*.18);cyl(g,r+.02,band,M.redTop,0,top-band/2,0,32);
   const lid=mesh(new THREE.ConeGeometry(r,.6,32),M.red);lid.position.set(0,top+.3,0);g.add(lid);box(g,.9,.9,.9,M.steel,0,top+.9,0);
@@ -4475,7 +4524,7 @@ function dropGroup(g){g.traverse(o=>{if(o.isCSS2DObject&&o.element)o.element.rem
 function clearGroup(g){g.children.slice().forEach(c=>{g.remove(c);c.traverse(o=>{if(o.geometry&&![UB,UC,MOUND].includes(o.geometry))o.geometry.dispose();});});}
 
 /* ================= v3: empty site -> add devices -> inspector ================= */
-M.binBody=std('#f0f1ef',{metalness:.2,roughness:.45});M.binBand=std('#c8342c',{metalness:.2,roughness:.45});
+M.binBody=std('#f0f1ef',{metalness:.2,roughness:.45});M.door=std('#8f989e',{metalness:.45,roughness:.45});M.binBand=std('#c8342c',{metalness:.2,roughness:.45});
 M.zone=new THREE.MeshBasicMaterial({color:'#6b4fa3',transparent:true,opacity:.22,depthWrite:false,side:THREE.DoubleSide});
 M.zoneEdge=new THREE.LineBasicMaterial({color:'#6b4fa3'});
 scene.add(new THREE.HemisphereLight(0xf2f5f7,0x8a8f86,.75));
@@ -4484,7 +4533,7 @@ const ground=mesh(new THREE.PlaneGeometry(4000,4000),M.ground,false);ground.rota
 const siteG=new THREE.Group(),beltG=new THREE.Group(),dimG=new THREE.Group();scene.add(siteG,beltG,dimG);let flows=[];
 const DROP=1.5,CEMENT_T=1.3,AGG_T=1.6;
 const TYPE={hopper:'卡車卸料斗',bins:'砂石料倉',tower:'主機樓',silo:'水泥桶',transfer:'轉台',zone:'限制區'};
-const SILO_PRESET={'120T':{D:3.535,cyl:9,cone:2.78,bottom:12.915},'250T':{D:4.8,cyl:9,cone:3.875,bottom:12.915},'350T':{D:7.65,cyl:7.5,cone:6.344,bottom:12.915}};
+const SILO_PRESET={'120T':{D:3.535,cyl:9,cone:2.78,bottom:12.915},'250T':{D:4.8,cyl:9,cone:3.875,bottom:12.915},'350T':{D:7.65,cyl:7.5,cone:6.344,bottom:12.915},'D4370':{D:4.37,cyl:10.4,cone:3.7,bottom:14.2}};
 const PALETTES={'紅白':{steel:'#c0302a',accent:'#c8342c',body:'#f0f1ef',clad:'#f7f7f5',gallery:'#f3f4f2',binBody:'#f0f1ef',binBand:'#c8342c'},
   '藍白':{steel:'#2f5d9b',accent:'#2f6fb5',body:'#f0f2f4',clad:'#f4f7fa',gallery:'#eef2f6',binBody:'#f0f2f4',binBand:'#2f6fb5'},
   '綠白':{steel:'#2e6b4a',accent:'#2e8b57',body:'#f1f3f0',clad:'#f5f8f4',gallery:'#eef3ee',binBody:'#f1f3f0',binBand:'#2e8b57'},
@@ -4498,6 +4547,7 @@ const rotDeg=r=>((-r/D2R)%360+360)%360;
 
 /* ---------- state ---------- */
 const DEFAULT_BINS={cells:'4',L:12,W:12,nx:2,nz:2,legH:7,hopH:4.4,boxH:6};
+const BIN_RC={cells:'4',L:12.7,W:12.7,nx:2,nz:2,legH:4.5,hopH:6.5,boxH:7.7,st:'rc'};   // RC bins, steel cones (3M3 standard)
 const S0=()=>({traffic:{on:false,dump:true,mixer:true,cement:true},W:80,L:150,m:3,max:22,screw:9,rotStep:15,support:'rc',supGap:15,siloFollow:true,lines:1,cur:1,colors:Object.assign({},PALETTES['紅白']),items:[],zones:[]});
 let S=S0();
 try{const sv=JSON.parse(localStorage.getItem('rmc-config-v4')||'null');if(sv&&Array.isArray(sv.items))S=Object.assign(S0(),sv);if(!S.supGap)S.supGap=15;if(!S.traffic)S.traffic={on:false,dump:true,mixer:true,cement:true};}catch(e){}
@@ -4515,15 +4565,28 @@ const LAYOUTS={'4':[2,2],'5':[3,2],'6':[3,3]};
 function binLayout(b){if(!b.cells)b.cells=(b.nx*b.nz>=6?'6':b.nx*b.nz===5?'5':'4');return LAYOUTS[b.cells]||LAYOUTS['4'];}
 const binTop=b=>b.legH+b.hopH+b.boxH, topFeed=b=>binTop(b)+3.3;
 const siloTop=s=>s.base+s.bottom+s.cone+s.cyl, siloVol=s=>Math.PI*(s.D/2)**2*(s.cyl+s.cone/3), binVol=b=>b.L*b.W*(b.boxH+b.hopH/3);
-function headOf(t){const [a,b]=rotXZ(HEAD_LOCAL.x,HEAD_LOCAL.z,t.r);return V(t.x+a,HEAD_LOCAL.y,t.z+b);}
+const TT=t=>t.tt==='half'?'half':'classic';
+function TD(t){return TT(t)==='half'?{hx:HT.hx,hz:HT.hz,sx:HT.hx+.1,sz:HT.hz+.1,sy:HT.f3+2.5,R:5.2,lab:23.5}:{hx:5.6,hz:5.05,sx:5.3,sz:4.75,sy:FL['3F']+3.4,R:8,lab:29};}
+function localFace(t,c){const d=COMPASS[c];const [lx,lz]=rotXZ(d[0],d[1],-(t.r||0));return Math.abs(lx)>Math.abs(lz)?(lx>0?'+x':'-x'):(lz>0?'+z':'-z');}
+function faceCompass(t,f){const v=faceVec(f),[wx,wz]=rotXZ(v[0],v[1],t.r||0);return Math.abs(wx)>Math.abs(wz)?(wx>0?'E':'W'):(wz>0?'S':'N');}
+function mainUp(t){const L=belts(t.line||1).main;return L&&L[L.length-1]===t?L[L.length-2]:null;}
+function inletFace(t){if(t.inlet&&t.inlet!=='auto')return localFace(t,t.inlet);const u=mainUp(t);if(!u)return '+z';
+  const [lx,lz]=rotXZ(u.x-t.x,u.z-t.z,-(t.r||0));return Math.abs(lx)>Math.abs(lz)?(lx>0?'+x':'-x'):(lz>0?'+z':'-z');}
+function headOf(t){if(TT(t)==='half'){const [nx,nz]=faceVec(inletFace(t)),[a,b]=rotXZ(nx*HT.headIn,nz*HT.headIn,t.r||0);return V(t.x+a,HT.head,t.z+b);}
+  const [a,b]=rotXZ(HEAD_LOCAL.x,HEAD_LOCAL.z,t.r);return V(t.x+a,HEAD_LOCAL.y,t.z+b);}
+// angle the main belt makes with the tower inlet face (90 = square entry)
+function entryAngle(t){const u=mainUp(t);if(!u)return null;const a=outPt(u,t),b=headOf(t),d=V(b.x-a.x,0,b.z-a.z).normalize(),fv=faceVec(inletFace(t)),[wx,wz]=rotXZ(fv[0],fv[1],t.r||0);
+  return Math.asin(Math.min(1,Math.abs(d.x*wx+d.z*wz)))/D2R;}
+// main belt tail under the bins: fixed on the bins' local z axis, 3.3 m in from the far edge
+function binTail(n,nx){let sg=1;if(nx){const [lx,lz]=rotXZ(nx.x-n.x,nx.z-n.z,-(n.r||0));sg=lz>0?-1:1;}const off=sg*Math.max(0,n.b.W/2-3.3),[a,b]=rotXZ(0,off,n.r||0);return V(n.x+a,OUT_Y,n.z+b);}
 function belts(l){ // ordered node lists per belt of line l
   const h=one('hopper',l),b=one('bins',l),t=one('tower',l),o={};
   if(h&&b)o.inc=[h].concat(transfer('inc',l)?[transfer('inc',l)]:[],[b]);
   if(b&&t)o.main=[b].concat(transfer('main',l)?[transfer('main',l)]:[],[t]);
   return o;}
-function outPt(n){if(n.type==='hopper')return V(n.x,PIT_Y,n.z);if(n.type==='bins')return V(n.x,OUT_Y,n.z);if(n.type==='transfer')return V(n.x,n.top-DROP,n.z);}
+function outPt(n,nx){if(n.type==='hopper')return V(n.x,PIT_Y,n.z);if(n.type==='bins')return binTail(n,nx);if(n.type==='transfer')return V(n.x,n.top-DROP,n.z);}
 function inPt(n){if(n.type==='bins')return V(n.x,topFeed(n.b),n.z);if(n.type==='tower')return headOf(n);if(n.type==='transfer')return V(n.x,n.top,n.z);}
-function align(){lineIds().forEach(alignLine);}
+function align(){S.items.forEach(i=>{if(i.auto){i.auto=false;i.r=0;}});}
 function alignLine(l){
   const B=belts(l),h=one('hopper',l),b=one('bins',l),t=one('tower',l);
   const face=(n,q,away)=>{if(n&&q&&n.auto)n.r=away?Math.atan2(n.x-q.x,n.z-q.z):Math.atan2(q.x-n.x,q.z-n.z);};
@@ -4534,11 +4597,11 @@ function alignLine(l){
 }
 function transferTops(){
   S.items.filter(i=>i.type==='transfer').forEach(tr=>{const L=belts(tr.line||1)[tr.belt];tr.autoTop=12;
-    if(L){const k=L.indexOf(tr),a=outPt(L[k-1]),b=inPt(L[k+1]),L1=hz(a,tr),L2=hz(tr,b);tr.autoTop=Math.max(4,a.y+L1*(b.y-a.y+DROP)/Math.max(1,L1+L2));}
+    if(L){const k=L.indexOf(tr),a=outPt(L[k-1],tr),b=inPt(L[k+1]),L1=hz(a,tr),L2=hz(tr,b);tr.autoTop=Math.max(4,a.y+L1*(b.y-a.y+DROP)/Math.max(1,L1+L2));}
     tr.top=tr.h!=null?Math.max(4,tr.h):tr.autoTop;});
 }
 function segments(){const out=[];lineIds().forEach(l=>{const B=belts(l);
-  [['inc','入庫帶運機'],['main','主帶運機']].forEach(([k,nm])=>{const L=B[k];if(!L)return;for(let i=1;i<L.length;i++){const a=outPt(L[i-1]),b=inPt(L[i]),h=hz(a,b),rise=b.y-a.y;
+  [['inc','入庫帶運機'],['main','主帶運機']].forEach(([k,nm])=>{const L=B[k];if(!L)return;for(let i=1;i<L.length;i++){const a=outPt(L[i-1],L[i]),b=inPt(L[i]),h=hz(a,b),rise=b.y-a.y;
     out.push({line:l,belt:k,name:LN(l)+nm+(L.length>2?'①②'[i-1]:''),a,b,hz:h,rise,len:Math.hypot(h,rise),ang:Math.atan2(rise,h)/D2R});}});});return out;}
 const over=a=>a>S.max+.05;
 
@@ -4547,9 +4610,9 @@ function siloLegs(k,y){const lr=k.D/2*.92;return [0,1,2,3].map(i=>{const a=Math.
 function towerFor(s){return one('tower',s.line||1)||S.items.filter(i=>i.type==='tower').sort((a,b)=>hz(a,s)-hz(b,s))[0];}
 function screwRoute(s){
   const t=towerFor(s);if(!t)return null;
-  let [lx,lz]=rotXZ(s.x-t.x,s.z-t.z,-t.r);let cx=Math.max(-5.3,Math.min(5.3,lx)),cz=Math.max(-4.75,Math.min(4.75,lz));
-  if(Math.abs(lx)<=5.3&&Math.abs(lz)<=4.75){if(5.3-Math.abs(lx)<4.75-Math.abs(lz))cx=Math.sign(lx||1)*5.3;else cz=Math.sign(lz||1)*4.75;}
-  const [a,b]=rotXZ(cx,cz,t.r);const A=V(s.x,s.base+s.bottom-.3,s.z),B=V(t.x+a,FL['3F']+3.4,t.z+b),L=A.distanceTo(B);
+  const td=TD(t),SX=td.sx,SZ=td.sz;let [lx,lz]=rotXZ(s.x-t.x,s.z-t.z,-t.r);let cx=Math.max(-SX,Math.min(SX,lx)),cz=Math.max(-SZ,Math.min(SZ,lz));
+  if(Math.abs(lx)<=SX&&Math.abs(lz)<=SZ){if(SX-Math.abs(lx)<SZ-Math.abs(lz))cx=Math.sign(lx||1)*SX;else cz=Math.sign(lz||1)*SZ;}
+  const [a,b]=rotXZ(cx,cz,t.r);const A=V(s.x,s.base+s.bottom-.3,s.z),B=V(t.x+a,td.sy,t.z+b),L=A.distanceTo(B);
   if(L<=S.screw)return{A,B,L,pieces:[[A,B]],kind:'single'};
   let best=null;silos().forEach(k=>{if(k===s||(k.line||1)!==(s.line||1))return;const cb=k.base+k.bottom;const y=Math.min(cb-.8,(A.y+B.y)/2);if(y<k.base+1.2)return;
     const J=V(k.x,y,k.z),L1=A.distanceTo(J),L2=J.distanceTo(B);if(L1<=S.screw&&L2<=S.screw&&(!best||L1+L2<best.L))best={L:L1+L2,J,k,L1,L2};});
@@ -4559,22 +4622,22 @@ function screwRoute(s){
 
 /* ---------- 3D objects per item ---------- */
 const OBJ={};  // id -> {g,key}
-function objKey(i){if(i.type==='yard')return JSON.stringify(['yard',i.bays,i.tanks,i.sep,i.clear,i.silt]);if(i.type==='tower')return 'tower'+towerFace(i);if(FAC.includes(i.type))return JSON.stringify([i.w,i.L,i.W,i.n,i.rows,i.ang,i.sw,i.sl,i.cars]);if(i.type==='bins')return JSON.stringify(i.b);if(i.type==='silo')return JSON.stringify([i.D,i.cyl,i.cone,i.bottom,i.base]);
+function objKey(i){if(i.type==='yard')return JSON.stringify(['yard',i.bays,i.tanks,i.sep,i.clear,i.silt]);if(i.type==='tower')return 'tower'+TT(i)+towerFace(i)+(TT(i)==='half'?inletFace(i):'');if(FAC.includes(i.type))return JSON.stringify([i.w,i.L,i.W,i.n,i.rows,i.ang,i.sw,i.sl,i.cars]);if(i.type==='bins')return JSON.stringify(i.b);if(i.type==='silo')return JSON.stringify([i.D,i.cyl,i.cone,i.bottom,i.base,i.sup||'',i.cell||0,i.room||'',i.sup==='bldg'?doorOf(i):'']);
   if(i.type==='transfer')return fmt(i.top);if(i.type==='zone')return JSON.stringify([i.w,i.d]);return i.type;}
 const COMPASS={N:[0,-1],S:[0,1],E:[1,0],W:[-1,0]},CN={N:'北',S:'南',E:'東',W:'西'};
 function towerFace(t){const d=COMPASS[t.exit||'S'];const [lx,lz]=rotXZ(d[0],d[1],-(t.r||0));return Math.abs(lx)>Math.abs(lz)?(lx>0?'+x':'-x'):(lz>0?'+z':'-z');}
 function faceVec(f){return {'+z':[0,1],'-z':[0,-1],'+x':[1,0],'-x':[-1,0]}[f];}
 function buildObj(i){let g;
-  if(i.type==='hopper')g=buildHopper();else if(i.type==='tower')g=buildTower(towerFace(i));else if(i.type==='bins')g=buildBinsP(i.b);
+  if(i.type==='hopper')g=buildHopper();else if(i.type==='tower')g=TT(i)==='half'?buildTowerHalf(towerFace(i),inletFace(i)):buildTower(towerFace(i));else if(i.type==='bins')g=buildBinsP(i.b);
   else if(FAC.includes(i.type))g=buildFacility(i);
-  else if(i.type==='silo')g=buildSilo(i);else if(i.type==='transfer')g=buildTransfer(i.top);
+  else if(i.type==='silo')g=buildSilo(i,doorOf(i));else if(i.type==='transfer')g=buildTransfer(i.top);
   else if(i.type==='zone'){g=new THREE.Group();const p=mesh(new THREE.PlaneGeometry(i.w,i.d),M.zone,false);p.rotation.x=-Math.PI/2;p.position.y=.04;g.add(p);
     const e=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints([V(-i.w/2,.06,-i.d/2),V(i.w/2,.06,-i.d/2),V(i.w/2,.06,i.d/2),V(-i.w/2,.06,i.d/2)]),M.zoneEdge);g.add(e);
     const hit=mesh(new THREE.BoxGeometry(i.w,.3,i.d),new THREE.MeshBasicMaterial({visible:false}),false);hit.position.y=.15;g.add(hit);}
   tagPick(g,i.id);return g;}
 function labelText(i){return (i.locked?'📌 ':'')+labelText0(i);}
 function labelText0(i){if(FAC.includes(i.type))return TYPE[i.type]+(i.type==='parking'?' '+i.n+' 格':i.type==='yard'?' '+i.bays+' 車位':'');return i.type==='silo'?i.name:i.type==='zone'?i.name:i.type==='bins'?LN(i.line||1)+'砂石料倉 '+(binLayout(i.b),i.b.cells)+' 倉':i.type==='transfer'?'轉台 H'+fmt(i.top):i.type==='hopper'?LN(i.line||1)+'卡車卸料斗（地下）':LN(i.line||1)+'主機樓';}
-function labelY(i){if(FAC.includes(i.type))return {gate:4.2,scale:3.6,wash:2.6,parking:2,yard:5}[i.type];return i.type==='silo'?siloTop(i)+2.6:i.type==='bins'?binTop(i.b)+7.5:i.type==='transfer'?i.top+4:i.type==='tower'?29:i.type==='zone'?.6:3;}
+function labelY(i){if(FAC.includes(i.type))return {gate:4.2,scale:3.6,wash:2.6,parking:2,yard:5}[i.type];return i.type==='silo'?siloTop(i)+2.6:i.type==='bins'?binTop(i.b)+7.5:i.type==='transfer'?i.top+4:i.type==='tower'?TD(i).lab:i.type==='zone'?.6:3;}
 function syncObjects(){
   const all=S.items.concat(S.zones);
   Object.keys(OBJ).forEach(id=>{if(!all.find(i=>i.id===id)){dropGroup(OBJ[id].g);delete OBJ[id];}});
@@ -4606,9 +4669,9 @@ function rebuildSite(){
 }
 
 /* ---------- checks ---------- */
-function radiusOf(i){if(FAC.includes(i.type))return facRadius(i);return i.type==='silo'?i.D/2:i.type==='bins'?Math.hypot(i.b.L,i.b.W)/2+.2:i.type==='tower'?8:i.type==='hopper'?4.2:3.4;}
+function radiusOf(i){if(FAC.includes(i.type))return facRadius(i);return i.type==='silo'?i.D/2:i.type==='bins'?Math.hypot(i.b.L,i.b.W)/2+.2:i.type==='tower'?TD(i).R:i.type==='hopper'?4.2:3.4;}
 function footPts(i){let poly;if(FAC.includes(i.type))poly=facFoot(i);else if(i.type==='bins'){const b=i.b;poly=[[-b.L/2-1,-b.W/2-1],[b.L/2+1,-b.W/2-1],[b.L/2+1,b.W/2+1],[-b.L/2-1,b.W/2+1]];}
-  else if(i.type==='tower')poly=[[-5.8,-5.3],[5.8,-5.3],[5.8,5.3],[-5.8,5.3]];else if(i.type==='hopper')poly=FOOT.hopper;
+  else if(i.type==='tower'){const d=TD(i);poly=[[-d.hx-.2,-d.hz-.2],[d.hx+.2,-d.hz-.2],[d.hx+.2,d.hz+.2],[-d.hx-.2,d.hz+.2]];}else if(i.type==='hopper')poly=FOOT.hopper;
   else{const r=radiusOf(i);poly=[[-r,0],[r,0],[0,-r],[0,r]];}return poly.map(([x,z])=>{const [a,b]=rotXZ(x,z,i.r||0);return [i.x+a,i.z+b];});}
 const inSite=([x,z])=>x>=S.m-1e-6&&x<=S.W-S.m+1e-6&&z>=S.m-1e-6&&z<=S.L-S.m+1e-6;
 function distToZone(p,z){const [lx,lz]=rotXZ(p.x-z.x,p.z-z.z,-(z.r||0));return Math.hypot(Math.max(Math.abs(lx)-z.w/2,0),Math.max(Math.abs(lz)-z.d/2,0));}
@@ -4619,7 +4682,7 @@ function evaluate(segs){
   S.items.forEach(i=>{if(i.type!=='gate'&&!footPts(i).every(inSite)){W.push(['warn',nm(i)+'超出廠地'+(S.m?'（含退縮 '+S.m+' m）':'')+(i.type==='tower'?'，含攪拌車車道':'')+'。']);bad.add(i.id);}});
   for(let a=0;a<S.items.length;a++)for(let b=a+1;b<S.items.length;b++){const A=S.items[a],B=S.items[b];let hit;if(A.type==='gate'||B.type==='gate')continue;
     if(A.type==='silo'&&B.type==='tower'||B.type==='silo'&&A.type==='tower'){const s=A.type==='silo'?A:B,T=A.type==='tower'?A:B;const [lx,lz]=rotXZ(s.x-T.x,s.z-T.z,-T.r);
-      hit=Math.hypot(Math.max(Math.abs(lx)-5.6,0),Math.max(Math.abs(lz)-5.05,0))<s.D/2-.6;}
+      const td=TD(T),half=s.sup==='bldg'?Math.min(s.D/2,(s.cell||5.4)/2)-.3:s.D/2-.6;hit=Math.hypot(Math.max(Math.abs(lx)-td.hx,0),Math.max(Math.abs(lz)-td.hz,0))<half;}
     else if(A.type==='silo'&&B.type==='silo')hit=hz(A,B)<A.D/2+B.D/2+.2;
     else hit=hz(A,B)<radiusOf(A)+radiusOf(B)-(A.type==='silo'||B.type==='silo'?.5:0);
     if(hit){W.push(['warn',nm(A)+'和'+nm(B)+'重疊。']);bad.add(A.id);bad.add(B.id);}}
@@ -4723,7 +4786,7 @@ function buildRoutes(){
     if(h){const f=F.dump,r=[P(gOut),P(gIn)];weigh(r,f.in);const ap=W2(h,0,24),st=W2(h,0,6.8);r.push(P(ap),P(st,{rev:true,dwell:6,act:'dump'}),P(ap));
       washIt(r,f.wash);weigh(r,f.out);r.push(P(gIn),P(gOut));out.push({kind:'dump',line:l,st:r});}
     if(t){const f=F.mixer,r=[];if(park){const s=stalls(park)[0];r.push(P(W2(park,s.x,s.z),{dwell:4}),P(W2(park,s.x+s.ux*(park.sl/2+5),s.z+s.uz*(park.sl/2+5))));}else r.push(P(gIn));
-      weigh(r,f.in);const fv=faceVec(towerFace(t)),lat=[fv[1]*.5,-fv[0]*.5],ap=W2(t,fv[0]*34+lat[0],fv[1]*34+lat[1]),st=W2(t,fv[0]*4+lat[0],fv[1]*4+lat[1]);r.push(P(ap),P(st,{rev:true,dwell:7,act:'load'}),P(ap));washIt(r,f.wash);weigh(r,f.out);r.push(P(gIn),P(gOut));
+      weigh(r,f.in);const fv=faceVec(towerFace(t)),lat=[fv[1]*.5,-fv[0]*.5],ap=W2(t,fv[0]*34+lat[0],fv[1]*34+lat[1]),sd=TT(t)==='half'?(fv[0]?HT.hx:HT.hz)-1.05:4,st=W2(t,fv[0]*sd+lat[0],fv[1]*sd+lat[1]);r.push(P(ap),P(st,{rev:true,dwell:7,act:'load'}),P(ap));washIt(r,f.wash);weigh(r,f.out);r.push(P(gIn),P(gOut));
       const yard=S.items.find(i=>i.type==='yard');if(yard&&f.yard!==false){r.push(P(gIn));const G=yardGeom(yard),bx=G.rampX;
         r.push(P(W2(yard,bx,G.D/2+16)),P(W2(yard,bx,G.zb+4.7),{rev:true,dwell:8,act:'wash'}),P(W2(yard,bx,G.D/2+16)));}
       if(park){const s=stalls(park)[0];r.push(P(W2(park,s.x+s.ux*(park.sl/2+5),s.z+s.uz*(park.sl/2+5))),P(W2(park,s.x,s.z),{rev:true}));}
@@ -4822,10 +4885,10 @@ function update(){
 function freeSpot(r,pref){const cands=[pref];for(let k=1;k<8;k++)for(let a=0;a<8;a++)cands.push({x:pref.x+Math.cos(a*Math.PI/4)*k*r*1.6,z:pref.z+Math.sin(a*Math.PI/4)*k*r*1.6});
   return cands.find(c=>c.x>S.m+r&&c.x<S.W-S.m-r&&c.z>S.m+r&&c.z<S.L-S.m-r&&S.items.every(i=>hz(c,i)>radiusOf(i)+r+1))||pref;}
 function addItem(type){let it;const t=one('tower'),b=one('bins'),h=one('hopper');
-  if(type==='tower')it={type,...freeSpot(11,{x:S.lines>1?S.m+16+(S.cur-1)*34:S.W/2,z:S.m+12}),r:0,auto:false};
-  else if(type==='bins')it={type,...freeSpot(9,{x:t?t.x:S.W/2,z:t?t.z+50:S.L*.45}),r:0,auto:false,b:Object.assign({},DEFAULT_BINS)};
+  if(type==='tower')it={type,tt:'half',exit:'S',inlet:'auto',...freeSpot(11,{x:S.lines>1?S.m+16+(S.cur-1)*34:S.W/2,z:S.m+12}),r:0,auto:false};
+  else if(type==='bins')it={type,...freeSpot(9,{x:t?t.x:S.W/2,z:t?t.z+50:S.L*.45}),r:0,auto:false,b:Object.assign({},BIN_RC)};
   else if(type==='hopper')it={type,...freeSpot(5,{x:b?b.x:t?t.x:S.W/2,z:b?Math.min(S.L-S.m-20,b.z+58):S.L-S.m-20}),r:0,auto:false};
-  else if(type==='silo'){const base=byId(selected)&&byId(selected).type==='silo'?byId(selected):silos()[silos().length-1];const spec=base?{D:base.D,cyl:base.cyl,cone:base.cone,bottom:base.bottom,base:0}:Object.assign({base:0},SILO_PRESET['250T']);
+  else if(type==='silo'){const base=byId(selected)&&byId(selected).type==='silo'?byId(selected):silos()[silos().length-1];const spec=base?{D:base.D,cyl:base.cyl,cone:base.cone,bottom:base.bottom,base:base.sup==='bldg'?base.base:0,sup:base.sup==='bldg'?'bldg':'steel',rcf:base.rcf,cell:base.cell}:{D:4.37,cyl:10.4,cone:3.7,base:RCH[3],bottom:14.2-RCH[3],sup:'bldg',rcf:3,cell:5.4};if(!spec.rcf)delete spec.rcf;if(!spec.cell)delete spec.cell;
     it={type,name:LN(S.cur)+'水泥桶 #'+(silos().filter(x=>(x.line||1)===S.cur).length+1),...spec,...freeSpot(spec.D/2+.5,t?{x:t.x-9,z:t.z}:{x:S.W/2,z:S.L/2})};}
   else if(type==='transfer'){const belt=!transfer('inc')&&h&&b?'inc':!transfer('main')&&b&&t?'main':!transfer('inc')?'inc':'main';const A=belt==='inc'?h:b,B=belt==='inc'?b:t;
     const m=A&&B?{x:(A.x+B.x)/2+8,z:(A.z+B.z)/2}:{x:S.W/2,z:S.L/2};it={type,belt,x:m.x,z:m.z,r:0,auto:false,h:null};}
@@ -4859,7 +4922,7 @@ function row(k,lab,step,unit,opt={}){return '<div class="irow"><label for="i-'+k
 function sect(t){return '<div class="isect">'+t+'</div>';}
 function upstream(i){const B=belts(i.line||1);for(const k of ['inc','main']){const L=B[k];if(L){const j=L.indexOf(i);if(j>0)return L[j-1];}}return null;}
 function renderInspector(){
-  if(selSet.size>1){const it=grpItems();$('tabIns').disabled=false;insEl.innerHTML='<div class="ihead"><span class="tag">多選</span><b>已選 '+it.length+' 項</b></div>'+
+  insEl.dataset.id='';if(selSet.size>1){const it=grpItems();$('tabIns').disabled=false;insEl.innerHTML='<div class="ihead"><span class="tag">多選</span><b>已選 '+it.length+' 項</b></div>'+
     '<p class="note">'+it.map(nm).join('、')+'</p>'+sect('整組平移')+row('gdx','ΔX（往右為正）','1','m')+row('gdz','ΔY（往下為正）','1','m')+
     '<div class="iacts"><button class="primary sm" type="button" data-g="move">套用平移</button></div>'+sect('整組旋轉（繞中心）')+
     '<div class="iacts"><button class="hbtn" type="button" data-g="rl">↺ '+S.rotStep+'°</button><button class="hbtn" type="button" data-g="rr">↻ '+S.rotStep+'°</button></div>'+
@@ -4873,12 +4936,16 @@ function renderInspector(){
   h+=sect('位置')+'<label class="chk sm"><input type="checkbox" id="i-locked" data-k="locked"> 📌 固定位置（不能拖曳、旋轉）</label>'+row('x','X 座標','0.5','m',{dis:i.locked})+row('z','Y 座標','0.5','m',{dis:i.locked})+
     (i.type==='silo'&&towerFor(i)?row('rx','相對主機樓中心 ΔX','0.5','m',{dis:i.locked})+row('rz','相對主機樓中心 ΔY','0.5','m',{dis:i.locked}):'');
   if(upstream(i))h+=row('dist','距上游設備','0.5','m',{dis:i.locked})+row('az','方位（0°=上）','5','°',{dis:i.locked});
-  if(i.type!=='silo')h+=row('rot','旋轉（可直接輸入任意角度）',String(S.rotStep),'°',{dis:i.auto||i.locked})+(i.type!=='zone'?'<label class="chk sm"><input type="checkbox" id="i-auto" data-k="auto"> 自動轉向輸送帶（不勾 = 對齊 X/Y 軸）</label>':'');
-  if(i.type==='tower')h+=sect('主機樓')+'<div class="irow"><label for="i-exit">混凝土車出口</label><select id="i-exit" data-k="exit"><option value="N">北面</option><option value="E">東面</option><option value="S">南面</option><option value="W">西面</option></select></div>';
-  if(i.type==='bins')h+=sect('料倉尺寸')+row('L','長度','0.5','m')+row('W','寬度','0.5','m')+
+  if(i.type!=='silo')h+=row('rot','旋轉（可直接輸入任意角度）',String(S.rotStep),'°',{dis:i.locked});
+  if(i.type==='tower')h+=sect('主機樓')+'<div class="irow"><label for="i-tt">型式</label><select id="i-tt" data-k="tt"><option value="half">半高塔 7.15×7.05（標準）</option><option value="classic">6 層塔 11.2×10.1（舊廠）</option></select></div>'+
+    (TT(i)==='half'?'<div class="irow"><label for="i-inlet">主帶運機入料面</label><select id="i-inlet" data-k="inlet"><option value="auto">自動（朝向料倉）</option><option value="N">北面</option><option value="E">東面</option><option value="S">南面</option><option value="W">西面</option></select></div>':'')+'<div class="irow"><label for="i-exit">混凝土車出口</label><select id="i-exit" data-k="exit"><option value="N">北面</option><option value="E">東面</option><option value="S">南面</option><option value="W">西面</option></select></div>';
+  if(i.type==='bins')h+=sect('料倉尺寸')+'<div class="irow"><label for="i-st">結構</label><select id="i-st" data-k="st"><option value="rc">RC 倉體＋鋼構錐斗</option><option value="steel">全鋼構（鋼柱＋鋼倉體）</option></select></div>'+row('L','長度','0.5','m')+row('W','寬度','0.5','m')+
     '<div class="irow"><label for="i-grid">倉別</label><select id="i-grid" data-k="grid"><option value="4">4 倉（2×2）</option><option value="5">5 倉（3+2）</option><option value="6">6 倉（3+3）</option></select></div>'+
-    row('legH','腳架高','0.2','m')+row('hopH','漏斗高','0.2','m')+row('boxH','倉體高','0.2','m');
-  if(i.type==='silo')h+=sect('支撐')+'<div class="irow"><label for="i-sup">支撐形式</label><select id="i-sup" data-k="sup"><option value="steel">全鋼構（鐵管腳柱到地面）</option><option value="rc">RC 柱＋鋼構腳柱</option></select></div>'+row('base','RC 高度','0.5','m',{dis:!(i.base>0)})+row('cbot','錐底離地','0.2','m')+sect('筒倉規格')+'<div class="irow"><label for="i-preset">規格範本</label><select id="i-preset" data-k="preset"><option value="">— 選擇 —</option>'+Object.keys(SILO_PRESET).map(k=>'<option>'+k+'</option>').join('')+'</select></div>'+
+    row('legH','出料口高（腳架）','0.2','m')+row('hopH','錐斗高','0.2','m')+row('boxH','倉體高','0.2','m');
+  if(i.type==='silo')h+=sect('支撐')+'<div class="irow"><label for="i-sup">支撐形式</label><select id="i-sup" data-k="sup"><option value="steel">全鋼構（鐵管腳柱到地面）</option><option value="rc">RC 柱＋鋼構腳柱</option><option value="bldg">RC 建物（下方當電器室、空壓機室等）</option></select></div>'+
+    (i.sup==='bldg'?'<div class="irow"><label for="i-rcf">RC 樓層</label><select id="i-rcf" data-k="rcf"><option value="3">3F（17.9 m，無腳柱）</option><option value="2">2F（11.0 m，短腳柱）</option><option value="1">1F（7.3 m）</option></select></div>'+
+      row('cell','RC 單元寬（桶距）','0.05','m')+'<div class="irow"><label for="i-room">1F 房間用途</label><input type="text" id="i-room" data-k="room" class="txt" placeholder="例：電器室"></div>':'')+
+    row('base','RC 高度','0.5','m',{dis:!(i.base>0)||i.sup==='bldg'})+row('cbot','錐底離地','0.2','m')+sect('筒倉規格')+'<div class="irow"><label for="i-preset">規格範本</label><select id="i-preset" data-k="preset"><option value="">— 選擇 —</option>'+Object.keys(SILO_PRESET).map(k=>'<option>'+k+'</option>').join('')+'</select></div>'+
     row('D','直徑','0.05','m')+row('cyl','筒身高','0.2','m')+row('cone','錐底高','0.1','m');
   if(i.type==='transfer')h+=sect('轉台')+'<div class="irow"><label for="i-belt">屬於</label><select id="i-belt" data-k="belt"><option value="inc">入庫帶運機</option><option value="main">主帶運機</option></select></div>'+
     row('h','高度','0.5','m',{dis:i.h==null})+'<label class="chk sm"><input type="checkbox" id="i-hauto" data-k="hauto"> 自動高度（前後坡度相同）</label>';
@@ -4891,24 +4958,27 @@ function renderInspector(){
   h+=tplSection(i);
   h+='<p class="note" id="i-calc"></p><div class="iacts">'+(i.type==='silo'?'<button type="button" class="hbtn" data-act="all">全部水泥桶套用此規格</button><button type="button" class="hbtn" data-act="dup">複製一座</button>':'')+
     '<button type="button" class="hbtn danger" data-act="del">刪除</button></div>';
-  insEl.innerHTML=h;fillInspector();
+  insEl.innerHTML=h;insEl.dataset.id=i.id;fillInspector();
 }
-function fillInspector(){const i=byId(selected);if(!i||!$('i-x'))return;const set=(k,v)=>{const el=$('i-'+k);if(el&&document.activeElement!==el)el.value=v;};
+function fillInspector(){const i=byId(selected);if(!i||!$('i-x')||insEl.dataset.id!==i.id)return;const set=(k,v)=>{const el=$('i-'+k);if(el&&document.activeElement!==el)el.value=v;};
   set('x',fmt(i.x));set('z',fmt(i.z));if(i.type==='silo'&&$('i-rx')){const t=towerFor(i);if(t){set('rx',fmt(i.x-t.x,2));set('rz',fmt(i.z-t.z,2));}}if($('i-locked'))$('i-locked').checked=!!i.locked;if($('i-line'))$('i-line').value=i.line||1;set('name',i.name||'');const u=upstream(i);if(u){set('dist',fmt(hz(u,i)));set('az',fmt(azOf(u,i),0));}
-  if($('i-rot')){set('rot',fmt(rotDeg(i.r||0),0));$('i-rot').disabled=(!!i.auto&&i.type!=='zone')||!!i.locked;}if($('i-auto'))$('i-auto').checked=!!i.auto;
-  if(i.type==='tower')$('i-exit').value=i.exit||'S';
-  if(i.type==='bins'){['L','W','legH','hopH','boxH'].forEach(k=>set(k,fmt(i.b[k])));binLayout(i.b);$('i-grid').value=i.b.cells;}
-  if(i.type==='silo'){['D','cyl','cone','base'].forEach(k=>set(k,fmt(i[k],k==='D'?3:2)));set('cbot',fmt(i.base+i.bottom,2));$('i-sup').value=i.base>0?'rc':'steel';$('i-base').disabled=!(i.base>0);}
+  if($('i-rot')){set('rot',fmt(rotDeg(i.r||0),0));$('i-rot').disabled=!!i.locked;}
+  if(i.type==='tower'){$('i-exit').value=i.exit||'S';$('i-tt').value=TT(i);if($('i-inlet'))$('i-inlet').value=i.inlet||'auto';}
+  if(i.type==='bins'){['L','W','legH','hopH','boxH'].forEach(k=>set(k,fmt(i.b[k])));binLayout(i.b);$('i-grid').value=i.b.cells;$('i-st').value=i.b.st==='rc'?'rc':'steel';}
+  if(i.type==='silo'){['D','cyl','cone','base'].forEach(k=>set(k,fmt(i[k],k==='D'?3:2)));set('cbot',fmt(i.base+i.bottom,2));$('i-sup').value=i.sup==='bldg'?'bldg':i.base>0?'rc':'steel';$('i-base').disabled=!(i.base>0)||i.sup==='bldg';if($('i-rcf')){$('i-rcf').value=String(i.rcf||3);set('cell',fmt(i.cell||5.4,2));set('room',i.room||'');}}
   if(i.type==='transfer'){$('i-belt').value=i.belt;set('h',fmt(i.top));$('i-h').disabled=i.h==null;$('i-hauto').checked=i.h==null;}
   if(i.type==='zone'){set('w',fmt(i.w));set('d',fmt(i.d));}
   if(i.type==='gate')set('w',fmt(i.w));if(i.type==='scale'||i.type==='wash'){set('L',fmt(i.L));set('W',fmt(i.W));}
   if(i.type==='yard'){set('bays',i.bays);set('tanks',i.tanks);set('clear',i.clear==null?3:i.clear);$('i-sep').checked=!!i.sep;$('i-silt').checked=i.silt!==false;}
   if(i.type==='parking'){set('n',i.n);$('i-rows').value=i.rows;set('ang',fmt(i.ang,0));set('sw',fmt(i.sw));set('sl',fmt(i.sl));$('i-cars').checked=!!i.cars;}
   const c=$('i-calc');if(!c)return;
-  if(i.type==='silo'){const v=siloVol(i),r=screwRoute(i);c.innerHTML='總高 <b>'+fmt(siloTop(i)+1)+' m</b>　容積 <b>'+fmt(v,0)+' m³</b>，約 <b>'+fmt(v*CEMENT_T,0)+' 噸</b>水泥（1.3 t/m³）'+
+  if(i.type==='silo'){const v=siloVol(i),r=screwRoute(i),ct=i.base+i.bottom+i.cone;c.innerHTML=(i.sup==='bldg'?'RC 建物 '+(i.rcf||3)+'F 高 <b>'+fmt(i.base)+' m</b>，'+(i.base>=ct-.05?'筒倉直接坐在 RC 頂（錐斗在頂樓內），無腳柱':'露出鋼構腳柱 <b>'+fmt(ct-i.base)+' m</b>')+'。<br>':'')+'總高 <b>'+fmt(siloTop(i)+1)+' m</b>　容積 <b>'+fmt(v,0)+' m³</b>，約 <b>'+fmt(v*CEMENT_T,0)+' 噸</b>水泥（1.3 t/m³）'+
     (r?'<br>螺運機 <b>'+fmt(r.L)+' m</b>：'+({single:'單支',relay:'兩支接力（借「'+(r.via&&r.via.name)+'」腳柱）',nosupport:'需兩支但無腳柱可借',toolong:'超過兩支，需移近'})[r.kind]:'<br>尚未加入主機樓，無螺運機');}
-  else if(i.type==='bins'){const v=binVol(i.b);c.innerHTML='倉頂 <b>'+fmt(binTop(i.b))+' m</b>，分料頂 <b>'+fmt(topFeed(i.b))+' m</b>　容積 <b>'+fmt(v,0)+' m³</b>，約 <b>'+fmt(v*AGG_T,0)+' 噸</b>（1.6 t/m³）';}
-  else if(i.type==='tower')c.innerHTML='平面 11.2 × 10.1 m，6 層，主帶運機頭輪 5F <b>19.0 m</b>。混凝土車由<b>'+CN[i.exit||'S']+'面</b>倒車進入接料，對面封閉。';
+  else if(i.type==='bins'){const v=binVol(i.b),L=belts(i.line||1).main;let ba='';if(L&&L[0]===i){const a=outPt(i,L[1]),b=inPt(L[1]),d=V(b.x-a.x,0,b.z-a.z).normalize(),[wx,wz]=rotXZ(0,1,i.r||0),ang=Math.acos(Math.min(1,Math.abs(d.x*wx+d.z*wz)))/D2R;
+      ba='<br>主帶運機與料倉軸線夾角 <b>'+fmt(ang,0)+'°</b>'+(ang<=2?'（平行，正對出料）':'（料倉沒有與輸送帶平行，輸送帶在倉下斜穿）');}c.innerHTML='倉頂 <b>'+fmt(binTop(i.b))+' m</b>，分料頂 <b>'+fmt(topFeed(i.b))+' m</b>　容積 <b>'+fmt(v,0)+' m³</b>，約 <b>'+fmt(v*AGG_T,0)+' 噸</b>（1.6 t/m³）'+ba;}
+  else if(i.type==='tower'){const ea=entryAngle(i),es=ea==null?'':'<br>主帶運機與入料面夾角 <b>'+fmt(ea,0)+'°</b>'+(ea>=88?'（垂直進入）':'（料倉與主機樓不平行／不對正，輸送帶斜進）');
+    c.innerHTML=(TT(i)==='half'?'半高塔 7.15 × 7.05 m：1F RC（7.1 m）攪拌車接料；2F 攪拌機；3F 計量（骨材＋粉料×3＋水）11.0 m；4F 集塵 16.0 m；屋頂 20.3 m。<br>主帶運機入料點固定在<b>'+CN[faceCompass(i,inletFace(i))]+'面</b>、距中心 3.0 m、高 <b>15.2 m</b>。':
+      '平面 11.2 × 10.1 m，6 層，主帶運機頭輪 5F <b>19.0 m</b>。')+'<br>混凝土車由<b>'+CN[i.exit||'S']+'面</b>倒車進入接料，對面封閉。'+es;}
   else if(i.type==='hopper')c.innerHTML='地下受料坑，坑底 <b>-3.0 m</b>。砂石車由背離輸送帶的一側倒車卸料。';
   else if(i.type==='transfer')c.innerHTML='自動建議高度 <b>'+fmt(i.autoTop)+' m</b>，前後皮帶落差 '+DROP+' m。';
   else if(i.type==='parking'){const P=parkGeom(i);c.innerHTML='佔地約 <b>'+fmt(P.width)+' × '+fmt(P.band*i.rows)+' m</b>（含 9 m 車道）。車頭朝車道停放，出場直接前進。';}
@@ -4921,8 +4991,14 @@ function fillInspector(){const i=byId(selected);if(!i||!$('i-x'))return;const se
 function applyField(i,k,v){
   if(k==='name'){i.name=v||i.name;return;}
   if(k==='locked'){i.locked=!!v;return;}
-  if(k==='exit'){i.exit=v;return;}
-  if(k==='sup'&&i.type==='silo'){const cb=i.base+i.bottom;i.base=v==='rc'?Math.min(Math.max(i.base||6,1),cb-1):0;i.bottom=cb-i.base;return;}
+  if(k==='exit'){i.exit=v;return;}if(k==='tt'){i.tt=v;if(!i.inlet)i.inlet='auto';return;}if(k==='inlet'){i.inlet=v;return;}if(k==='room'){i.room=String(v||'').slice(0,12);return;}
+  if(k==='st'&&i.type==='bins'){const P=v==='rc'?BIN_RC:DEFAULT_BINS;Object.assign(i.b,{st:v==='rc'?'rc':undefined,legH:P.legH,hopH:P.hopH,boxH:P.boxH});if(v!=='rc')delete i.b.st;return;}
+  if(k==='sup'&&i.type==='silo'){const cb=i.base+i.bottom;
+    if(v==='bldg'){i.sup='bldg';i.rcf=i.rcf||3;i.cell=i.cell||5.4;i.base=RCH[i.rcf];i.bottom=(RCH[3]-i.cone)-i.base;return;}
+    i.sup=v;i.base=v==='rc'?Math.min(Math.max(Math.min(i.base,cb-1)||6,1),cb-1):0;i.bottom=cb-i.base;return;}
+  if(k==='rcf'&&i.type==='silo'){const cb=i.base+i.bottom;i.rcf=+v||3;i.base=RCH[i.rcf];i.bottom=cb-i.base;return;}
+  if(k==='cell'&&i.type==='silo'){const n=parseFloat(v);if(isFinite(n))i.cell=Math.max(i.D+.2,Math.min(12,n));return;}
+  if(i.type==='silo'&&i.sup==='bldg'&&k==='cbot'){const n=parseFloat(v);if(isFinite(n))i.bottom=Math.max(2,n)-i.base;return;}
   if(i.type==='silo'&&(k==='cbot'||k==='base')){const n=parseFloat(v);if(!isFinite(n))return;const cb=k==='cbot'?Math.max(2,n):i.base+i.bottom;
     if(k==='base')i.base=Math.max(.5,Math.min(n,cb-1));else if(i.base>cb-1)i.base=Math.max(0,cb-1);i.bottom=cb-i.base;return;}
   if(i.locked&&['x','z','dist','az','rot','rx','rz'].includes(k))return;
@@ -4931,19 +5007,19 @@ function applyField(i,k,v){
   if(k==='auto'){i.auto=v;return;}if(k==='hauto'){i.h=v?null:i.top;return;}if(k==='belt'){if(!transfer(v,i.line||1)||transfer(v,i.line||1)===i)i.belt=v;return;}
   if(k==='cars'){i.cars=v;return;}if(k==='sep'){i.sep=v;return;}if(k==='silt'){i.silt=v;return;}if(k==='bays'){i.bays=Math.max(1,Math.min(3,Math.round(parseFloat(v)||1)));return;}if(k==='tanks'){i.tanks=Math.max(2,Math.min(6,Math.round(parseFloat(v)||4)));return;}if(k==='clear'){i.clear=Math.max(0,Math.min(5,Math.round(parseFloat(v)||0)));return;}if(k==='rows'){i.rows=+v;return;}
   if(k==='grid'){i.b.cells=v;if(v!=='4'&&i.b.L<15)i.b.L=Math.max(i.b.L,v==='4'?12:16.5);return;}
-  if(k==='preset'){if(SILO_PRESET[v]){const b=i.base||0;Object.assign(i,SILO_PRESET[v]);i.base=Math.min(b,i.bottom-1>0?b:0);i.bottom=SILO_PRESET[v].bottom-i.base;}return;}
+  if(k==='preset'){if(SILO_PRESET[v]){const b=i.base||0;Object.assign(i,SILO_PRESET[v]);if(i.sup==='bldg'){i.base=RCH[i.rcf||3];i.bottom=(RCH[3]-i.cone)-i.base;if(i.cell<i.D+.2)i.cell=Math.round((i.D+1)*20)/20;}else{i.base=Math.min(b,i.bottom-1>0?b:0);i.bottom=SILO_PRESET[v].bottom-i.base;}}return;}
   v=parseFloat(v);if(!isFinite(v))return;
   if(k==='x'||k==='z'){const dx=k==='x'?v-i.x:0,dz=k==='z'?v-i.z:0;moveItem(i,dx,dz);}
   else if(k==='dist'||k==='az'){const u=upstream(i);const d=k==='dist'?Math.max(1,v):hz(u,i),az=(k==='az'?v:azOf(u,i))*D2R;moveItem(i,u.x+Math.sin(az)*d-i.x,u.z-Math.cos(az)*d-i.z);}
-  else if(k==='rot'){i.r=-v*D2R;if(i.type!=='zone')i.auto=false;}
+  else if(k==='rot'){i.r=-v*D2R;}
   else if(i.type==='bins')i.b[k]=Math.max(k==='legH'?3:(k==='L'||k==='W'?4:1),v);
   else if(k==='h')i.h=Math.max(4,v);
   else if(k==='n')i.n=Math.max(1,Math.round(v));else if(k==='ang')i.ang=Math.max(30,Math.min(90,v));
   else i[k]=Math.max(k==='base'?0:k==='D'?1:k==='w'||k==='d'?2:.5,v);
 }
 function moveItem(i,dx,dz){i.x+=dx;i.z+=dz;if(i.type==='tower'&&S.siloFollow)silos().filter(s=>(s.line||1)===(i.line||1)&&!s.locked).forEach(s=>{s.x+=dx;s.z+=dz;});}
-insEl.addEventListener('change',e=>{if(selSet.size>1)return;const t=e.target,k=t.dataset.k,i=byId(selected);if(!k||!i)return;applyField(i,k,t.type==='checkbox'?t.checked:t.value);
-  if(['auto','hauto','preset','grid','belt','line','rows','cars','locked','sup','exit','sep','silt'].includes(k))renderInspector();update();});
+insEl.addEventListener('change',e=>{if(selSet.size>1)return;const t=e.target,k=t.dataset.k,i=byId(selected);if(!k||!i||insEl.dataset.id!==i.id)return;applyField(i,k,t.type==='checkbox'?t.checked:t.value);
+  if(['auto','hauto','preset','grid','belt','line','rows','cars','locked','sup','exit','sep','silt','tt','inlet','st','rcf'].includes(k))renderInspector();update();});
 insEl.addEventListener('click',e=>{const b0=e.target.closest('button');if(b0&&selSet.size>1){const g=b0.dataset.g;
     if(b0.dataset.step){const el=$('i-'+b0.dataset.step);el.value=(parseFloat(el.value)||0)+parseFloat(b0.dataset.d);return;}
     if(g==='move'){moveGroup(parseFloat($('i-gdx').value)||0,parseFloat($('i-gdz').value)||0);$('i-gdx').value=0;$('i-gdz').value=0;update();}
@@ -4953,11 +5029,11 @@ insEl.addEventListener('click',e=>{const b0=e.target.closest('button');if(b0&&se
   const b=e.target.closest('button');const i=byId(selected);if(!b||!i)return;
   if(b.dataset.step){const k=b.dataset.step,el=$('i-'+k);if(el.disabled)return;const v=(parseFloat(el.value)||0)+parseFloat(b.dataset.d);el.value=v;applyField(i,k,String(v));update();}
   if(b.dataset.act==='del'){S.items=S.items.filter(x=>x!==i);S.zones=S.zones.filter(x=>x!==i);selected=null;renderInspector();update();}
-  if(b.dataset.act==='all'){silos().forEach(o=>{if(o!==i){o.D=i.D;o.cyl=i.cyl;o.cone=i.cone;o.bottom=i.bottom;o.base=i.base;}});update();}
+  if(b.dataset.act==='all'){silos().forEach(o=>{if(o!==i){o.D=i.D;o.cyl=i.cyl;o.cone=i.cone;o.bottom=i.bottom;o.base=i.base;o.sup=i.sup;o.rcf=i.rcf;o.cell=i.cell;}});update();}
   if(b.dataset.act==='dup'){const c=Object.assign({},i,{id:newId('s'),name:i.name+'（複製）',x:i.x+i.D+1.5});S.items.push(c);select(c.id);}});
 
 /* ---------- equipment templates (shared when a backend is connected) ---------- */
-const TPL_KEYS={silo:['D','cyl','cone','bottom','base'],bins:['b'],tower:['exit'],hopper:[],transfer:['h'],yard:['bays','tanks','clear','sep','silt'],parking:['n','rows','ang','sw','sl','cars'],scale:['L','W'],wash:['L','W'],gate:['w'],zone:['w','d']};
+const TPL_KEYS={silo:['D','cyl','cone','bottom','base','sup','rcf','cell'],bins:['b'],tower:['tt','exit','inlet'],hopper:[],transfer:['h'],yard:['bays','tanks','clear','sep','silt'],parking:['n','rows','ang','sw','sl','cars'],scale:['L','W'],wash:['L','W'],gate:['w'],zone:['w','d']};
 let TPL=(()=>{try{return JSON.parse(localStorage.getItem('rmc-tpl')||'[]');}catch(e){return [];}})(),DBREF=null;
 async function tplPersist(){try{localStorage.setItem('rmc-tpl',JSON.stringify(TPL));}catch(e){}
   try{if(DBREF)await DBREF.doc('templates/all').set({list:TPL});else if(SHEET.on){const j=await sheetCall(null,{action:'save',id:SHEET.tplId||'',name:'__TEMPLATES__',saved:Date.now(),summary:'設備範本',state:{list:TPL},thumb:''});SHEET.tplId=j.id;}}
@@ -4999,6 +5075,14 @@ function loadExample(){S.W=80;S.L=150;S.m=3;S.zones=[];
   [h,b,t].forEach(o=>o.line=1);S.lines=1;S.cur=1;S.items=[h,b,t].concat(sl.map(([n,lx,lz,D,cyl,cone,bottom,base],k)=>({id:'s'+(k+1),type:'silo',line:1,name:n,x:t.x+lx,z:t.z+lz,D,cyl,cone,bottom,base})));
   selected=null;renderLineSel();syncSite();rebuildSite();renderInspector();update();frame(false);}
 $('bExample').addEventListener('click',loadExample);
+// standard example: half-height tower, 5 x D4370 silos on a 3F RC building in an L, RC bins (from the 3M3 半高塔 layout)
+function loadExample2(){S.W=80;S.L=150;S.m=3;S.zones=[];
+  const t={id:'t1',type:'tower',tt:'half',exit:'W',inlet:'auto',x:40,z:16,r:0,auto:false},b={id:'b1',type:'bins',x:40,z:62,r:0,auto:false,b:Object.assign({},BIN_RC)},h={id:'h1',type:'hopper',x:40,z:131,r:0,auto:false};
+  const P=[[-3.75,-7.05,'倉庫室'],[1.65,-7.05,'控制室'],[7.05,-7.05,'電器室'],[7.05,-1.65,'空壓機室'],[7.05,3.75,'藥劑室']];
+  [h,b,t].forEach(o=>o.line=1);S.lines=1;S.cur=1;
+  S.items=[h,b,t].concat(P.map(([lx,lz,room],k)=>({id:'s'+(k+1),type:'silo',line:1,name:'水泥桶 #'+(k+1),x:t.x+lx,z:t.z+lz,D:4.37,cyl:10.4,cone:3.7,base:RCH[3],bottom:14.2-RCH[3],sup:'bldg',rcf:3,cell:5.4,room})));
+  selected=null;renderLineSel();syncSite();rebuildSite();renderInspector();update();frame(false);}
+$('bExample2').addEventListener('click',loadExample2);
 let hintOff=(()=>{try{return localStorage.getItem('rmc-hint-off')==='1';}catch(e){return false;}})();
 $('hintClose').addEventListener('click',()=>{hintOff=true;$('hint').hidden=true;if($('hintNever').checked){try{localStorage.setItem('rmc-hint-off','1');}catch(e){}}});
 $('bClear').addEventListener('click',()=>{if($('bClear').dataset.arm!=='1'){$('bClear').dataset.arm='1';$('bClear').textContent='再按一次清空';setTimeout(()=>{$('bClear').dataset.arm='';$('bClear').textContent='清空';},2500);return;}
@@ -5170,7 +5254,7 @@ function coverSheet(total){return sheet('配置總表',(g,a)=>{const FONT='"Noto
     g.font='25px '+FONT;rows.forEach((r,n)=>{const yy=y+rh*(n+1);if(n%2){g.fillStyle='#f8f9fa';g.fillRect(x,yy,w,rh);}g.fillStyle=r._bad?'#c8342c':'#1d252c';let cx=x;r.forEach((c,k)=>{g.fillText(String(c),cx+10,yy+10,widths[k]-16);cx+=widths[k];});});
     g.strokeStyle='#c9d0d6';g.lineWidth=1;g.strokeRect(x,y,w,rh*(rows.length+1));return y+rh*(rows.length+1);};
   const spec=i=>i.type==='bins'?(binLayout(i.b),i.b.cells)+' 倉　'+fmt(i.b.L)+'×'+fmt(i.b.W)+' m　倉頂 '+fmt(binTop(i.b))+' m':i.type==='silo'?(towerFor(i)?'距主機樓 ('+fmt(i.x-towerFor(i).x)+', '+fmt(i.z-towerFor(i).z)+')　':'')+'Ø'+fmt(i.D,2)+'　總高 '+fmt(siloTop(i)+1)+' m　約 '+fmt(siloVol(i)*CEMENT_T,0)+' t':
-    i.type==='tower'?'11.2×10.1 m　6F　頭輪 19.0 m':i.type==='transfer'?'高 '+fmt(i.top)+' m':i.type==='parking'?i.n+' 格　'+fmt(i.ang,0)+'°　'+fmt(i.sw)+'×'+fmt(i.sl)+' m':i.type==='scale'||i.type==='wash'?fmt(i.L)+'×'+fmt(i.W)+' m':i.type==='gate'?'門寬 '+fmt(i.w)+' m':i.type==='hopper'?'地下受料坑 -3.0 m':'';
+    i.type==='tower'?(TT(i)==='half'?'半高塔 7.15×7.05 m　1F RC　入料點 15.2 m':'11.2×10.1 m　6F　頭輪 19.0 m')+(entryAngle(i)!=null?'　進入角 '+fmt(entryAngle(i),0)+'°':''):i.type==='transfer'?'高 '+fmt(i.top)+' m':i.type==='parking'?i.n+' 格　'+fmt(i.ang,0)+'°　'+fmt(i.sw)+'×'+fmt(i.sl)+' m':i.type==='scale'||i.type==='wash'?fmt(i.L)+'×'+fmt(i.W)+' m':i.type==='gate'?'門寬 '+fmt(i.w)+' m':i.type==='hopper'?'地下受料坑 -3.0 m':'';
   const eq=S.items.map(i=>[nm(i),spec(i),fmt(i.x),fmt(i.z),fmt(rotDeg(i.r||0),0)+'°']);
   const colW=Math.floor(a.w*.56);let y2=table(a.x+30,y,colW,['設備','規格','X (m)','Y (m)','旋轉'],eq.slice(0,24),[colW*.3,colW*.4,colW*.1,colW*.1,colW*.1]);
   const segs=segments(),bx=a.x+60+colW,bw=a.w-colW-90;
@@ -5206,8 +5290,8 @@ function dxf(){const L=[],Y=z=>(S.L-z)*1000,X=x=>x*1000;const layers={SITE:7,EQU
   const circle=(x,z,r,ly)=>L.push('0','CIRCLE','8',ly,'10',X(x).toFixed(1),'20',Y(z).toFixed(1),'30','0','40',(r*1000).toFixed(1));
   const rect=(i,hx,hz,ly,ox=0,oz=0)=>poly([[-hx,-hz],[hx,-hz],[hx,hz],[-hx,hz]].map(([a,b])=>{const [p,q]=rotXZ(a+ox,b+oz,i.r||0);return [i.x+p,i.z+q];}),ly);
   poly([[0,0],[S.W,0],[S.W,S.L],[0,S.L]],'SITE');if(S.m>0)poly([[S.m,S.m],[S.W-S.m,S.m],[S.W-S.m,S.L-S.m],[S.m,S.L-S.m]],'SITE');
-  S.items.forEach(i=>{if(i.type==='silo'){circle(i.x,i.z,i.D/2,'SILO');text(i.x,i.z+i.D/2+1.2,.8,i.name);return;}
-    if(i.type==='tower'){rect(i,5.6,5.05,'EQUIP');}
+  S.items.forEach(i=>{if(i.type==='silo'){if(i.sup==='bldg'&&i.base>0)rect(i,(i.cell||5.4)/2,(i.cell||5.4)/2,'EQUIP');circle(i.x,i.z,i.D/2,'SILO');text(i.x,i.z+i.D/2+1.2,.8,i.name);return;}
+    if(i.type==='tower'){const d=TD(i);rect(i,d.hx,d.hz,'EQUIP');}
     else if(i.type==='bins')rect(i,i.b.L/2,i.b.W/2,'EQUIP');else if(i.type==='hopper'){rect(i,2.9,2.9,'EQUIP');}
     else if(i.type==='transfer')rect(i,2.25,2.25,'EQUIP');
     else if(i.type==='parking'){const P=parkGeom(i);stalls(i).forEach(s=>[-1,1].forEach(e=>{const x=s.bx+e*P.pitch/2,A=rotXZ(x,0,i.r||0),B=rotXZ(x+s.ux*i.sl,s.uz*i.sl,i.r||0);line([i.x+A[0],i.z+A[1]],[i.x+B[0],i.z+B[1]],'PARK');}));}
