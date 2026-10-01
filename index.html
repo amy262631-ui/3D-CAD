@@ -4523,6 +4523,7 @@ function buildBinsP(b){
 }
 const RCH={1:7.3,2:11.0,3:17.9};   // RC building heights by floor count (3F reaches the cone top -> no legs)
 function doorOf(s){const t=towerFor(s);if(!t)return '+z';const dx=s.x-t.x,dz=s.z-t.z;return Math.abs(dx)>Math.abs(dz)?(dx>0?'+x':'-x'):(dz>0?'+z':'-z');}
+const HOOP=new THREE.TorusGeometry(.45,.03,4,14);
 function buildSilo(s,door){ // s.base = RC height (0 = steel legs to the ground); s.sup==='bldg': RC building underneath (rooms)
   const g=new THREE.Group(),r=s.D/2,lr=r*.92,cb=s.base+s.bottom,ct=cb+s.cone,top=ct+s.cyl;
   if(s.sup==='bldg'&&s.base>0){const c=s.cell||5.4,H=s.base,lvs=[0,RCH[1],RCH[2],RCH[3]].filter(y=>y<H-.5).concat([H]);
@@ -4534,13 +4535,32 @@ function buildSilo(s,door){ // s.base = RC height (0 = steel legs to the ground)
     if(s.room)label(g,s.room,V(dx*(c/2+.3),3.9,dz*(c/2+.3)),'room');}
   else if(s.base>0){const cr=r*.92;const P4=[0,1,2,3].map(i=>{const a=Math.PI/4+i*Math.PI/2;return [cr*Math.cos(a),cr*Math.sin(a)];});
     P4.forEach(([x,z])=>box(g,.9,s.base,.9,M.rc,x,s.base/2,z));P4.forEach(([x,z],k)=>{const [x2,z2]=P4[(k+1)%4];const bm=member(g,V(x,s.base-.35,z),V(x2,s.base-.35,z2),.7,M.rc);});}
-  if(s.base<ct-.05){
-  for(let i=0;i<4;i++){const a=Math.PI/4+i*Math.PI/2;member(g,V(lr*Math.cos(a),s.base,lr*Math.sin(a)),V(lr*Math.cos(a),ct,lr*Math.sin(a)),.4,M.steel);}
-  if(cb-s.base>1.5)for(let i=0;i<4;i++){const a=Math.PI/4+i*Math.PI/2,b=a+Math.PI/2,mid=(s.base+cb)/2;
-    member(g,V(lr*Math.cos(a),s.base+.5,lr*Math.sin(a)),V(lr*Math.cos(b),mid,lr*Math.sin(b)),.1,M.brace);member(g,V(lr*Math.cos(b),s.base+.5,lr*Math.sin(b)),V(lr*Math.cos(a),mid,lr*Math.sin(a)),.1,M.brace);}}
-  cone(g,r,.3,s.cone,M.red,0,cb,0);cyl(g,r,s.cyl,M.silo,0,ct+s.cyl/2,0,32);
+  // ---- steel support (company standard silo): 4 tube legs, X-braced tiers (~3.4 m) up to the screw platform, then open to the shell ----
+  const LP=[0,1,2,3].map(i=>{const a=Math.PI/4+i*Math.PI/2;return [lr*Math.cos(a),lr*Math.sin(a)];}),legH=ct-s.base,haveLegs=legH>.05;
+  const pl=Math.max(s.base,cb-1.8);   // screw / service platform under the cone
+  if(haveLegs){LP.forEach(([x,z])=>{cyl(g,.2,legH,M.steel,x,s.base+legH/2,z,12);if(s.base<.01)box(g,.8,.25,.8,M.rc,x,.12,z);});
+    const ring=y=>LP.forEach(([x,z],k)=>{const [x2,z2]=LP[(k+1)%4];member(g,V(x,y,z),V(x2,y,z2),.16,M.steel);});
+    const span=pl-s.base;if(span>2){const n=Math.max(1,Math.round(span/3.4)),lv=[];for(let k=0;k<=n;k++)lv.push(s.base+.3+(span-.3)*k/n);
+      lv.forEach(ring);for(let k=0;k<n;k++)LP.forEach(([x,z],q)=>{const [x2,z2]=LP[(q+1)%4];member(g,V(x,lv[k],z),V(x2,lv[k+1],z2),.1,M.brace);member(g,V(x2,lv[k],z2),V(x,lv[k+1],z),.1,M.brace);});}
+    if(ct-pl>2.5)ring((pl+ct)/2);
+    if(pl>s.base+1){const w=lr*Math.SQRT2+1.2;const gr=box(g,w,.08,w,M.grate,0,pl,0);gr.castShadow=false;   // platform + handrail
+      const h=w/2;[[-h,-h,h,-h],[h,-h,h,h],[h,h,-h,h],[-h,h,-h,-h]].forEach(([x1,z1,x2,z2])=>{member(g,V(x1,pl+1.1,z1),V(x2,pl+1.1,z2),.06,M.yellow);member(g,V(x1,pl+.55,z1),V(x2,pl+.55,z2),.05,M.yellow);});
+      [[-h,-h],[h,-h],[h,h],[-h,h]].forEach(([x,z])=>member(g,V(x,pl,z),V(x,pl+1.1,z),.06,M.yellow));}}
+  // ---- shell: cone, cylinder with stiffener rings, red top band, low cone roof with guard rail, dust collector ----
+  cone(g,r,.3,s.cone,M.red,0,cb,0);cyl(g,r,s.cyl,M.silo,0,ct+s.cyl/2,0,32);cyl(g,r+.05,.18,M.steel,0,ct+.09,0,32);
   const band=Math.min(3.2,s.cyl*.18);cyl(g,r+.02,band,M.redTop,0,top-band/2,0,32);
-  const lid=mesh(new THREE.ConeGeometry(r,.6,32),M.red);lid.position.set(0,top+.3,0);g.add(lid);box(g,.9,.9,.9,M.steel,0,top+.9,0);
+  for(let y=ct+1.5;y<top-band-.3;y+=1.5)cyl(g,r+.035,.07,M.silo2,0,y,0,32);
+  const lid=mesh(new THREE.ConeGeometry(r,.35,32),M.red);lid.position.set(0,top+.175,0);g.add(lid);
+  const RR=r-.1,NP=12;for(let k=0;k<NP;k++){const a=k/NP*Math.PI*2,b=(k+1)/NP*Math.PI*2;member(g,V(RR*Math.cos(a),top,RR*Math.sin(a)),V(RR*Math.cos(a),top+1.1,RR*Math.sin(a)),.05,M.yellow);
+    member(g,V(RR*Math.cos(a),top+1.1,RR*Math.sin(a)),V(RR*Math.cos(b),top+1.1,RR*Math.sin(b)),.05,M.yellow);member(g,V(RR*Math.cos(a),top+.55,RR*Math.sin(a)),V(RR*Math.cos(b),top+.55,RR*Math.sin(b)),.04,M.yellow);}
+  const [ddx,ddz]=faceVec(door||'+z');                       // ladder / fill pipe side faces away from the tower
+  box(g,1.6,1.3,1.1,M.silo2,-ddx*(r*.45)-ddz*.3,top+.95,-ddz*(r*.45)+ddx*.3);cyl(g,.25,.8,M.steel,ddz*r*.4,top+.6,-ddx*r*.4,12);box(g,.7,.15,.7,M.steel,0,top+.42,0);
+  // ---- cage ladder from the platform (or RC roof) to the roof, rest landings every ~5 m; pneumatic fill pipe from ground level ----
+  const ly0=haveLegs?pl:s.base,lx=ddx*(r+.55),lz=ddz*(r+.55),tx=-ddz*.25,tz=ddx*.25;
+  [-1,1].forEach(sg=>member(g,V(lx+tx*sg,ly0,lz+tz*sg),V(lx+tx*sg,top+1.1,lz+tz*sg),.05,M.silo2));
+  for(let y=ly0+2.2;y<top+.8;y+=.9){const cx=lx+ddx*.2,cz=lz+ddz*.2,hp=mesh(HOOP,M.silo2,false);hp.rotation.x=Math.PI/2;hp.position.set(cx,y,cz);g.add(hp);}
+  for(let y=ly0+5;y<top-1;y+=5){const gr=box(g,ddx?1:1.4,.07,ddx?1.4:1,M.grate,lx+ddx*.2,y,lz+ddz*.2);gr.castShadow=false;}
+  const fx=-ddz*(r+.25),fz=ddx*(r+.25);cyl(g,.07,top+.6-1,M.silo2,fx,(1+top+.6)/2,fz,8);member(g,V(fx,top+.6,fz),V(fx*.6,top+.6,fz*.6),.12,M.silo2);
   return g;
 }
 const FOOTP={tower:[[-5.8,-9],[12.1,-9],[12.1,5.3],[-5.8,5.3]],bins:FOOT.bins,hopper:FOOT.hopper,transfer:[[-3,-3],[3,-3],[3,3],[-3,3]]};
@@ -4701,7 +4721,7 @@ function screwRoute(s){
 
 /* ---------- 3D objects per item ---------- */
 const OBJ={};  // id -> {g,key}
-function objKey(i){if(i.type==='yard')return JSON.stringify(['yard',i.bays,i.tanks,i.sep,i.clear,i.silt]);if(i.type==='tower')return 'tower'+TT(i)+towerFace(i)+(TT(i)==='half'?inletFace(i):'')+'m'+(i.mixRot||0);if(FAC.includes(i.type))return JSON.stringify([i.w,i.L,i.W,i.n,i.rows,i.ang,i.sw,i.sl,i.cars]);if(i.type==='bins')return JSON.stringify(i.b);if(i.type==='rbin')return JSON.stringify(['rb',i.rk,i.mt,i.n,i.P,i.W,i.ext,i.gap,rbinSg(i)]);if(i.type==='silo')return JSON.stringify([i.D,i.cyl,i.cone,i.bottom,i.base,i.sup||'',i.cell||0,i.room||'',i.sup==='bldg'?doorOf(i):'']);
+function objKey(i){if(i.type==='yard')return JSON.stringify(['yard',i.bays,i.tanks,i.sep,i.clear,i.silt]);if(i.type==='tower')return 'tower'+TT(i)+towerFace(i)+(TT(i)==='half'?inletFace(i):'')+'m'+(i.mixRot||0);if(FAC.includes(i.type))return JSON.stringify([i.w,i.L,i.W,i.n,i.rows,i.ang,i.sw,i.sl,i.cars]);if(i.type==='bins')return JSON.stringify(i.b);if(i.type==='rbin')return JSON.stringify(['rb',i.rk,i.mt,i.n,i.P,i.W,i.ext,i.gap,rbinSg(i)]);if(i.type==='silo')return JSON.stringify([i.D,i.cyl,i.cone,i.bottom,i.base,i.sup||'',i.cell||0,i.room||'',doorOf(i)]);
   if(i.type==='transfer')return fmt(i.top);if(i.type==='zone')return JSON.stringify([i.w,i.d]);return i.type;}
 const COMPASS={N:[0,-1],S:[0,1],E:[1,0],W:[-1,0]},CN={N:'北',S:'南',E:'東',W:'西'};
 function towerFace(t){const d=COMPASS[t.exit||'S'];const [lx,lz]=rotXZ(d[0],d[1],-(t.r||0));return Math.abs(lx)>Math.abs(lz)?(lx>0?'+x':'-x'):(lz>0?'+z':'-z');}
@@ -5510,7 +5530,7 @@ function dxfElevation(key){const E=ELEV[key],ents=[],seen=new Set(),v=new THREE.
     if(Math.abs(a[0]-b[0])<1e-3&&Math.abs(a[1]-b[1])<1e-3)return;hmin=Math.min(hmin,a[0],b[0]);hmax=Math.max(hmax,a[0],b[0]);
     ents.push('0','LINE','8',ly,'10',(a[0]*1000).toFixed(0),'20',(a[1]*1000).toFixed(0),'30','0','11',(b[0]*1000).toFixed(0),'21',(b[1]*1000).toFixed(0),'31','0');};
   const walk=(root,ly0)=>{root.updateMatrixWorld(true);root.traverse(o=>{if(!o.isMesh||!o.visible||o.geometry===MOUND)return;const m=o.material;if(m&&m.visible===false)return;
-      const ly=ly0||LAYER_OF[(byId(o.userData.key)||{}).type]||'EQUIP';if(o.geometry===MIXER_GEO){meshOutline(o,E,line,'MIXER');return;}const arr=edgesOf(o.geometry),mw=o.matrixWorld;
+      const ly=ly0||LAYER_OF[(byId(o.userData.key)||{}).type]||'EQUIP';if(o.geometry===MIXER_GEO){meshOutline(o,E,line,'MIXER');return;}if(o.geometry===HOOP)return;const arr=edgesOf(o.geometry),mw=o.matrixWorld;
       for(let i=0;i<arr.length;i+=6){v.set(arr[i],arr[i+1],arr[i+2]).applyMatrix4(mw);const a=[E.h(v),Math.max(v.y,-4)];v.set(arr[i+3],arr[i+4],arr[i+5]).applyMatrix4(mw);line(a,[E.h(v),Math.max(v.y,-4)],ly);}
       const gp=o.geometry.parameters,gt=o.geometry.type;   // silhouette of vertical cylinders / cones (smooth sides have no feature edges)
       if(gp&&(gt==='CylinderGeometry'||gt==='ConeGeometry')){const ax=new THREE.Vector3(0,1,0).transformDirection(mw);if(Math.abs(ax.y)>.98){
