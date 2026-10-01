@@ -4554,7 +4554,8 @@ function buildSilo(s,door){ // s.base = RC height (0 = steel legs to the ground)
   const RR=r-.1,NP=12;for(let k=0;k<NP;k++){const a=k/NP*Math.PI*2,b=(k+1)/NP*Math.PI*2;member(g,V(RR*Math.cos(a),top,RR*Math.sin(a)),V(RR*Math.cos(a),top+1.1,RR*Math.sin(a)),.05,M.yellow);
     member(g,V(RR*Math.cos(a),top+1.1,RR*Math.sin(a)),V(RR*Math.cos(b),top+1.1,RR*Math.sin(b)),.05,M.yellow);member(g,V(RR*Math.cos(a),top+.55,RR*Math.sin(a)),V(RR*Math.cos(b),top+.55,RR*Math.sin(b)),.04,M.yellow);}
   const [ddx,ddz]=faceVec(door||'+z');                       // ladder / fill pipe side faces away from the tower
-  box(g,1.6,1.3,1.1,M.silo2,-ddx*(r*.45)-ddz*.3,top+.95,-ddz*(r*.45)+ddx*.3);cyl(g,.25,.8,M.steel,ddz*r*.4,top+.6,-ddx*r*.4,12);box(g,.7,.15,.7,M.steel,0,top+.42,0);
+  const DC=top+.35;box(g,1.5,.25,1.3,M.steel,0,DC+.12,0);box(g,1.25,2.3,1.05,M.redTop,0,DC+.25+1.15,0);box(g,.95,.55,.8,M.redTop,0,DC+2.55+.27,0);cyl(g,.2,.55,M.steel,.75,DC+2.75,0,12);  // bin-top dust collector on the roof centre
+  cyl(g,.25,.7,M.steel,ddz*r*.55,top+.55,-ddx*r*.55,12);   // pressure relief valve
   // ---- cage ladder from the platform (or RC roof) to the roof, rest landings every ~5 m; pneumatic fill pipe from ground level ----
   const ly0=haveLegs?pl:s.base,lx=ddx*(r+.55),lz=ddz*(r+.55),tx=-ddz*.25,tz=ddx*.25;
   [-1,1].forEach(sg=>member(g,V(lx+tx*sg,ly0,lz+tz*sg),V(lx+tx*sg,top+1.1,lz+tz*sg),.05,M.silo2));
