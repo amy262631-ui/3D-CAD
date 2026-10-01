@@ -5446,7 +5446,7 @@ function dxf(){const L=[],Y=z=>(S.L-z)*1000,X=x=>x*1000;const layers={SITE:7,EQU
   const u=t=>[...t].map(ch=>ch.charCodeAt(0)>126?'\\U+'+ch.charCodeAt(0).toString(16).toUpperCase().padStart(4,'0'):ch).join('');
   const line=(a,b,ly)=>L.push('0','LINE','8',ly,'10',X(a[0]).toFixed(1),'20',Y(a[1]).toFixed(1),'30','0','11',X(b[0]).toFixed(1),'21',Y(b[1]).toFixed(1),'31','0');
   const poly=(pts,ly)=>pts.forEach((p,k)=>line(p,pts[(k+1)%pts.length],ly));
-  const text=(x,z,h,t,ly='TEXT')=>L.push('0','TEXT','8',ly,'10',X(x).toFixed(1),'20',Y(z).toFixed(1),'30','0','40',(h*1000).toFixed(0),'1',u(t),'72','1','11',X(x).toFixed(1),'21',Y(z).toFixed(1),'31','0');
+  const text=(x,z,h,t,ly='TEXT')=>L.push('0','TEXT','8',ly,'7','CJK','10',X(x).toFixed(1),'20',Y(z).toFixed(1),'30','0','40',(h*1000).toFixed(0),'1',u(t),'72','1','11',X(x).toFixed(1),'21',Y(z).toFixed(1),'31','0');
   const circle=(x,z,r,ly)=>L.push('0','CIRCLE','8',ly,'10',X(x).toFixed(1),'20',Y(z).toFixed(1),'30','0','40',(r*1000).toFixed(1));
   const rect=(i,hx,hz,ly,ox=0,oz=0)=>poly([[-hx,-hz],[hx,-hz],[hx,hz],[-hx,hz]].map(([a,b])=>{const [p,q]=rotXZ(a+ox,b+oz,i.r||0);return [i.x+p,i.z+q];}),ly);
   poly([[0,0],[S.W,0],[S.W,S.L],[0,S.L]],'SITE');if(S.m>0)poly([[S.m,S.m],[S.W-S.m,S.m],[S.W-S.m,S.L-S.m],[S.m,S.L-S.m]],'SITE');
@@ -5462,7 +5462,7 @@ function dxf(){const L=[],Y=z=>(S.L-z)*1000,X=x=>x*1000;const layers={SITE:7,EQU
     line([s.a.x,s.a.z],[s.b.x,s.b.z],'BELT');[1,-1].forEach(k=>line([s.a.x+n.x*k,s.a.z+n.z*k],[s.b.x+n.x*k,s.b.z+n.z*k],'BELT'));
     text((s.a.x+s.b.x)/2+n.x*2.5,(s.a.z+s.b.z)/2+n.z*2.5,.9,s.name+' '+fmt(s.ang)+'° L='+fmt(s.len)+'m');});
   ROUTES.forEach(r=>{for(let k=1;k<r.pts.length;k++)line([r.pts[k-1].p.x,r.pts[k-1].p.z],[r.pts[k].p.x,r.pts[k].p.z],'ROUTE');});
-  const head=['0','SECTION','2','HEADER','9','$ACADVER','1','AC1009','9','$INSUNITS','70','4','0','ENDSEC','0','SECTION','2','TABLES','0','TABLE','2','LAYER','70',String(Object.keys(layers).length)];
+  const head=['0','SECTION','2','HEADER','9','$ACADVER','1','AC1009','9','$DWGCODEPAGE','3','ANSI_950','9','$INSUNITS','70','4','0','ENDSEC','0','SECTION','2','TABLES','0','TABLE','2','STYLE','70','1','0','STYLE','2','CJK','70','0','40','0','41','1','50','0','71','0','42','2.5','3','mingliu.ttc','4','','0','ENDTAB','0','TABLE','2','LAYER','70',String(Object.keys(layers).length)];
   Object.entries(layers).forEach(([n,c])=>head.push('0','LAYER','2',n,'70','0','62',String(c),'6','CONTINUOUS'));head.push('0','ENDTAB','0','ENDSEC','0','SECTION','2','ENTITIES');
   return head.concat(L,['0','ENDSEC','0','EOF']).join('\r\n');}
 $('x3d').addEventListener('click',async()=>{if(!THREE.GLTFExporter){toast('元件尚未載入，請稍候再試');return;}busy(true,'產生 3D 模型…');
@@ -5501,7 +5501,7 @@ function edgesOf(geo){let e=EDGE_CACHE.get(geo);
   if(!e){e=new THREE.EdgesGeometry(geo,28).attributes.position.array;EDGE_CACHE.set(geo,e);}return e;}
 const ELEV={S:{t:'南向立面圖（由南往北看）',h:p=>p.x},N:{t:'北向立面圖（由北往南看）',h:p=>-p.x},E:{t:'東向立面圖（由東往西看）',h:p=>-p.z},W:{t:'西向立面圖（由西往東看）',h:p=>p.z}};
 const LAYER_OF={tower:'TOWER',silo:'SILO',bins:'BINS',hopper:'HOPPER',transfer:'BELT',yard:'YARD',parking:'PARK',gate:'SITE',scale:'SITE',wash:'SITE',zone:'ZONE'};
-function dxfWrite(layers,ents){const head=['0','SECTION','2','HEADER','9','$ACADVER','1','AC1009','9','$INSUNITS','70','4','0','ENDSEC','0','SECTION','2','TABLES','0','TABLE','2','LAYER','70',String(Object.keys(layers).length)];
+function dxfWrite(layers,ents){const head=['0','SECTION','2','HEADER','9','$ACADVER','1','AC1009','9','$DWGCODEPAGE','3','ANSI_950','9','$INSUNITS','70','4','0','ENDSEC','0','SECTION','2','TABLES','0','TABLE','2','STYLE','70','1','0','STYLE','2','CJK','70','0','40','0','41','1','50','0','71','0','42','2.5','3','mingliu.ttc','4','','0','ENDTAB','0','TABLE','2','LAYER','70',String(Object.keys(layers).length)];
   Object.entries(layers).forEach(([n,c])=>head.push('0','LAYER','2',n,'70','0','62',String(c),'6','CONTINUOUS'));head.push('0','ENDTAB','0','ENDSEC','0','SECTION','2','ENTITIES');
   return head.concat(ents,['0','ENDSEC','0','EOF']).join('\r\n');}
 const dxfU=t=>[...t].map(ch=>ch.charCodeAt(0)>126?'\\U+'+ch.charCodeAt(0).toString(16).toUpperCase().padStart(4,'0'):ch).join('');
@@ -5521,7 +5521,7 @@ function dxfElevation(key){const E=ELEV[key],ents=[],seen=new Set(),v=new THREE.
   Object.values(OBJ).forEach(o=>walk(o.g));walk(beltG,'BELT');
   if(hmin>hmax){hmin=0;hmax=10;}
   ents.push('0','LINE','8','GL','10',((hmin-5)*1000).toFixed(0),'20','0','30','0','11',((hmax+5)*1000).toFixed(0),'21','0','31','0');
-  const txt=(x,y,h,t,ly='TEXT')=>ents.push('0','TEXT','8',ly,'10',(x*1000).toFixed(0),'20',(y*1000).toFixed(0),'30','0','40',(h*1000).toFixed(0),'1',dxfU(t));
+  const txt=(x,y,h,t,ly='TEXT')=>ents.push('0','TEXT','8',ly,'7','CJK','10',(x*1000).toFixed(0),'20',(y*1000).toFixed(0),'30','0','40',(h*1000).toFixed(0),'1',dxfU(t));
   txt(hmax+1,.3,.8,'GL ±0');txt(hmin,-4,1.6,($('xName').value||'預拌廠配置')+'　'+E.t);
   S.items.forEach(i=>{if(['zone','parking','gate'].includes(i.type))return;const p=V(i.x,0,i.z);txt(E.h(p),labelY(i)+1,.9,labelText(i));});
   return dxfWrite({GL:7,MIXER:2,TOWER:5,SILO:1,BINS:4,HOPPER:8,BELT:3,YARD:140,PARK:8,SITE:7,ZONE:30,EQUIP:5,TEXT:7},ents);}
