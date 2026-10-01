@@ -243,6 +243,8 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
           <li><b>拖曳</b>設備：移動位置；靠近其他設備（水泥桶優先對其他水泥桶）的中心線時會自動對齊並出現藍色虛線，按住 Alt 可暫時不對齊。📌 固定後就不會被拖動。</li>
           <li><b>多選</b>：按「框選」後在空白處拉框，或按住 Shift 點設備；拖曳其中一個整組移動，或在參數欄輸入 ΔX／ΔY。按 Esc 取消選取。</li>
           <li>旋轉：↺ ↻ 按鈕或鍵盤 Q／E；每次角度在「場地 → 旋轉按鈕每次」設定。</li>
+          <li><b>快捷鍵</b>：Ctrl+Z 復原、Ctrl+Y（或 Ctrl+Shift+Z）重做、Ctrl+C 複製、Ctrl+V 貼上（每貼一次往右下錯開 4 m）、Ctrl+X 剪下、Ctrl+D 直接複製一份、Ctrl+A 全選、Delete 刪除、Ctrl+S 存檔。Mac 用 ⌘。下方工具列也有 ↶ 復原／↷ 重做／複製／貼上按鈕。</li>
+          <li>卸料斗、砂石料倉、主機樓每套只能一個，貼上前先「＋ 新增一套」並切到那一套；大門、地磅、洗胎池、洗車場全廠只有一個。</li>
           <li>水泥桶參數會顯示「相對主機樓中心 ΔX／ΔY」。</li><li><b>主機樓型式</b>：新增預設為半高塔（7.15×7.05 m，1F RC），也可改回 6 層舊廠塔。主帶運機入料點固定在入料面內 3.0 m、高 15.2 m；料倉與主機樓沒對正時，輸送帶會斜著進去，參數裡會顯示夾角（90° = 垂直進入）。</li><li><b>水泥桶支撐</b>：全鋼構／RC 柱＋鋼構腳柱／<b>RC 建物</b>。RC 建物選 3F（17.9 m）筒倉直接坐在 RC 頂、沒有腳柱；2F（11.0 m）露出一節短腳柱；1F（7.3 m）腳柱更長。下方可填房間用途（電器室、空壓機室…）。預設 Ø4370，可改其他直徑。</li><li><b>砂石料倉結構</b>：RC 倉體＋鋼構錐斗（預設），或全鋼構。主帶運機尾端固定在料倉軸線上、離遠端 3.3 m。</li></ul></details>
         <details><summary>3. 範本</summary><ul>
           <li>設備參數改好後，在參數欄「範本」輸入名稱 →「儲存目前參數為範本」。</li>
@@ -363,7 +365,11 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
     <span class="sep"></span>
     <button class="btn" id="rotL" type="button" aria-label="逆時針旋轉 15 度">↺ 15°</button>
     <button class="btn" id="rotR" type="button" aria-label="順時針旋轉 15 度">↻ 15°</button>
-    <button class="btn" id="bDel" type="button">刪除選取</button>
+    <button class="btn" id="bUndo" type="button" title="復原（Ctrl+Z）" disabled>↶ 復原</button>
+    <button class="btn" id="bRedo" type="button" title="重做（Ctrl+Y）" disabled>↷ 重做</button>
+    <button class="btn" id="bCopy" type="button" title="複製（Ctrl+C）">複製</button>
+    <button class="btn" id="bPaste" type="button" title="貼上（Ctrl+V）" disabled>貼上</button>
+    <button class="btn" id="bDel" type="button" title="刪除（Delete）">刪除選取</button>
     <button class="btn" id="bBox" type="button">框選</button>
     <button class="btn" id="bAll" type="button">全選</button>
     <span class="sep"></span>
@@ -4878,7 +4884,7 @@ function update(){
   $('msgs').innerHTML=ev.W.map(([c,t])=>'<li class="'+c+'">'+t+'</li>').join('');
   const nb=ev.W.filter(w=>w[0]==='bad'||w[0]==='warn').length;$('tabCheck').textContent='檢查'+(nb?'（'+nb+'）':'');$('tabCheck').classList.toggle('alert',nb>0);
   const ovl=segs.filter(s=>over(s.ang)).map(s=>s.name+' '+fmt(s.ang)+'°');$('banner').hidden=!ovl.length;if(ovl.length)$('banner').textContent='⚠ '+ovl.join('、')+' 超過坡度上限 '+fmt(S.max)+'°';
-  rebuildRoutes();placeDel();$('hint').hidden=hintOff||S.items.length>0;fillInspector();renderZoneList();updatePalette();save();
+  rebuildRoutes();placeDel();$('hint').hidden=hintOff||S.items.length>0;fillInspector();renderZoneList();updatePalette();save();histRecord();
 }
 
 /* ---------- add devices ---------- */
@@ -5101,7 +5107,40 @@ function showTab(t){$('tabIns').classList.toggle('on',t==='ins');$('tabCheck').c
 $('tabIns').addEventListener('click',()=>showTab('ins'));$('tabCheck').addEventListener('click',()=>showTab('chk'));
 function rotateSel(d){if(selSet.size>1){rotateGroup(Math.sign(d)*S.rotStep);update();return;}const i=byId(selected);if(!i)return;if(i.locked){toast('已固定，請先解除固定');return;}d=Math.sign(d)*S.rotStep;i.r=(i.r||0)+d*D2R;if(i.type!=='zone')i.auto=false;update();}
 $('rotL').addEventListener('click',()=>rotateSel(15));$('rotR').addEventListener('click',()=>rotateSel(-15));
-$('bDel').addEventListener('click',()=>{const i=byId(selected);if(!i)return;S.items=S.items.filter(x=>x!==i);S.zones=S.zones.filter(x=>x!==i);selected=null;renderInspector();update();});
+$('bDel').addEventListener('click',()=>{const del=selSet.size>1?grpItems():[byId(selected)].filter(Boolean);if(!del.length)return;S.items=S.items.filter(x=>!del.includes(x));S.zones=S.zones.filter(x=>!del.includes(x));selSet.clear();selected=null;renderInspector();update();if(del.length>1)toast('已刪除 '+del.length+' 項（Ctrl+Z 可復原）');});
+/* ---------- undo / redo (snapshots of the whole layout) ---------- */
+let histCur=null,histTok=null,histBusy=false;const UNDO=[],REDO=[];
+const histJSON=()=>JSON.stringify(S,(k,v)=>k==='on'&&v===!!v?undefined:v);
+function histRecord(){if(histBusy)return;const cur=histJSON();if(histCur===null){histCur=cur;return;}if(cur===histCur)return;
+  if(!(drag&&drag===histTok)){UNDO.push(histCur);if(UNDO.length>100)UNDO.shift();REDO.length=0;}histTok=drag;histCur=cur;histBtns();}
+function histBtns(){$('bUndo').disabled=!UNDO.length;$('bRedo').disabled=!REDO.length;}
+function histGo(from,to,msg){if(!from.length){toast(msg==='復原'?'沒有可以復原的步驟':'沒有可以重做的步驟');return;}to.push(histCur);const st=from.pop();histCur=st;histBusy=true;
+  const tOn=!!(S.traffic&&S.traffic.on);try{Object.keys(S).forEach(k=>delete S[k]);Object.assign(S,S0(),JSON.parse(st));trafficInit();S.traffic.on=tOn;if(!byId(selected))selected=null;selSet=new Set([...selSet].filter(byId));if(selSet.size<2)selSet.clear();
+    applyColors();renderLineSel();syncSite();rebuildSite();renderInspector();update();}finally{histBusy=false;}histBtns();toast(msg+'（還可'+msg+' '+from.length+' 步）');}
+const undo=()=>histGo(UNDO,REDO,'復原'),redo=()=>histGo(REDO,UNDO,'重做');
+$('bUndo').addEventListener('click',undo);$('bRedo').addEventListener('click',redo);
+/* ---------- copy / paste ---------- */
+let CLIP=null,pasteN=0;
+const ONE_PER_LINE=['hopper','bins','tower'],ONE_PER_SITE=['gate','scale','wash','yard'];
+function copySel(){const it=selSet.size>1?grpItems():[byId(selected)].filter(Boolean);if(!it.length){toast('請先選取要複製的設備');return false;}
+  CLIP=JSON.parse(JSON.stringify(it));pasteN=0;$('bPaste').disabled=false;toast('已複製 '+it.map(nm).join('、'));return true;}
+function pasteClip(){if(!CLIP){toast('還沒有複製任何設備');return;}pasteN++;const off=4*pasteN,ids=[],skip=[];
+  CLIP.forEach(o=>{const c=JSON.parse(JSON.stringify(o));
+    if(c.type==='transfer'){skip.push('轉台');return;}
+    if(ONE_PER_SITE.includes(c.type)&&S.items.some(i=>i.type===c.type)){skip.push(TYPE[c.type]);return;}
+    if(ONE_PER_LINE.includes(c.type)){const l=S.cur;if(one(c.type,l)){skip.push(TYPE[c.type]+'（每套只能一個，可先「＋ 新增一套」）');return;}c.line=l;}
+    c.id=c.type==='zone'?newId('z'):newId(c.type[0]+c.type[1]);c.x+=off;c.z+=off;c.locked=false;
+    if(c.type==='silo'||c.type==='zone')c.name=(c.name||TYPE[c.type]).replace(/（複製\d*）$/,'')+'（複製）';
+    if(c.type==='zone')S.zones.push(c);else S.items.push(c);ids.push(c.id);});
+  if(skip.length)toast('沒有貼上：'+[...new Set(skip)].join('、'));
+  if(!ids.length)return;if(ids.length===1){selSet.clear();selected=ids[0];renderInspector();update();}else setGroup(ids);}
+$('bCopy').addEventListener('click',copySel);$('bPaste').addEventListener('click',pasteClip);
+addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||e.target.isContentEditable)return;const k=(e.key||'').toLowerCase();
+  if(e.altKey||!(e.ctrlKey||e.metaKey))return;
+  if(k==='z'&&!e.shiftKey){e.preventDefault();undo();}else if(k==='y'||(k==='z'&&e.shiftKey)){e.preventDefault();redo();}
+  else if(k==='c'){if(copySel())e.preventDefault();}else if(k==='x'){if(copySel()){e.preventDefault();$('bDel').click();}}
+  else if(k==='v'){e.preventDefault();pasteClip();}else if(k==='d'){e.preventDefault();if(copySel())pasteClip();}
+  else if(k==='a'){e.preventDefault();$('bAll').click();}});
 addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;if(e.key==='q'||e.key==='Q')rotateSel(15);if(e.key==='e'||e.key==='E')rotateSel(-15);
   if((e.key==='Delete'||e.key==='Backspace')&&selected)$('bDel').click();});
 const ray=new THREE.Raycaster(),ptr=new THREE.Vector2(),gplane=new THREE.Plane(V(0,1,0),0);let drag=null;
