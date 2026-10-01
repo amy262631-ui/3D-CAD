@@ -249,7 +249,7 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
         <details><summary>4. 動線模擬</summary><ul>
           <li>下方「動線模擬」開啟，砂石車（橘）、預拌車（紅）、水泥車（藍）可個別開關。</li>
           <li>「場地 → 動線與過磅」勾選各車是否進場過磅、出場過磅、經洗胎池、洗車場，並設定發車間隔（秒）與模擬速度。</li>
-          <li>「編輯路徑」選車種後，在路線附近點一下加轉彎點，拖曳圓點調整。</li></ul></details>
+          <li>「編輯路徑」選車種後，在路線附近點一下加轉彎點，拖曳圓點調整。</li><li>車輛靠右行駛，往返分兩個車道；各車種與各套生產線的發車時間會自動錯開。</li></ul></details>
         <details open><summary>5. 存檔到共用資料庫（後台）</summary><ol>
           <li>上方按「我的配置」。</li>
           <li>第一次使用：點開「▶ 共用資料庫：Google 試算表」，在「密碼」欄輸入 <b>公司統編</b>（8 碼數字），按「連線並記住」。之後這台電腦會記住，不用再輸入。</li>
@@ -4757,9 +4757,11 @@ function renderFlowUI(){const el=$('flowTbl');if(!el)return;const F=S.traffic.fl
     '<div class="row" style="margin-top:6px"><label for="simSpd">模擬速度</label><select id="simSpd">'+[.5,1,2,4].map(v=>'<option value="'+v+'"'+(S.traffic.speed==v?' selected':'')+'>'+v+'×</option>').join('')+'</select></div>';
   if(el.dataset.h!==h){el.innerHTML=h;el.dataset.h=h;}
   $('editKind').value=editKind;$('viaDel').disabled=!selVia;$('viaClear').disabled=!editKind;}
-let simT=0,lastT=0;function animateTraffic(T){simT+=(T-lastT)*(S.traffic.speed||1);lastT=T;ROUTES.forEach((r,k)=>{if(!r.ev||!r.ev.length||!r.trucks)return;r.trucks.forEach((tr,j)=>{const tt=((simT+((r.line||1)-1)/Math.max(1,S.lines)*r.gap*.5+{dump:0,mixer:3,cement:9}[r.kind]-j*r.gap)%r.T+r.T)%r.T;let e=r.ev.find(x=>tt>=x.t0&&tt<x.t1)||r.ev[r.ev.length-1];
+const LANE=1.9;let simT=0,lastT=0;function animateTraffic(T){simT+=(T-lastT)*(S.traffic.speed||1);lastT=T;ROUTES.forEach((r,k)=>{if(!r.ev||!r.ev.length||!r.trucks)return;r.trucks.forEach((tr,j)=>{const kOff={dump:0,mixer:.5,cement:.25}[r.kind]*r.gap,lOff=((r.line||1)-1)/Math.max(1,S.lines)*r.gap;const tt=((simT+kOff+lOff-j*r.gap)%r.T+r.T)%r.T;let e=r.ev.find(x=>tt>=x.t0&&tt<x.t1)||r.ev[r.ev.length-1];
   let dir,pos;if(e.dwell){pos=e.a;const pm=[...r.ev].reverse().find(x=>!x.dwell&&x.t1<=e.t0+1e-6);dir=pm?pm.b.clone().sub(pm.a):V(0,0,1);}
-  else{const u=(tt-e.t0)/(e.t1-e.t0);pos=e.a.clone().lerp(e.b,u);dir=e.b.clone().sub(e.a);}
+  else{const u=(tt-e.t0)/(e.t1-e.t0);pos=e.a.clone().lerp(e.b,u);dir=e.b.clone().sub(e.a);
+    // keep right: shift sideways by half a lane, easing to the centreline over the first/last 5 m so stations stay exact
+    const L=dir.length();if(L>1){const ramp=Math.min(1,u*L/5,(1-u)*L/5),n=V(-dir.z,0,dir.x).normalize();pos.addScaledVector(n,-LANE*ramp*(e.rev?-1:1));}}
   if(e.rev)dir.negate();tr.position.set(pos.x,0,pos.z);if(dir.lengthSq()>1e-6)tr.rotation.y=Math.atan2(-dir.x,-dir.z);
   const ud=tr.userData;if(ud.drum)ud.drum.rotation.y=T*(e.dwell&&e.act==='load'?4:1.2);
   if(ud.bed)ud.bed.rotation.x=e.dwell&&e.act==='dump'?Math.sin(Math.min(1,(tt-e.t0)/(e.t1-e.t0))*Math.PI)*.75:0;});});}
