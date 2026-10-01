@@ -4957,7 +4957,7 @@ function update(){
       siloLegs(r.via,J.y).map(l=>[l,l.distanceTo(J)]).sort((a,b)=>a[1]-b[1]).slice(0,2).forEach(([l])=>{member(beltG,J,l,.14,M.steel);member(beltG,V(J.x,J.y-.5,J.z),V(l.x,J.y-1.6,l.z),.1,M.brace);});}});
   if(showDims){const pts=[];lineIds().map(l=>belts(l)).forEach(B=>Object.values(B).forEach(L=>{for(let i=1;i<L.length;i++){const p=L[i-1],n=L[i];if(pts.find(q=>q.p===p&&q.n===n))continue;pts.push({p,n});}}));
     const lp=[];pts.forEach(({p,n})=>{lp.push(V(p.x,.08,p.z),V(n.x,.08,n.z));tmpL.push(label(scene,fmt(hz(p,n))+' m',V((p.x+n.x)/2,.3,(p.z+n.z)/2),'dim'));});
-    if(lp.length){const ls=new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(lp),new THREE.LineDashedMaterial({color:'#c8342c',dashSize:1.2,gapSize:.8}));ls.computeLineDistances();dimG.add(ls);}
+    if(lp.length){const ls=new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(lp),new THREE.LineDashedMaterial({color:'#7d8a96',dashSize:.6,gapSize:.9}));ls.computeLineDistances();dimG.add(ls);}
     const s=byId(selected);if(s)tmpL.push(label(scene,'X '+fmt(s.x)+'　Y '+fmt(s.z),V(s.x,.3,s.z+(s.type==='zone'?s.d/2+2:(radiusOf(s)+2.5))),'dim'));}
   const ev=evaluate(segs);
   const all=S.items.concat(S.zones);Object.keys(discs).forEach(id=>{if(!all.find(i=>i.id===id)){scene.remove(discs[id]);delete discs[id];}});
