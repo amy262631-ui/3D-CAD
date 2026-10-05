@@ -253,7 +253,7 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
           <li><b>再生粒料儲倉</b>：「東南高良」埋地、水平計量皮帶直接接主帶運機（CLSM 不用卸料斗與骨材庫）；「吉鼎」淺坑鋼架、鏟裝機投料，主帶運機尾端延伸到地下接它，骨材庫要放在主帶運機正上方；「對稱雙儲倉」兩側各自往中間的主帶運機投料（預設地上鋼架、不挖坑）。倉數、倉長寬、埋地／鋼架都能改。按下方「地下透視」可以看到地下坑與皮帶。</li>
           <li><b>簡易工地型-2方／RC 混凝土塊</b>：主機樓型式可選「簡易工地型-2方」（鋼構四柱、攪拌車從拌合層下方通過）；「RC混凝土塊」可堆成平台、擋牆或墊高（每塊 2×2×1 m）；工地型骨材倉可設定用幾層混凝土塊墊高。範例：「簡易工地型-2方（外島）」。輸送帶外觀可在「場地」改成「開放桁架」。</li>
           <li><b>設計部規則</b>：骨材庫可選標準規格（□9／10／12 m），參數欄顯示建議帶運機寬度與 22°／18° 所需水平距離；水泥桶多了 Ø4370、Ø5800 各噸數規格；「檢查」會依拌合機（2 方 120 m³/h、3 方 180 m³/h）算 1 天 8 小時所需膠結材與砂石，對照水泥桶與骨材庫儲量；也會提醒大門寬 ≥10 m、雨水回收池 = 廠區面積 2.5%。邊界退縮預設 2 m。可加辦公室、司機休息室、雨水回收池。</li>
-          <li><b>機具／車輛</b>：上方「＋ 機具／車輛…」可放鏟裝機、怪手、小山貓、堆高機、預拌車、砂石車、水泥車，參數欄顯示常見規格，怪手有作業半徑圓圈。</li>
+          <li><b>機具／車輛</b>：拖到 RC 混凝土塊上會自動站在塊頂（例如怪手站在平台上餵料），也可關掉自動、手動輸入離地高度。上方「＋ 機具／車輛…」可放鏟裝機、怪手、小山貓、堆高機、預拌車、砂石車、水泥車，參數欄顯示常見規格，怪手有作業半徑圓圈。</li>
           <li><b>油漆顏色</b>：「場地 → 外觀配色」可改鋼構、水泥桶頂部／筒身／錐斗（預設頂部與錐斗同色）、骨材庫（預設跟鋼構同色，改了就整座一起變）、欄杆、浪板、輸送帶包覆。下方「輪廓線」可開關設備邊線。</li>
           <li><b>迴車倒車點</b>：上方「迴車倒車點」放在主機樓出口、卸料斗或洗車場附近，車輛會先開到圈內停下，再沿弧線倒車進站；拖曳圈改變迴車空間，參數「左右對調」換邊，可選預拌車或砂石車。</li>
           <li><b>洗胎池</b>：車輛照池上白色箭頭單向通過（A 進 B 出），方向不對就旋轉洗胎池。可以放一座或兩座，參數裡選「進場洗胎／離場洗胎／進出場都經過」；哪種車要洗胎在「動線與過磅」勾選。</li>
@@ -4813,12 +4813,15 @@ function labelY(i){if(FAC.includes(i.type))return i.type==='veh'?((VEH[i.kind]||
 const OUTLINE_CACHE=new Map();M.outline=new THREE.LineBasicMaterial({color:'#2a3036',transparent:true,opacity:.32,depthWrite:false});
 function addOutlines(g){const ms=[];g.traverse(o=>{if(!o.isMesh||o.geometry===MOUND||o.geometry===HOOP||o.geometry===MIXER_GEO)return;const m=o.material;if(!m||m.visible===false||(m.transparent&&m.opacity<.6)||m===M.grate)return;ms.push(o);});
   ms.forEach(o=>{let eg=OUTLINE_CACHE.get(o.geometry);if(!eg){eg=new THREE.EdgesGeometry(o.geometry,30);OUTLINE_CACHE.set(o.geometry,eg);}const l=new THREE.LineSegments(eg,M.outline);l.raycast=()=>{};l.userData.outline=true;o.add(l);});}
+// machines can stand on stacked RC blocks: auto-lift to the top of the block stack under their centre (or a manual height)
+function blkTopAt(x,z){let h=0;S.items.forEach(b=>{if(b.type!=='blk')return;const [lx,lz]=rotXZ(x-b.x,z-b.z,-(b.r||0));if(Math.abs(lx)<=b.nx*BLK.s/2&&Math.abs(lz)<=b.nz*BLK.s/2)h=Math.max(h,b.layers*BLK.h);});return h;}
+function baseY(i){if(i.type!=='veh')return 0;if(i.yAuto===false)return Math.max(0,i.y0||0);return blkTopAt(i.x,i.z);}
 function syncObjects(){
   const all=S.items.concat(S.zones);
   Object.keys(OBJ).forEach(id=>{if(!all.find(i=>i.id===id)){dropGroup(OBJ[id].g);delete OBJ[id];}});
   all.forEach(i=>{const key=objKey(i)+'|'+labelText(i)+(S.outline===false?'|n':'');if(!OBJ[i.id]||OBJ[i.id].key!==key){if(OBJ[i.id])dropGroup(OBJ[i.id].g);const g=buildObj(i);if(S.outline!==false)addOutlines(g);
       label(g,labelText(i),V(0,labelY(i),0),i.type==='zone'?'zone':'');scene.add(g);OBJ[i.id]={g,key};}
-    const g=OBJ[i.id].g;g.position.set(i.x,0,i.z);g.rotation.y=i.r||0;});
+    const g=OBJ[i.id].g;g.position.set(i.x,baseY(i),i.z);g.rotation.y=i.r||0;});
 }
 
 /* ---------- colours ---------- */
@@ -5220,7 +5223,7 @@ function renderInspector(){
     row('h','高度','0.5','m',{dis:i.h==null})+'<label class="chk sm"><input type="checkbox" id="i-hauto" data-k="hauto"> 自動高度（前後坡度相同）</label>';
   if(i.type==='zone')h+=sect('範圍')+row('w','寬','1','m')+row('d','長','1','m');
   if(i.type==='gate')h+=sect('大門')+row('w','門寬','0.5','m');
-  if(i.type==='veh')h+=sect('機具')+'<div class="irow"><label for="i-vk">種類</label><select id="i-vk" data-k="vkind">'+Object.keys(VEH).map(k=>'<option value="'+k+'">'+VEH[k].name+'</option>').join('')+'</select></div>'+(VEH[i.kind]&&VEH[i.kind].reach?'<label class="chk sm"><input type="checkbox" id="i-ring" data-k="ring"> 顯示作業半徑圓圈</label>':'');
+  if(i.type==='veh')h+=sect('機具')+'<div class="irow"><label for="i-vk">種類</label><select id="i-vk" data-k="vkind">'+Object.keys(VEH).map(k=>'<option value="'+k+'">'+VEH[k].name+'</option>').join('')+'</select></div><label class="chk sm"><input type="checkbox" id="i-yauto" data-k="yAuto"> 自動站上 RC 混凝土塊</label>'+row('y0','離地高度（手動）','0.5','m',{dis:i.yAuto!==false})+(VEH[i.kind]&&VEH[i.kind].reach?'<label class="chk sm"><input type="checkbox" id="i-ring" data-k="ring"> 顯示作業半徑圓圈</label>':'');
   if(i.type==='tpt')h+=sect('迴車倒車')+'<div class="irow"><label for="i-tkind">車種</label><select id="i-tkind" data-k="kind"><option value="mixer">預拌車（主機樓、洗車場）</option><option value="dump">砂石車（卸料斗）</option></select></div><div class="iacts"><button type="button" class="hbtn" data-act="mirror">⇆ 左右對調</button></div>';
   if(i.type==='wash')h+=sect(TYPE[i.type])+'<div class="irow"><label for="i-wdir">用途</label><select id="i-wdir" data-k="dir"><option value="out">離場洗胎</option><option value="in">進場洗胎</option><option value="both">進場、離場都經過</option></select></div>';
   if(['scale','wash','office','rest','pond'].includes(i.type))h+=sect(TYPE[i.type]+'尺寸')+row('L','長度','0.5','m')+row('W','寬度','0.1','m')+(i.type==='pond'?row('n','分池數','1','池'):'');
@@ -5241,7 +5244,7 @@ function fillInspector(){const i=byId(selected);if(!i||!$('i-x')||insEl.dataset.
   if(i.type==='rbin'){$('i-rk').value=i.rk||'line';$('i-mt').value=i.mt||'pit';set('n',i.n);set('P',fmt(i.P,2));set('W',fmt(i.W,2));if($('i-ext'))set('ext',fmt(i.ext));if($('i-gap'))set('gap',fmt(i.gap));if($('i-lift'))set('lift',i.lift||0);}
   if(i.type==='transfer'){$('i-belt').value=i.belt;set('h',fmt(i.top));$('i-h').disabled=i.h==null;$('i-hauto').checked=i.h==null;}
   if(i.type==='zone'){set('w',fmt(i.w));set('d',fmt(i.d));}if(i.type==='blk'){set('nx',i.nx);set('nz',i.nz);set('layers',i.layers);}
-  if(i.type==='gate')set('w',fmt(i.w));if(['scale','wash','office','rest','pond'].includes(i.type)){set('L',fmt(i.L));set('W',fmt(i.W));}if(i.type==='pond')set('n',i.n||2);if(i.type==='wash')$('i-wdir').value=i.dir||'out';if(i.type==='tpt')$('i-tkind').value=i.kind||'mixer';if(i.type==='veh'){$('i-vk').value=i.kind;if($('i-ring'))$('i-ring').checked=i.ring!==false;}
+  if(i.type==='gate')set('w',fmt(i.w));if(['scale','wash','office','rest','pond'].includes(i.type)){set('L',fmt(i.L));set('W',fmt(i.W));}if(i.type==='pond')set('n',i.n||2);if(i.type==='wash')$('i-wdir').value=i.dir||'out';if(i.type==='tpt')$('i-tkind').value=i.kind||'mixer';if(i.type==='veh'){$('i-vk').value=i.kind;$('i-yauto').checked=i.yAuto!==false;set('y0',fmt(baseY(i)));$('i-y0').disabled=i.yAuto!==false;if($('i-ring'))$('i-ring').checked=i.ring!==false;}
   if(i.type==='yard'){set('bays',i.bays);set('tanks',i.tanks);set('clear',i.clear==null?3:i.clear);$('i-sep').checked=!!i.sep;$('i-silt').checked=i.silt!==false;}
   if(i.type==='parking'){set('n',i.n);$('i-rows').value=i.rows;set('ang',fmt(i.ang,0));set('sw',fmt(i.sw));set('sl',fmt(i.sl));$('i-cars').checked=!!i.cars;}
   const c=$('i-calc');if(!c)return;
@@ -5265,7 +5268,7 @@ function fillInspector(){const i=byId(selected);if(!i||!$('i-x')||insEl.dataset.
   else if(i.type==='office')c.innerHTML='行政人員辦公用，兩層，'+fmt(i.W)+' × '+fmt(i.L)+' m。';
   else if(i.type==='rest')c.innerHTML='預拌車司機等待裝料休息室，'+fmt(i.W)+' × '+fmt(i.L)+' m。';
   else if(i.type==='pond'){const need=S.W*S.L*.025;c.innerHTML='面積 <b>'+fmt(i.W*i.L,0)+' m²</b>（建議廠區面積 2.5% ≈ '+fmt(need,0)+' m²，可分 2～3 池、加蓋或露天）。';}
-  else if(i.type==='veh'){const v=VEH[i.kind]||VEH.loader;c.innerHTML='<b>'+v.name+'</b><table class="ftbl" style="margin-top:6px">'+v.spec.map(([a,b])=>'<tr><th style="text-align:left">'+a+'</th><td style="text-align:left">'+b+'</td></tr>').join('')+'</table><span class="unit">一般市面常見規格，實際依車型／廠牌而定。不參與碰撞檢查，可用來檢查作業空間。</span>';}
+  else if(i.type==='veh'){const v=VEH[i.kind]||VEH.loader;c.innerHTML='<b>'+v.name+'</b><table class="ftbl" style="margin-top:6px">'+v.spec.map(([a,b])=>'<tr><th style="text-align:left">'+a+'</th><td style="text-align:left">'+b+'</td></tr>').join('')+'</table><span class="unit">一般市面常見規格，實際依車型／廠牌而定。不參與碰撞檢查，可用來檢查作業空間。</span><br>目前離地 <b>'+fmt(baseY(i))+' m</b>'+(i.yAuto!==false?'（拖到 RC 混凝土塊上會自動站上去）':'（手動）')+'。';}
   else if(i.type==='tpt'){const m=TPT_LINK[i.id];c.innerHTML=(!S.traffic.on?'開啟下方「動線模擬」就會看到倒車路線。':m?'對應：<b>'+m+'</b>。':'附近 60 m 內沒有這種車的倒車站，請拖近主機樓出口、卸料斗或洗車場。')+'<br>車輛先往前開到這個圈停下，再沿弧線倒車，最後一段直線對準入口倒進去。拖曳圈的位置可改變迴車空間大小，「左右對調」換到入口另一側。';}
   else if(i.type==='cpad'){const all=S.items.filter(x=>x.type==='cpad'&&(x.line||1)===(i.line||1));c.innerHTML='水泥車沿藍色箭頭方向開進、停在框內打料，再往前開出（旋轉可改方向）。同一套有 '+all.length+' 處打料點，水泥車依加入順序逐一打料（第 <b>'+(all.indexOf(i)+1)+'</b> 處）。動線若仍穿過設備，可在動線模擬裡加轉彎點。';}
   else if(i.type==='wash'){const d=i.dir||'out';c.innerHTML=(d==='in'?'進場洗胎：車輛進大門後先洗胎再過磅／作業。':d==='both'?'進場、離場都經過這座洗胎池。':'離場洗胎：作業完、出場過磅前洗胎。')+'<br>哪些車要洗胎，在「場地 → 動線與過磅」的洗胎池欄位勾選。可以放兩座，一座進場、一座離場。';}
@@ -5275,7 +5278,7 @@ function applyField(i,k,v){
   if(k==='name'){i.name=v||i.name;return;}
   if(k==='locked'){i.locked=!!v;return;}
   if(i.type==='blk'&&['nx','nz','layers'].includes(k)){const n=parseFloat(v);if(isFinite(n))i[k]=Math.max(1,Math.min(k==='layers'?6:30,Math.round(n)));return;}
-  if(k==='bpre'&&i.type==='bins'){if(BIN_STD[v])Object.assign(i.b,BIN_STD[v]);return;}if(k==='exit'){i.exit=v;return;}if(k==='topH'){i.topH=v==='1';return;}if(k==='dir'&&i.type==='wash'){i.dir=v;return;}if(k==='kind'&&i.type==='tpt'){i.kind=v;return;}if(k==='vkind'&&i.type==='veh'){i.kind=v;return;}if(k==='ring'){i.ring=!!v;return;}if(k==='rk'||k==='mt'){i[k]=v;if(k==='rk'&&v==='twin'&&i.n>3)i.n=2;return;}
+  if(k==='bpre'&&i.type==='bins'){if(BIN_STD[v])Object.assign(i.b,BIN_STD[v]);return;}if(k==='exit'){i.exit=v;return;}if(k==='topH'){i.topH=v==='1';return;}if(k==='dir'&&i.type==='wash'){i.dir=v;return;}if(k==='kind'&&i.type==='tpt'){i.kind=v;return;}if(k==='vkind'&&i.type==='veh'){i.kind=v;return;}if(k==='yAuto'){i.yAuto=!!v;if(!v)i.y0=blkTopAt(i.x,i.z);return;}if(k==='y0'&&i.type==='veh'){const n=parseFloat(v);if(isFinite(n))i.y0=Math.max(0,Math.min(30,n));return;}if(k==='ring'){i.ring=!!v;return;}if(k==='rk'||k==='mt'){i[k]=v;if(k==='rk'&&v==='twin'&&i.n>3)i.n=2;return;}
   if(i.type==='rbin'&&k==='lift'){const n=parseFloat(v);if(isFinite(n))i.lift=Math.max(0,Math.min(5,Math.round(n)));return;}
   if(i.type==='rbin'&&['n','P','W','ext','gap'].includes(k)){const n=parseFloat(v);if(!isFinite(n))return;i[k]=k==='n'?Math.max(1,Math.min(8,Math.round(n))):k==='ext'?Math.max(0,Math.min(30,n)):k==='gap'?Math.max(1.5,Math.min(8,n)):Math.max(2,Math.min(10,n));return;}if(k==='mixRot'){i.mixRot=(+v||0)%360;return;}if(k==='tt'){i.tt=v;if(!i.inlet)i.inlet='auto';return;}if(k==='inlet'){i.inlet=v;return;}if(k==='room'){i.room=String(v||'').slice(0,12);return;}
   if(k==='st'&&i.type==='bins'){const P=v==='rc'?BIN_RC:DEFAULT_BINS;Object.assign(i.b,{st:v==='rc'?'rc':undefined,legH:P.legH,hopH:P.hopH,boxH:P.boxH});if(v!=='rc')delete i.b.st;return;}
@@ -5305,7 +5308,7 @@ function applyField(i,k,v){
 }
 function moveItem(i,dx,dz){i.x+=dx;i.z+=dz;if(i.type==='tower'&&S.siloFollow)silos().filter(s=>(s.line||1)===(i.line||1)&&!s.locked).forEach(s=>{s.x+=dx;s.z+=dz;});}
 insEl.addEventListener('change',e=>{if(selSet.size>1)return;const t=e.target,k=t.dataset.k,i=byId(selected);if(!k||!i||insEl.dataset.id!==i.id)return;applyField(i,k,t.type==='checkbox'?t.checked:t.value);
-  if(['auto','hauto','preset','grid','belt','line','rows','cars','locked','sup','exit','sep','silt','tt','inlet','st','rcf','rk','mt','mixRot','dir','kind','vkind','ring','bpre'].includes(k))renderInspector();update();});
+  if(['auto','hauto','preset','grid','belt','line','rows','cars','locked','sup','exit','sep','silt','tt','inlet','st','rcf','rk','mt','mixRot','dir','kind','vkind','ring','bpre','yAuto'].includes(k))renderInspector();update();});
 insEl.addEventListener('click',e=>{const bf=e.target.closest('[data-fl]');if(bf){const t=byId(selected);if(t){if($('bClad').classList.contains('on'))$('bClad').click();if(topMode)frame(false);focusAt(V(t.x,+bf.dataset.fl,t.z),11);toast('已關閉外牆浪板，按「外牆浪板」可再打開');}return;}const b0=e.target.closest('button');if(b0&&selSet.size>1){const g=b0.dataset.g;
     if(b0.dataset.step){const el=$('i-'+b0.dataset.step);el.value=(parseFloat(el.value)||0)+parseFloat(b0.dataset.d);return;}
     if(g==='move'){moveGroup(parseFloat($('i-gdx').value)||0,parseFloat($('i-gdz').value)||0);$('i-gdx').value=0;$('i-gdz').value=0;update();}
