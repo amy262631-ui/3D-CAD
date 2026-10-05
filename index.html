@@ -104,6 +104,22 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
 #palette .ttl{font-size:12px;color:var(--muted);letter-spacing:.08em;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:7px 10px}
 #palette select{font:13px var(--f-ui);padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--fg)}
 .btn.add{font-weight:500}
+.grp{display:flex;flex-wrap:wrap;gap:4px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:4px 5px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.grp.end{margin-left:auto}
+.grp .gl{font-size:11px;color:var(--muted);letter-spacing:.06em;padding:0 4px 0 2px;white-space:nowrap}
+.grp .btn{border-color:transparent}.grp .btn:hover{border-color:var(--accent)}
+.btn.go{background:#2e8b57;border-color:#2e8b57!important;color:#fff;font-weight:600}
+.btn.help{background:#2f6fb5;border-color:#2f6fb5!important;color:#fff}
+.btn.warnb{color:var(--accent)}
+.btn.site{font-weight:600}
+.menu{position:relative}
+.pop{position:absolute;top:calc(100% + 6px);left:0;z-index:12;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px;display:grid;gap:3px;min-width:180px;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.pop[hidden]{display:none}.pop.up{top:auto;bottom:calc(100% + 6px)}
+.pop .btn{text-align:left;border-color:transparent;width:100%}
+.pop .btn.on{background:var(--accent-soft);color:var(--fg)}.pop .btn.on::before{content:'✓ ';color:var(--accent)}.pop .btn:not(.on):not(.add)::before{content:'　'}
+.psub{font-size:11px;color:var(--muted);padding:6px 6px 2px;border-top:1px solid var(--line);margin-top:3px}
+.req{color:var(--accent);font-weight:700}
+fieldset.must{border-color:var(--accent);background:var(--accent-soft)}
 .btn.add::before{content:"＋ ";color:var(--accent)}
 #banner{top:64px}
 .tabs{display:flex;gap:4px}
@@ -140,9 +156,9 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
   width:min(380px,calc(100% - 32px));z-index:2;display:flex;flex-direction:column;gap:10px}
 #hint h3{margin:0;font-size:16px}
 #hint .hh{display:flex;justify-content:space-between;align-items:center;gap:8px}
-#exportDlg,#libDlg,#helpDlg{position:absolute;inset:0;z-index:20;background:rgba(20,26,31,.45);display:flex;align-items:center;justify-content:center;padding:16px}
-#helpDlg .xcard,#libDlg .xcard,#exportDlg .xcard{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;width:min(560px,100%);max-height:100%;display:flex;flex-direction:column;overflow:hidden}
-#helpDlg header,#libDlg header,#exportDlg header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}#exportDlg h2{margin:0;font-size:16px}
+#exportDlg,#libDlg,#helpDlg,#autoDlg{position:absolute;inset:0;z-index:20;background:rgba(20,26,31,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+#autoDlg .xcard,#helpDlg .xcard,#libDlg .xcard,#exportDlg .xcard{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;width:min(560px,100%);max-height:100%;display:flex;flex-direction:column;overflow:hidden}
+#autoDlg header,#helpDlg header,#libDlg header,#exportDlg header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}#exportDlg h2{margin:0;font-size:16px}
 .xbody{padding:12px 16px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
 .xviews{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 10px;font-size:13px}
 .xviews label{display:flex;gap:6px;align-items:center}
@@ -178,37 +194,23 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
 <div id="app">
   <div id="view"></div>
   <div id="palette">
-    <span class="ttl">加入設備</span>
-    <select id="lineSel" aria-label="目前設計第幾套"></select>
-    <button class="btn add" data-add="hopper" type="button">卸料斗</button>
-    <button class="btn add" data-add="bins" type="button">骨材庫</button>
-    <select id="vehSel" style="width:auto;max-width:150px" aria-label="加入機具"><option value="">＋ 機具／車輛…</option><option value="loader">鏟裝機</option><option value="excavator">挖土機（怪手）</option><option value="skid">小山貓</option><option value="forklift">堆高機</option><option value="mixer">預拌車</option><option value="dump">砂石車</option><option value="cement">水泥車</option></select>
-    <select id="rbSel" style="width:auto;max-width:180px" aria-label="加入再生粒料儲倉"><option value="">＋ 再生粒料儲倉…</option><option value="d">東南高良（埋地）</option><option value="j">吉鼎（淺坑鋼架）</option><option value="t">對稱雙儲倉（地上鋼架）</option><option value="s">簡易工地型骨材倉（RC 塊墊高）</option></select>
-    <button class="btn add" data-add="tower" type="button">主機樓</button>
-    <button class="btn add" data-add="silo" type="button">水泥桶</button>
-    <button class="btn add" data-add="transfer" type="button">轉台</button>
-    <button class="btn add" data-add="zone" type="button">限制區</button>
-    <button class="btn add" data-add="blk" type="button" title="堆疊式 RC 混凝土塊（免基礎工程）：平台、擋牆、墊高">RC混凝土塊</button>
-    <span class="sep"></span>
-    <button class="btn add" data-add="gate" type="button">大門口</button>
-    <button class="btn add" data-add="scale" type="button">地磅</button>
-    <button class="btn add" data-add="wash" type="button">洗胎池</button>
-    <button class="btn add" data-add="office" type="button">辦公室</button>
-    <button class="btn add" data-add="rest" type="button">司機休息室</button>
-    <button class="btn add" data-add="pond" type="button">雨水回收池</button>
-    <button class="btn add" data-add="tpt" type="button" title="車輛先開到這點停下，再沿弧線倒車進站（主機樓、卸料斗、洗車場）">迴車倒車點</button>
-    <button class="btn add" data-add="cpad" type="button" title="水泥車停靠打料的位置，可放 1～2 處，旋轉決定開進方向">水泥車打料點</button>
-    <button class="btn add" data-add="parking" type="button">停車區</button>
-    <button class="btn add" data-add="yard" type="button">洗車場</button>
-    <span class="sep"></span>
-    <select id="exSel" style="width:auto;max-width:170px" aria-label="載入範例"><option value="">載入範例…</option><option value="2">半高塔標準</option><option value="3">吉鼎第一套</option><option value="1">台泥桃園#3機</option><option value="4">簡易工地型-2方（外島）</option></select>
-    <button class="btn" id="bClear" type="button">清空</button>
-    <button class="btn" id="bHelp" type="button">操作說明</button>
-    <button class="btn on" id="bLib" type="button">我的配置</button>
-    <button class="btn" id="bExport" type="button">輸出／檔案</button>
+    <div class="grp"><span class="gl">① 開始</span><button class="btn go" id="bAuto" type="button" title="依作業指導書的四種配置型式自動排出一套">⚡ 快速配置</button><select id="exSel" style="width:auto;max-width:150px" aria-label="載入範例"><option value="">載入歷史範例…</option><option value="2">半高塔標準</option><option value="3">吉鼎第一套</option><option value="1">台泥桃園#3機</option><option value="4">簡易工地型-2方（外島）</option></select></div>
+    <div class="grp"><span class="gl">② 加入設備</span><select id="lineSel" aria-label="目前設計第幾套"></select><div class="menu"><button class="btn mbtn" type="button" data-menu="mMain">主要設備 ▾</button><div class="pop" id="mMain" hidden><button class="btn add" data-add="hopper" type="button">卡車卸料斗</button><button class="btn add" data-add="bins" type="button">骨材庫</button><button class="btn add" data-add="tower" type="button">主機樓</button><button class="btn add" data-add="silo" type="button">水泥桶</button><button class="btn add" data-add="transfer" type="button">轉台</button><div class="psub">再生粒料儲倉（CLSM）</div><button class="btn add" data-add="rbin-d" type="button">東南高良（埋地）</button><button class="btn add" data-add="rbin-j" type="button">吉鼎（淺坑鋼架）</button><button class="btn add" data-add="rbin-t" type="button">對稱雙儲倉</button><button class="btn add" data-add="rbin-s" type="button">簡易工地型骨材倉</button></div></div><div class="menu"><button class="btn mbtn" type="button" data-menu="mFac">廠區設施 ▾</button><div class="pop" id="mFac" hidden><button class="btn add" data-add="gate" type="button">大門口</button><button class="btn add" data-add="scale" type="button">地磅</button><button class="btn add" data-add="wash" type="button">洗胎池</button><button class="btn add" data-add="office" type="button">辦公室</button><button class="btn add" data-add="rest" type="button">司機休息室</button><button class="btn add" data-add="parking" type="button">預拌車停車區</button><button class="btn add" data-add="yard" type="button">洗車場</button><button class="btn add" data-add="pond" type="button">雨水回收池</button></div></div><div class="menu"><button class="btn mbtn" type="button" data-menu="mTraf">動線輔助 ▾</button><div class="pop" id="mTraf" hidden><button class="btn add" data-add="tpt" type="button" title="車輛先開到這點停下，再沿弧線倒車進站">迴車倒車點</button><button class="btn add" data-add="cpad" type="button" title="水泥車停靠打料的位置，旋轉決定開進方向">水泥車打料點</button></div></div><div class="menu"><button class="btn mbtn" type="button" data-menu="mOth">其他／機具 ▾</button><div class="pop" id="mOth" hidden><button class="btn add" data-add="zone" type="button">限制區（既有基礎）</button><button class="btn add" data-add="blk" type="button" title="堆疊式免基礎：平台、擋牆、墊高">RC 混凝土塊</button><div class="psub">機具／車輛</div><button class="btn add" data-add="veh-loader" type="button">鏟裝機</button><button class="btn add" data-add="veh-excavator" type="button">挖土機（怪手）</button><button class="btn add" data-add="veh-skid" type="button">小山貓</button><button class="btn add" data-add="veh-forklift" type="button">堆高機</button><button class="btn add" data-add="veh-mixer" type="button">預拌車</button><button class="btn add" data-add="veh-dump" type="button">砂石車</button><button class="btn add" data-add="veh-cement" type="button">水泥車</button></div></div></div>
+    <div class="grp"><span class="gl">③ 存檔輸出</span><button class="btn" id="bLib" type="button">我的配置</button><button class="btn" id="bExport" type="button">輸出／檔案</button></div>
+    <div class="grp end"><button class="btn help" id="bHelp" type="button">？ 操作說明</button><button class="btn warnb" id="bClear" type="button">清空</button></div>
   </div>
   <div id="banner" hidden></div>
   <div id="tfMenu" hidden></div>
+  <div id="autoDlg" hidden><div class="xcard"><header><b>快速配置</b><button class="hbtn" type="button" id="autoX">關閉</button></header><div style="padding:12px 16px;overflow:auto">
+    <p class="note">依「配置圖作業指導書」：配置型式分一字型、N字型、L字型、ㄈ字型，其餘特殊場地由這四種變化；粉體桶繞著主機樓（兩旁或 L 角，用螺運機輸送）。會用目前「場地」的寬、長、退縮，並清除現有設備。</p>
+    <div class="row"><label for="aType">配置型式</label><select id="aType"><option value="I">一字型</option><option value="L">L字型</option><option value="U">ㄈ字型</option><option value="N">N字型</option></select></div>
+    <div class="row"><label for="aSilo">粉體桶位置</label><select id="aSilo"><option value="side">主機樓兩旁</option><option value="corner">主機樓 L 角</option></select></div>
+    <div class="row"><label for="aN">粉體桶數量</label><select id="aN"><option>4</option><option selected>5</option><option>6</option></select></div>
+    <div class="row"><label for="aSize">粉體桶規格</label><select id="aSize"><option value="Ø4370-250T">Ø4370 250T</option><option value="Ø4370-300T">Ø4370 300T</option><option value="Ø5800-300T">Ø5800 300T</option></select></div>
+    <div class="row"><label for="aBin">骨材庫</label><select id="aBin"><option value="□10 m／700 m³">□10 m／700 m³</option><option value="□12 m／1300 m³" selected>□12 m／1300 m³</option><option value="□12 m／1000 m³">□12 m／1000 m³</option><option value="□9 m／500 m³">□9 m／500 m³</option></select></div>
+    <label class="chk sm"><input type="checkbox" id="aFac" checked> 一併放大門、地磅、辦公室、預拌車停車區、洗胎池、雨水回收池</label>
+    <div class="iacts" style="margin-top:10px"><button class="primary sm" type="button" id="aGo">產生配置</button></div>
+    <p class="note" id="aMsg"></p></div></div></div>
   <div id="toast" hidden></div>
   <div id="boxSel" hidden></div>
   <div id="snapTip" hidden></div>
@@ -252,6 +254,7 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
           <li>旋轉：↺ ↻ 按鈕或鍵盤 Q／E；每次角度在「場地 → 旋轉按鈕每次」設定。</li>
           <li><b>再生粒料儲倉</b>：「東南高良」埋地、水平計量皮帶直接接主帶運機（CLSM 不用卸料斗與骨材庫）；「吉鼎」淺坑鋼架、鏟裝機投料，主帶運機尾端延伸到地下接它，骨材庫要放在主帶運機正上方；「對稱雙儲倉」兩側各自往中間的主帶運機投料（預設地上鋼架、不挖坑）。倉數、倉長寬、埋地／鋼架都能改。按下方「地下透視」可以看到地下坑與皮帶。</li>
           <li><b>簡易工地型-2方／RC 混凝土塊</b>：主機樓型式可選「簡易工地型-2方」（鋼構四柱、攪拌車從拌合層下方通過）；「RC混凝土塊」可堆成平台、擋牆或墊高（每塊 2×2×1 m）；工地型骨材倉可設定用幾層混凝土塊墊高。範例：「簡易工地型-2方（外島）」。輸送帶外觀可在「場地」改成「開放桁架」。</li>
+          <li><b>快速配置</b>：上方「快速配置」選一字型／N字型／L字型／ㄈ字型、粉體桶在主機樓兩旁或 L 角，依目前場地自動排出一套（帶運機自動拉到 ≤ 20°），之後再拖曳微調。設備擺放邊界預設退縮 1.5 m（依作業指導書，實際依當地法規確認）。</li>
           <li><b>設計部規則</b>：骨材庫可選標準規格（□9／10／12 m），參數欄顯示建議帶運機寬度與 22°／18° 所需水平距離；水泥桶多了 Ø4370、Ø5800 各噸數規格；「檢查」會依拌合機（2 方 120 m³/h、3 方 180 m³/h）算 1 天 8 小時所需膠結材與砂石，對照水泥桶與骨材庫儲量；也會提醒大門寬 ≥10 m、雨水回收池 = 廠區面積 2.5%。邊界退縮預設 2 m。可加辦公室、司機休息室、雨水回收池。</li>
           <li><b>機具／車輛</b>：拖到 RC 混凝土塊上會自動站在塊頂（例如怪手站在平台上餵料），也可關掉自動、手動輸入離地高度。上方「＋ 機具／車輛…」可放鏟裝機、怪手、小山貓、堆高機、預拌車、砂石車、水泥車，參數欄顯示常見規格，怪手有作業半徑圓圈。</li>
           <li><b>油漆顏色</b>：「場地 → 外觀配色」可改鋼構、水泥桶頂部／筒身／錐斗（預設頂部與錐斗同色）、骨材庫（預設跟鋼構同色，改了就整座一起變）、欄杆、浪板、輸送帶包覆。下方「輪廓線」可開關設備邊線。</li>
@@ -323,27 +326,28 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
   </div>
   <div id="hint" hidden>
     <div class="hh"><h3>使用教學</h3><button class="hbtn" id="hintClose" type="button" aria-label="關閉教學">✕ 關閉</button></div>
-    <ol><li>左邊「場地」先輸入空地寬、長與退縮</li><li>用「＋ 限制區」標出既有基礎或不能施工的範圍</li><li>從上方「加入設備」逐一放入卸料斗、骨材庫、主機樓、水泥桶</li><li>點設備調參數，輸送帶與螺運機會自動連接</li></ol>
-    <p class="note">完整教學（含存檔到共用資料庫）請按上方「操作說明」。</p>
+    <ol><li>左邊「場地設定」先填 <b>空地寬、長、退縮</b>（紅色＊必填）</li><li>上方「① 開始」按 <b>⚡ 快速配置</b> 自動排一套，或載入歷史範例；也可以從「② 加入設備」的選單一個一個放</li><li>點設備拖曳、點兩下調參數，輸送帶與螺運機會自動連接</li><li>看右邊「檢查」有沒有紅色警告，最後到「③ 存檔輸出」</li></ol>
+    <p class="note">完整教學（含存檔到共用資料庫）請按右上藍色「？ 操作說明」。</p>
     <label class="chk sm"><input type="checkbox" id="hintNever"> 下次不要再顯示</label>
   </div>
 
   <aside class="sheet" id="params">
     <header><h2>場地</h2><button class="hbtn" data-close="params" type="button">收起 ✕</button></header>
     <div class="body">
-      <fieldset>
-        <legend>空地尺寸</legend>
-        <div class="row"><label for="sW">寬度 <span class="unit">m</span></label><input id="sW" type="number" min="30" step="1"></div>
-        <div class="row"><label for="sL">長度 <span class="unit">m</span></label><input id="sL" type="number" min="30" step="1"></div>
-        <div class="row"><label for="sM">邊界退縮 <span class="unit">m</span></label><input id="sM" type="number" min="0" step="0.5"></div>
+      <fieldset class="must">
+        <legend>① 空地尺寸 <span class="req">＊必填</span></legend>
+        <p class="note" style="margin:0 0 6px">先輸入空地的寬、長與邊界退縮，所有設備都會依這個範圍檢查。</p>
+        <div class="row"><label for="sW">寬度 <span class="req">＊</span> <span class="unit">m</span></label><input id="sW" type="number" min="30" step="1"></div>
+        <div class="row"><label for="sL">長度 <span class="req">＊</span> <span class="unit">m</span></label><input id="sL" type="number" min="30" step="1"></div>
+        <div class="row"><label for="sM">邊界退縮 <span class="req">＊</span> <span class="unit">m</span></label><input id="sM" type="number" min="0" step="0.5"></div>
       </fieldset>
       <fieldset>
-        <legend>基礎限制區</legend>
+        <legend>基礎限制區（選填）</legend>
         <div class="flowline" id="zoneList"></div>
         <button class="hbtn" id="addZone" type="button">＋ 限制區</button>
       </fieldset>
       <fieldset>
-        <legend>設計規則</legend>
+        <legend>設計規則（有預設值，可不改）</legend>
         <div class="row"><label for="sMax">輸送帶坡度上限 <span class="unit">°</span></label><input id="sMax" type="number" min="8" max="35" step="0.5"></div>
         <div class="row"><label for="sScrew">螺運機單支上限 <span class="unit">m</span></label><input id="sScrew" type="number" min="3" max="20" step="0.5"></div>
         <div class="row"><label for="sBelt">輸送帶外觀</label><select id="sBelt"><option value="gallery">包覆通廊</option><option value="open">開放桁架＋皮帶罩</option></select></div>
@@ -353,14 +357,14 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
         <label class="chk sm"><input id="sFollow" type="checkbox"> 移動主機樓時，同一套的水泥桶一起移動</label>
       </fieldset>
       <fieldset>
-        <legend>動線與過磅</legend>
+        <legend>動線與過磅（選填）</legend>
         <div id="flowTbl"></div>
         <div class="row"><label for="editKind">編輯路徑</label><select id="editKind"><option value="">不編輯</option><option value="dump">砂石車</option><option value="mixer">預拌車</option><option value="cement">水泥車</option></select></div>
         <p class="note">編輯時：在該車路線附近點一下新增轉彎點，拖曳圓點移動；點圓點可選取後刪除。</p>
         <div class="iacts"><button class="hbtn" id="viaDel" type="button">刪除選取的轉彎點</button><button class="hbtn" id="viaClear" type="button">清除此車自訂路徑</button></div>
       </fieldset>
       <fieldset>
-        <legend>整廠配色</legend>
+        <legend>整廠配色（選填）</legend>
         <div id="palettes"></div>
         <div class="flowline" id="colors"></div>
       </fieldset>
@@ -377,33 +381,10 @@ legend{font-size:11px;letter-spacing:.1em;color:var(--muted);padding:0;margin-bo
   </aside>
 
   <div id="bar">
-    <button class="btn on" id="tParams" type="button">場地</button>
-    <button class="btn on" id="tCheck" type="button">參數／檢查</button>
-    <span class="sep"></span>
-    <button class="btn" id="rotL" type="button" aria-label="逆時針旋轉 15 度">↺ 15°</button>
-    <button class="btn" id="rotR" type="button" aria-label="順時針旋轉 15 度">↻ 15°</button>
-    <button class="btn" id="bUndo" type="button" title="復原（Ctrl+Z）" disabled>↶ 復原</button>
-    <button class="btn" id="bRedo" type="button" title="重做（Ctrl+Y）" disabled>↷ 重做</button>
-    <button class="btn" id="bCopy" type="button" title="複製（Ctrl+C）">複製</button>
-    <button class="btn" id="bPaste" type="button" title="貼上（Ctrl+V）" disabled>貼上</button>
-    <button class="btn" id="bDel" type="button" title="刪除（Delete）">刪除選取</button>
-    <button class="btn" id="bBox" type="button">框選</button>
-    <button class="btn" id="bAll" type="button">全選</button>
-    <span class="sep"></span>
-    <button class="btn" id="bTraffic" type="button">動線模擬</button>
-    <button class="btn trk" id="tr-dump" type="button" hidden><i class="sw" style="background:#d99a1c"></i>砂石車</button>
-    <button class="btn trk" id="tr-mixer" type="button" hidden><i class="sw" style="background:#c8342c"></i>預拌車</button>
-    <button class="btn trk" id="tr-cement" type="button" hidden><i class="sw" style="background:#3b7ab8"></i>水泥車</button>
-    <span class="sep"></span>
-    <button class="btn" id="vTop" type="button">俯視</button>
-    <button class="btn" id="vPersp" type="button">全景</button>
-    <button class="btn on" id="bDims" type="button">尺寸</button>
-    <button class="btn on" id="bLabels" type="button">標籤</button>
-    <button class="btn on" id="bClad" type="button" title="關閉後主機樓、骨材庫頂屋的浪板外牆與屋頂隱藏，看得到內部設備">外牆浪板</button>
-    <button class="btn on" id="bOutline" type="button" title="設備邊線">輪廓線</button>
-    <button class="btn" id="bXray" type="button" title="地面半透明，看地下坑、儲斗與水平計量皮帶">地下透視</button>
-    <button class="btn" id="bFull" type="button">全螢幕</button>
-    <button class="btn" id="bTheme" type="button">外觀：自動</button>
+    <div class="grp"><button class="btn on site" id="tParams" type="button">場地設定</button><button class="btn on" id="tCheck" type="button">參數／檢查</button></div>
+    <div class="grp"><span class="gl">編輯</span><button class="btn" id="bUndo" type="button" title="復原（Ctrl+Z）" disabled>↶</button><button class="btn" id="bRedo" type="button" title="重做（Ctrl+Y）" disabled>↷</button><button class="btn" id="rotL" type="button" title="逆時針旋轉（Q）">↺</button><button class="btn" id="rotR" type="button" title="順時針旋轉（E）">↻</button><button class="btn" id="bDel" type="button" title="刪除（Delete）">刪除</button><div class="menu"><button class="btn mbtn" type="button" data-menu="mEdit">更多 ▾</button><div class="pop up" id="mEdit" hidden><button class="btn" id="bCopy" type="button" title="Ctrl+C">複製</button><button class="btn" id="bPaste" type="button" title="Ctrl+V" disabled>貼上</button><button class="btn" id="bBox" type="button">框選多個</button><button class="btn" id="bAll" type="button">全選</button></div></div></div>
+    <div class="grp"><button class="btn" id="bTraffic" type="button">🚚 動線模擬</button><button class="btn trk" id="tr-dump" type="button" hidden><i class="sw" style="background:#d99a1c"></i>砂石車</button><button class="btn trk" id="tr-mixer" type="button" hidden><i class="sw" style="background:#c8342c"></i>預拌車</button><button class="btn trk" id="tr-cement" type="button" hidden><i class="sw" style="background:#3b7ab8"></i>水泥車</button></div>
+    <div class="grp"><span class="gl">檢視</span><button class="btn" id="vTop" type="button">俯視</button><button class="btn" id="vPersp" type="button">全景</button><div class="menu"><button class="btn mbtn" type="button" data-menu="mView">顯示 ▾</button><div class="pop up keep" id="mView" hidden><button class="btn on" id="bDims" type="button">尺寸</button><button class="btn on" id="bLabels" type="button">標籤</button><button class="btn on" id="bClad" type="button" title="關閉後看得到主機樓內部">外牆浪板</button><button class="btn on" id="bOutline" type="button">輪廓線</button><button class="btn" id="bXray" type="button" title="地面半透明，看地下設備">地下透視</button><button class="btn" id="bTheme" type="button">外觀：暗色</button></div></div><button class="btn" id="bFull" type="button">全螢幕</button></div>
   </div>
 </div>
 
@@ -4710,7 +4691,7 @@ const DEFAULT_BINS={cells:'4',L:12,W:12,nx:2,nz:2,legH:7,hopH:4.4,boxH:6};
 const BIN_STD={'□9 m／500 m³':{L:9,W:9,hopH:3.75,boxH:6.0},'□10 m／700 m³':{L:10,W:10,hopH:4.358,boxH:6.0},'□12 m／1000 m³':{L:12,W:12,hopH:5.574,boxH:6.0},'□12 m／1300 m³':{L:12,W:12,hopH:5.574,boxH:8.4}};
 const beltW=b=>Math.max(b.L,b.W)>=11?'1200 W':'900～1050 W';
 const BIN_RC={cells:'4',L:12.7,W:12.7,nx:2,nz:2,legH:4.5,hopH:6.5,boxH:7.7,st:'rc'};   // RC bins, steel cones (3M3 standard)
-const S0=()=>({traffic:{on:false,dump:true,mixer:true,cement:true},W:80,L:150,m:2,max:22,screw:9,rotStep:15,support:'rc',supGap:15,siloFollow:true,lines:1,cur:1,colors:colorsFix(PALETTES['標準灰']),items:[],zones:[]});
+const S0=()=>({traffic:{on:false,dump:true,mixer:true,cement:true},W:80,L:150,m:1.5,max:22,screw:9,rotStep:15,support:'rc',supGap:15,siloFollow:true,lines:1,cur:1,colors:colorsFix(PALETTES['標準灰']),items:[],zones:[]});
 let S=S0();
 try{const sv=JSON.parse(localStorage.getItem('rmc-config-v4')||'null');if(sv&&Array.isArray(sv.items))S=Object.assign(S0(),sv);if(!S.supGap)S.supGap=15;if(!S.traffic)S.traffic={on:false,dump:true,mixer:true,cement:true};}catch(e){}
 function save(){try{localStorage.setItem('rmc-config-v4',JSON.stringify(S));}catch(e){}}
@@ -5168,7 +5149,7 @@ function addItem(type){let it;const t=one('tower'),b=one('bins'),h=one('hopper')
   if(!FAC.includes(type))it.line=S.cur;it.id=newId(type[0]+type[1]);const dt=TPL.find(x=>x.type===type&&x.def);if(dt)tplApply(it,dt);S.items.push(it);openIns(it.id);}
 function renderLineSel(){$('lineSel').innerHTML=lineIds().map(l=>'<option value="'+l+'"'+(l===S.cur?' selected':'')+'>第 '+l+' 套</option>').join('')+'<option value="new">＋ 新增一套</option>';}
 $('lineSel').addEventListener('change',e=>{if(e.target.value==='new'){S.lines++;S.cur=S.lines;}else S.cur=+e.target.value;renderLineSel();update();});
-function updatePalette(){if($('rbSel'))$('rbSel').disabled=!!one('rbin');document.querySelectorAll('[data-add]').forEach(b=>{const k=b.dataset.add;b.disabled=(['hopper','bins','tower'].includes(k)&&!!one(k))||(['gate','scale','yard'].includes(k)&&!!S.items.find(i=>i.type===k))||(k==='transfer'&&transfer('inc')&&transfer('main'));});}
+function updatePalette(){if($('rbSel'))$('rbSel').disabled=!!one('rbin');document.querySelectorAll('[data-add]').forEach(b=>{const k=b.dataset.add;b.disabled=(['hopper','bins','tower'].includes(k)&&!!one(k))||(k.startsWith('rbin-')&&!!one('rbin'))||(['gate','scale','yard'].includes(k)&&!!S.items.find(i=>i.type===k))||(k==='transfer'&&transfer('inc')&&transfer('main'));});}
 document.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',e=>{if(b.dataset.add==='transfer'){openTfMenu(b);e.stopPropagation();return;}addItem(b.dataset.add);}));
 function openTfMenu(btn){const m=$('tfMenu');const opts=[];lineIds().forEach(l=>[['inc','入庫帶運機','hopper','bins'],['main','主帶運機','bins','tower']].forEach(([k,nm,a,b])=>{
     const A=k==='main'?(one('rbin',l)||one(a,l)):one(a,l),B=one(b,l),has=transfer(k,l);opts.push('<button type="button" class="tfo" data-l="'+l+'" data-b="'+k+'"'+(has||!A||!B?' disabled':'')+'>'+LN(l)+nm+
@@ -5398,9 +5379,42 @@ function loadExample3(){S.W=100;S.L=70;S.m=3;S.zones=[];
   const SP=[[-2.55,-6.62],[2.42,-6.62],[6.87,-2.44],[6.87,2.53],[11.84,2.53]];
   S.items=[h,tr,b,rb,t].concat(SP.map(([dx,dz],k)=>({id:'s'+(k+1),type:'silo',line:1,name:'水泥桶 #'+(k+1),x:t.x+dx,z:t.z+dz,D:4.37,cyl:10.4,cone:3.7,bottom:12.915,base:0,sup:'steel'})));
   selected=null;renderLineSel();syncSite();rebuildSite();renderInspector();update();frame(false);}
+/* ---------- quick layout (配置圖作業指導書: 一字／N字／L字／ㄈ字) ---------- */
+$('bAuto').addEventListener('click',()=>{$('autoDlg').hidden=false;$('aMsg').textContent='';});$('autoX').addEventListener('click',()=>$('autoDlg').hidden=true);
+$('aGo').addEventListener('click',()=>{const msg=autoLayout($('aType').value,$('aSilo').value,+$('aN').value,$('aSize').value,$('aBin').value,$('aFac').checked);$('aMsg').textContent=msg;if(!/無法/.test(msg))setTimeout(()=>{$('autoDlg').hidden=true;toast(msg);},400);});
+function autoLayout(type,siloPos,nS,size,binKey,fac){
+  const W=S.W,L=S.L,m=S.m;S.zones=[];S.lines=1;S.cur=1;
+  const u0=m+(siloPos==='side'?36:18),v0=type==='L'||type==='U'?m+16:W/2;   // tower near the top boundary, trucks reverse in from the free side
+  const t={id:'t1',type:'tower',tt:'half',inlet:'auto',x:v0,z:u0,r:0,auto:false,line:1,exit:siloPos==='side'?'N':'W'};
+  const b={id:'b1',type:'bins',x:v0,z:u0+34,r:0,auto:false,line:1,b:Object.assign({},BIN_RC,BIN_STD[binKey]||{})};
+  const h={id:'h1',type:'hopper',x:v0,z:b.z+50,r:0,auto:false,line:1};let tr=null;
+  if(type==='L'){h.x=b.x+50;h.z=b.z;h.r=Math.PI/2;}
+  if(type==='U'){tr={id:'tr1',type:'transfer',belt:'inc',line:1,x:b.x+30,z:b.z,r:0,auto:false,h:null};h.x=tr.x;h.z=b.z-40;h.r=Math.PI;}
+  if(type==='N'){tr={id:'tr1',type:'transfer',belt:'inc',line:1,x:b.x,z:b.z+28,r:0,auto:false,h:null};h.x=b.x+(b.x<W/2?1:-1)*26;h.z=b.z+4;}
+  S.items=[t,b,h].concat(tr?[tr]:[]);
+  // silos around the tower: both sides, or the L corner
+  const P=SILO_PRESET[size],c=Math.max(5.4,P.D+.9),hx=HT.hx+.3+c/2,list=[];
+  if(siloPos==='side'){const per=[Math.ceil(nS/2),Math.floor(nS/2)];[-1,1].forEach((sg,k)=>{for(let j=0;j<per[k];j++)list.push([sg*hx,(j-(per[k]-1)/2)*c]);});}
+  else{const row=Math.ceil(nS/2),col=nS-row,cx=HT.hx+.3+c/2,cz=HT.hz+.3+c/2;for(let j=0;j<row;j++)list.push([cx-j*c,-cz]);for(let j=0;j<col;j++)list.push([cx,-cz+(j+1)*c]);}
+  list.forEach(([dx,dz],k)=>S.items.push(Object.assign({id:'s'+(k+1),type:'silo',line:1,name:'水泥桶 #'+(k+1),x:t.x+dx,z:t.z+dz,sup:'steel',base:0},JSON.parse(JSON.stringify(P)))));
+  // stretch belts until every slope is within 20°
+  for(let it=0;it<6;it++){transferTops();const segs=segments();let moved=false;
+    segs.forEach(sg=>{if(sg.ang<=20.2)return;const need=sg.rise/Math.tan(20*D2R)-sg.hz+.5,d=V(sg.a.x-sg.b.x,0,sg.a.z-sg.b.z).normalize();
+      const up=sg.belt==='main'?[b,h].concat(tr?[tr]:[]):(tr&&sg.name.includes('②')?[tr,h]:[h]);up.forEach(o=>{o.x+=d.x*need;o.z+=d.z*need;});moved=true;});if(!moved)break;}
+  if(fac){const gw=12;S.items.push({id:'g1',type:'gate',x:Math.min(W-m-gw,Math.max(m+gw,W*.25)),z:L-.5,r:Math.PI,w:gw});
+    S.items.push({id:'sc1',type:'scale',x:W*.25+12,z:L-m-28,r:0,L:18,W:3.4});S.items.push({id:'wa1',type:'wash',x:W*.25-2,z:L-m-30,r:0,L:14,W:4.5,dir:'out'});
+    S.items.push({id:'of1',type:'office',x:m+6,z:L-m-14,r:0,W:8,L:15});
+    {const pk={id:'pk1',type:'parking',x:W-m-17,z:L-m-36,r:0,n:7,rows:1,ang:90,sw:3.8,sl:12,cars:true};S.items.push(pk);const P0=parkGeom(pk);pk.x=W-m-P0.width/2-1.5;}
+    const a=W*L*.025,pw=Math.max(4,Math.round(Math.sqrt(a/2))),pl=Math.ceil(a/pw);S.items.push({id:'pd1',type:'pond',x:W-m-pw/2-1,z:L*.5,r:0,W:pw,L:pl,n:2});}
+  selected=null;renderLineSel();syncSite();rebuildSite();renderInspector();update();frame(false);
+  const out=S.items.filter(i=>i.type!=='gate'&&!footPts(i).every(inSite)).map(nm),nm0={I:'一字型',L:'L字型',U:'ㄈ字型',N:'N字型'}[type];
+  return '已產生'+nm0+'配置（帶運機坡度 ≤ 20°）。'+(out.length?'場地不夠，超出：'+out.join('、')+'。可加大場地或改用其他型式。':'可再拖曳微調。');}
+document.querySelectorAll('[data-menu]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const p=$(b.dataset.menu),open=p.hidden;document.querySelectorAll('.pop').forEach(x=>x.hidden=true);p.hidden=!open;}));
+document.querySelectorAll('.pop').forEach(p=>p.addEventListener('click',e=>{if(e.target.closest('button')&&!p.classList.contains('keep'))p.hidden=true;e.stopPropagation();}));
+document.addEventListener('click',()=>document.querySelectorAll('.pop').forEach(x=>x.hidden=true));
 $('exSel').addEventListener('change',e=>{const v=e.target.value;e.target.value='';({1:loadExample,2:loadExample2,3:loadExample3,4:loadExample4})[v]&&({1:loadExample,2:loadExample2,3:loadExample3,4:loadExample4})[v]();});
-$('vehSel').addEventListener('change',e=>{const v=e.target.value;e.target.value='';if(v)addItem('veh-'+v);});
-$('rbSel').addEventListener('change',e=>{const v=e.target.value;e.target.value='';if(v)addItem('rbin-'+v);});
+$('vehSel')&&$('vehSel').addEventListener('change',e=>{const v=e.target.value;e.target.value='';if(v)addItem('veh-'+v);});
+$('rbSel')&&$('rbSel').addEventListener('change',e=>{const v=e.target.value;e.target.value='';if(v)addItem('rbin-'+v);});
 let hintOff=(()=>{try{return localStorage.getItem('rmc-hint-off')==='1';}catch(e){return false;}})();
 $('hintClose').addEventListener('click',()=>{hintOff=true;$('hint').hidden=true;if($('hintNever').checked){try{localStorage.setItem('rmc-hint-off','1');}catch(e){}}});
 $('bClear').addEventListener('click',()=>{if($('bClear').dataset.arm!=='1'){$('bClear').dataset.arm='1';$('bClear').textContent='再按一次清空';setTimeout(()=>{$('bClear').dataset.arm='';$('bClear').textContent='清空';},2500);return;}
@@ -5810,10 +5824,10 @@ addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&(e.key==='s'||e.key===
   SHARED=db.collection('plans');DBREF=db;db.doc('templates/all').onSnapshot(sn=>{if(sn.exists){TPL=(sn.data().list||[]).map(x=>Object.assign({},x));try{localStorage.setItem('rmc-tpl',JSON.stringify(TPL));}catch(e){}if(selected&&selSet.size<2)renderInspector();}},()=>{});SHARED.orderBy('saved','desc').limit(300).onSnapshot(snap=>{SH_LIST=snap.docs.map(d=>Object.assign({id:d.id},d.data()));if(!$('libDlg').hidden)renderLib();},
     err=>{SHARED=null;toast('共用配置暫時無法使用，改存在此瀏覽器');});}catch(e){}})();
 
-let themePref=(()=>{try{return localStorage.getItem('rmc-theme')||'auto';}catch(e){return 'auto';}})(),themeSet=false;
+let themePref=(()=>{try{return localStorage.getItem('rmc-theme2')||'dark';}catch(e){return 'dark';}})(),themeSet=false;
 function applyThemePref(){const el=document.documentElement;if(themePref==='auto'){if(themeSet){el.removeAttribute('data-theme');themeSet=false;}}else{el.setAttribute('data-theme',themePref);themeSet=true;}
   $('bTheme').textContent='外觀：'+{auto:'自動',light:'亮色',dark:'暗色'}[themePref];applyTheme();}
-$('bTheme').addEventListener('click',()=>{themePref={auto:'light',light:'dark',dark:'auto'}[themePref];try{localStorage.setItem('rmc-theme',themePref);}catch(e){}applyThemePref();
+$('bTheme').addEventListener('click',()=>{themePref={dark:'light',light:'auto',auto:'dark'}[themePref];try{localStorage.setItem('rmc-theme2',themePref);}catch(e){}applyThemePref();
   toast({auto:'外觀跟隨電腦／瀏覽器設定',light:'固定亮色',dark:'固定暗色'}[themePref]);});
 applyThemePref();
 /* ---------- start ---------- */
