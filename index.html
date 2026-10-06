@@ -255,6 +255,7 @@ fieldset.must{border-color:var(--accent);background:var(--accent-soft)}
           <li><b>再生粒料儲倉</b>：「東南高良」埋地、水平計量皮帶直接接主帶運機（CLSM 不用卸料斗與骨材庫）；「吉鼎」淺坑鋼架、鏟裝機投料，主帶運機尾端延伸到地下接它，骨材庫要放在主帶運機正上方；「對稱雙儲倉」兩側各自往中間的主帶運機投料（預設地上鋼架、不挖坑）。倉數、倉長寬、埋地／鋼架都能改。按下方「地下透視」可以看到地下坑與皮帶。</li>
           <li><b>簡易工地型-2方／RC 混凝土塊</b>：主機樓型式可選「簡易工地型-2方」（鋼構四柱、攪拌車從拌合層下方通過）；「RC混凝土塊」可堆成平台、擋牆或墊高（每塊 2×2×1 m）；工地型骨材倉可設定用幾層混凝土塊墊高。範例：「簡易工地型-2方（外島）」。輸送帶外觀可在「場地」改成「開放桁架」。</li>
           <li><b>雙向配料帶運機</b>：兩座骨材庫相鄰、共用一條入庫帶運機時，在骨材庫參數勾「與另一座骨材庫共用雙向配料帶」，入庫帶運機只進一條到兩庫中間，庫頂畫一條水平雙向帶運機分料到兩邊。</li>
+          <li><b>不規則場地</b>：「場地設定 → 不規則場地」匯入 DXF（地籍界線畫成封閉聚合線），可選單位、選哪一條當邊界、其他線條當底圖；退縮線沿著邊界往內畫，設備超出就提醒。底圖不存檔，邊界會存檔。</li>
           <li><b>快速配置</b>：上方「快速配置」選一字型／N字型／L字型／ㄈ字型、粉體桶在主機樓兩旁或 L 角，依目前場地自動排出一套（帶運機自動拉到 ≤ 20°），之後再拖曳微調。設備擺放邊界預設退縮 1.5 m（依作業指導書，實際依當地法規確認）。</li>
           <li><b>設計部規則</b>：骨材庫可選標準規格（□9／10／12 m），參數欄顯示建議帶運機寬度與 22°／18° 所需水平距離；水泥桶多了 Ø4370、Ø5800 各噸數規格；「檢查」會依拌合機（2 方 120 m³/h、3 方 180 m³/h）算 1 天 8 小時所需膠結材與砂石，對照水泥桶與骨材庫儲量；也會提醒大門寬 ≥10 m、雨水回收池 = 廠區面積 2.5%。邊界退縮預設 2 m。可加辦公室、司機休息室、雨水回收池。</li>
           <li><b>機具／車輛</b>：拖到 RC 混凝土塊上會自動站在塊頂（例如怪手站在平台上餵料），也可關掉自動、手動輸入離地高度。上方「＋ 機具／車輛…」可放鏟裝機、怪手、小山貓、堆高機、預拌車、砂石車、水泥車，參數欄顯示常見規格，怪手有作業半徑圓圈。</li>
@@ -341,6 +342,16 @@ fieldset.must{border-color:var(--accent);background:var(--accent-soft)}
         <div class="row"><label for="sW">寬度 <span class="req">＊</span> <span class="unit">m</span></label><input id="sW" type="number" min="30" step="1"></div>
         <div class="row"><label for="sL">長度 <span class="req">＊</span> <span class="unit">m</span></label><input id="sL" type="number" min="30" step="1"></div>
         <div class="row"><label for="sM">邊界退縮 <span class="req">＊</span> <span class="unit">m</span></label><input id="sM" type="number" min="0" step="0.5"></div>
+        <div class="psub" style="border:0;padding-left:0">不規則場地（從 CAD 匯入）</div>
+        <div class="note" style="margin:0 0 6px;padding:8px 10px;border:1px solid var(--warn);border-radius:6px;background:var(--warn-soft)"><b>CAD 端要先準備：</b><ol style="margin:4px 0 0;padding-left:18px"><li>把地籍界線畫成<b>封閉聚合線</b>（PLINE 畫完按 <b>C</b> 閉合；已經是線段的可用 <b>PEDIT</b> 合併並閉合）。</li><li>另存新檔，類型選 <b>DXF</b>，任何版本都可以。<b>DWG 網頁讀不了，一定要轉成 DXF。</b></li></ol></div>
+        <div class="iacts" style="margin:0"><label class="hbtn" style="cursor:pointer">📂 匯入 DXF 場地<input type="file" id="siteDxf" accept=".dxf" hidden></label><button class="hbtn" type="button" id="siteRect" hidden>改回長方形</button></div>
+        <div id="sitePick" hidden>
+          <div class="row"><label for="spUnit">圖面單位</label><select id="spUnit"><option value="0.001">mm</option><option value="0.01">cm</option><option value="1">m</option></select></div>
+          <div class="row"><label for="spPoly">場地邊界</label><select id="spPoly"></select></div>
+          <label class="chk sm"><input type="checkbox" id="spUnder" checked> 其他線條當底圖顯示（道路、建物、溪流…）</label>
+          <div class="iacts" style="margin:4px 0 0"><button class="primary sm" type="button" id="spOk">套用為場地</button></div>
+        </div>
+        <p class="note" id="siteInfo" hidden></p>
       </fieldset>
       <fieldset>
         <legend>基礎限制區（選填）</legend>
@@ -4822,16 +4833,22 @@ function applyColors(){const c=S.colors=colorsFix(S.colors);const lift=(h,k)=>ne
 
 /* ---------- site ---------- */
 let siteLabels=[];
+let UNDER=null;const polyArea=P=>Math.abs(P.reduce((a,[x,z],k)=>{const [x2,z2]=P[(k+1)%P.length];return a+x*z2-x2*z;},0))/2;
 function rebuildSite(){
   clearGroup(siteG);siteLabels.forEach(dropLabel);siteLabels=[];
-  const p=mesh(new THREE.PlaneGeometry(S.W,S.L),M.site,false);p.rotation.x=-Math.PI/2;p.position.set(S.W/2,0,S.L/2);siteG.add(p);
-  [[0,0,S.W,0],[S.W,0,S.W,S.L],[S.W,S.L,0,S.L],[0,S.L,0,0]].forEach(([x0,z0,x1,z1])=>{const L=Math.hypot(x1-x0,z1-z0),n=Math.max(1,Math.round(L/4));
+  const PL=S.poly&&S.poly.length>2?S.poly:null;
+  if(PL){const sh=new THREE.Shape(PL.map(([x,z])=>new THREE.Vector2(x,-z))),p=mesh(new THREE.ShapeGeometry(sh),M.site,false);p.rotation.x=-Math.PI/2;siteG.add(p);}
+  else{const p=mesh(new THREE.PlaneGeometry(S.W,S.L),M.site,false);p.rotation.x=-Math.PI/2;p.position.set(S.W/2,0,S.L/2);siteG.add(p);}
+  if(UNDER&&UNDER.length){siteG.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(UNDER),new THREE.LineBasicMaterial({color:'#7f8f99',transparent:true,opacity:.7})));}
+  (PL?PL.map((q,k)=>[q[0],q[1],PL[(k+1)%PL.length][0],PL[(k+1)%PL.length][1]]):[[0,0,S.W,0],[S.W,0,S.W,S.L],[S.W,S.L,0,S.L],[0,S.L,0,0]]).forEach(([x0,z0,x1,z1])=>{const L=Math.hypot(x1-x0,z1-z0),n=Math.max(1,Math.round(L/4));
     const r=mesh(UB,M.fence);r.scale.set(.12,.12,L);r.position.set((x0+x1)/2,1.4,(z0+z1)/2);r.lookAt(x1,1.4,z1);siteG.add(r);
     for(let i=0;i<=n;i++){const t=i/n;box(siteG,.14,1.6,.14,M.fence,x0+(x1-x0)*t,.8,z0+(z1-z0)*t);}});
   const pts=[];for(let x=10;x<S.W;x+=10)pts.push(V(x,.012,0),V(x,.012,S.L));for(let z=10;z<S.L;z+=10)pts.push(V(0,.012,z),V(S.W,.012,z));
   siteG.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:'#9aa3a0',transparent:true,opacity:.35})));
-  if(S.m>0){const q=mesh(new THREE.PlaneGeometry(Math.max(.1,S.W-2*S.m),Math.max(.1,S.L-2*S.m)),new THREE.MeshBasicMaterial({color:'#e0a526',transparent:true,opacity:.07,depthWrite:false}),false);q.rotation.x=-Math.PI/2;q.position.set(S.W/2,.01,S.L/2);siteG.add(q);}
-  siteLabels.push(label(scene,'寬 '+S.W+' m',V(S.W/2,.2,-2),'dim'),label(scene,'長 '+S.L+' m',V(-4,.2,S.L/2),'dim'),label(scene,'原點 (0,0)',V(0,.2,-2),'dim'));
+  if(PL&&S.m>0){const lp=[];const N=PL.length;for(let k=0;k<N;k++){const [ax,az]=PL[k],[bx,bz]=PL[(k+1)%N];let nx=-(bz-az),nz=bx-ax;const L=Math.hypot(nx,nz)||1;nx/=L;nz/=L;const mx=(ax+bx)/2,mz=(az+bz)/2;if(!ptInPoly(mx+nx*.1,mz+nz*.1,PL)){nx=-nx;nz=-nz;}lp.push(V(ax+nx*S.m,.02,az+nz*S.m),V(bx+nx*S.m,.02,bz+nz*S.m));}
+    const ln=new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(lp),new THREE.LineDashedMaterial({color:'#e0a526',dashSize:1,gapSize:.7}));ln.computeLineDistances();siteG.add(ln);}
+  else if(S.m>0){const q=mesh(new THREE.PlaneGeometry(Math.max(.1,S.W-2*S.m),Math.max(.1,S.L-2*S.m)),new THREE.MeshBasicMaterial({color:'#e0a526',transparent:true,opacity:.07,depthWrite:false}),false);q.rotation.x=-Math.PI/2;q.position.set(S.W/2,.01,S.L/2);siteG.add(q);}
+  if(PL){siteLabels.push(label(scene,'場地 '+fmt(polyArea(PL),0)+' m²（'+fmt(polyArea(PL)/3305.785,2)+' 甲／'+fmt(polyArea(PL)*.3025,0)+' 坪）',V(S.W/2,.2,-3),'dim'));}else siteLabels.push(label(scene,'寬 '+S.W+' m',V(S.W/2,.2,-2),'dim'),label(scene,'長 '+S.L+' m',V(-4,.2,S.L/2),'dim'),label(scene,'原點 (0,0)',V(0,.2,-2),'dim'));
   sun.position.set(S.W/2-80,140,S.L/2+60);sun.target.position.set(S.W/2,0,S.L/2);
   const sc=sun.shadow.camera,R=Math.max(S.W,S.L)*.65+20;sc.left=-R;sc.right=R;sc.top=R;sc.bottom=-R;sc.far=600;sc.updateProjectionMatrix();
 }
@@ -4841,7 +4858,9 @@ function radiusOf(i){if(FAC.includes(i.type))return facRadius(i);return i.type==
 function footPts(i){let poly;if(FAC.includes(i.type))poly=facFoot(i);else if(i.type==='bins'){const b=i.b;poly=[[-b.L/2-1,-b.W/2-1],[b.L/2+1,-b.W/2-1],[b.L/2+1,b.W/2+1],[-b.L/2-1,b.W/2+1]];}
   else if(i.type==='blk'){const a=i.nx*BLK.s/2,b=i.nz*BLK.s/2;poly=[[-a,-b],[a,-b],[a,b],[-a,b]];}else if(i.type==='rbin'){const [a,b]=rbinHalf(i);poly=[[-a,-b],[a,-b],[a,b],[-a,b]];}else if(i.type==='tower'){const d=TD(i);poly=[[-d.hx-.2,-d.hz-.2],[d.hx+.2,-d.hz-.2],[d.hx+.2,d.hz+.2],[-d.hx-.2,d.hz+.2]];}else if(i.type==='hopper')poly=FOOT.hopper;
   else{const r=radiusOf(i);poly=[[-r,0],[r,0],[0,-r],[0,r]];}return poly.map(([x,z])=>{const [a,b]=rotXZ(x,z,i.r||0);return [i.x+a,i.z+b];});}
-const inSite=([x,z])=>x>=S.m-1e-6&&x<=S.W-S.m+1e-6&&z>=S.m-1e-6&&z<=S.L-S.m+1e-6;
+function ptInPoly(x,z,P){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const [xi,zi]=P[i],[xj,zj]=P[j];if((zi>z)!==(zj>z)&&x<(xj-xi)*(z-zi)/(zj-zi)+xi)c=!c;}return c;}
+function distToPoly(x,z,P){let d=1e9;for(let i=0,j=P.length-1;i<P.length;j=i++){const [ax,az]=P[j],[bx,bz]=P[i],dx=bx-ax,dz=bz-az,L=dx*dx+dz*dz,t=L?Math.max(0,Math.min(1,((x-ax)*dx+(z-az)*dz)/L)):0;d=Math.min(d,Math.hypot(ax+dx*t-x,az+dz*t-z));}return d;}
+const inSite=([x,z])=>S.poly&&S.poly.length>2?ptInPoly(x,z,S.poly)&&distToPoly(x,z,S.poly)>=S.m-1e-6:(x>=S.m-1e-6&&x<=S.W-S.m+1e-6&&z>=S.m-1e-6&&z<=S.L-S.m+1e-6);
 function distToZone(p,z){const [lx,lz]=rotXZ(p.x-z.x,p.z-z.z,-(z.r||0));return Math.hypot(Math.max(Math.abs(lx)-z.w/2,0),Math.max(Math.abs(lz)-z.d/2,0));}
 function polyHit(P,Q){ // separating-axis test for convex polygons
   for(const R of [P,Q])for(let k=0;k<R.length;k++){const [x1,z1]=R[k],[x2,z2]=R[(k+1)%R.length],nx=z2-z1,nz=x1-x2;
@@ -4873,8 +4892,8 @@ function evaluate(segs){
       else if(rb)W.push(['info',LN(l)+'CLSM 回收料料性與補料方式不同，無法一次大量儲存，儲量請與業主溝通。']);}
     const miss=(rb?['tower']:sharedFeed(l)&&!one('hopper',l)?['bins','tower']:['hopper','bins','tower']).filter(k=>!one(k,l)).map(k=>TYPE[k]);
     if(miss.length)W.push(['info',LN(l)+'尚未加入：'+miss.join('、')+'。從上方「加入設備」點選。']);});
-  {const g=S.items.find(i=>i.type==='gate');if(g&&g.w<10)W.push(['warn','大門寬 '+fmt(g.w)+' m，建議 10 m 以上。']);
-   const need=S.W*S.L*.025,pa=S.items.filter(i=>i.type==='pond').reduce((a,i)=>a+i.L*i.W,0);if(S.items.length>2)W.push([pa&&pa<need*.98?'warn':'info','雨水回收池需約 '+fmt(need,0)+' m²（廠區面積 2.5%，可分 2～3 池）'+(pa?'，目前 '+fmt(pa,0)+' m²'+(pa>=need*.98?'，足夠。':'，不足。'):'，尚未配置（上方「雨水回收池」）。')+' 排水溝坡度 2%。']);}
+  {const SA=()=>S.poly&&S.poly.length>2?polyArea(S.poly):S.W*S.L;const g=S.items.find(i=>i.type==='gate');if(g&&g.w<10)W.push(['warn','大門寬 '+fmt(g.w)+' m，建議 10 m 以上。']);
+   const need=SA()*.025,pa=S.items.filter(i=>i.type==='pond').reduce((a,i)=>a+i.L*i.W,0);if(S.items.length>2)W.push([pa&&pa<need*.98?'warn':'info','雨水回收池需約 '+fmt(need,0)+' m²（廠區面積 2.5%，可分 2～3 池）'+(pa?'，目前 '+fmt(pa,0)+' m²'+(pa>=need*.98?'，足夠。':'，不足。'):'，尚未配置（上方「雨水回收池」）。')+' 排水溝坡度 2%。']);}
   if(!W.some(w=>w[0]==='bad'||w[0]==='warn')&&S.items.length)W.unshift(['ok','輸送帶坡度都在 '+fmt(S.max)+'° 以內，沒有超界或重疊。']);
   return{W,bad};
 }
@@ -5340,9 +5359,44 @@ insEl.addEventListener('click',async e=>{const b=e.target.closest('[data-tp]');c
 /* ---------- left panel: site, zones, colours ---------- */
 const siteInputs={sW:'W',sL:'L',sM:'m',sMax:'max',sScrew:'screw',sRot:'rotStep',sGap:'supGap'};
 function rotLabels(){$('rotL').textContent='↺ '+S.rotStep+'°';$('rotR').textContent='↻ '+S.rotStep+'°';}
-function syncSite(){Object.entries(siteInputs).forEach(([id,k])=>$(id).value=S[k]);$('sSup').value=S.support||'rc';$('sBelt').value=S.beltStyle||'gallery';rotLabels();$('sFollow').checked=S.siloFollow;renderColors();}
+function syncSite(){Object.entries(siteInputs).forEach(([id,k])=>$(id).value=S[k]);{const pl=S.poly&&S.poly.length>2;$('sW').disabled=pl;$('sL').disabled=pl;$('siteRect').hidden=!pl;$('siteInfo').hidden=!pl;if(pl)$('siteInfo').innerHTML='目前場地：CAD 匯入的不規則邊界，'+S.poly.length+' 個頂點、面積 <b>'+fmt(polyArea(S.poly),0)+' m²</b>（約 '+fmt(polyArea(S.poly)*.3025,0)+' 坪）。設備超出邊界或退縮線會提醒。';}$('sSup').value=S.support||'rc';$('sBelt').value=S.beltStyle||'gallery';rotLabels();$('sFollow').checked=S.siloFollow;renderColors();}
 Object.entries(siteInputs).forEach(([id,k])=>$(id).addEventListener('change',()=>{const v=parseFloat($(id).value);if(isFinite(v))S[k]=k==='W'||k==='L'?Math.max(30,v):k==='rotStep'?Math.min(90,Math.max(1,v)):v;rotLabels();renderInspector();rebuildSite();update();}));
 $('sFollow').addEventListener('change',e=>{S.siloFollow=e.target.checked;save();});
+/* ---------- import an irregular site boundary from a DXF (ASCII) ---------- */
+let DXFI=null;
+function parseDxf(txt){const L=txt.split(/\r?\n/),polys=[],segs=[];let i=0,ins=1;const pair=()=>{const c=parseInt(L[i]),v=(L[i+1]||'').trim();i+=2;return [c,v];};
+  for(let k=0;k<L.length-1;k+=2){if(L[k].trim()==='$INSUNITS'){ins=parseInt(L[k+3]);break;}}
+  let inEnt=false;while(i<L.length-1){let [c,v]=pair();if(c===2&&v==='ENTITIES'){inEnt=true;break;}}
+  if(!inEnt)return null;let cur=null;const flush=()=>{if(!cur)return;if(cur.t==='LW'||cur.t==='PL'){if(cur.pts.length>1){if(cur.closed&&cur.pts.length>2)polys.push({pts:cur.pts,layer:cur.layer});else for(let k=1;k<cur.pts.length;k++)segs.push([cur.pts[k-1],cur.pts[k]]);}}else if(cur.t==='LINE'&&cur.a&&cur.b)segs.push([cur.a,cur.b]);cur=null;};
+  let pend=null;
+  while(i<L.length-1){const [c,v]=pair();
+    if(c===0){if(v==='VERTEX'&&cur&&cur.t==='PL'){pend={};continue;}if(v==='SEQEND'&&cur&&cur.t==='PL'){flush();pend=null;continue;}
+      if(!(cur&&cur.t==='PL'&&v==='VERTEX'))flush();
+      if(v==='LWPOLYLINE')cur={t:'LW',pts:[],closed:false,layer:''};else if(v==='POLYLINE')cur={t:'PL',pts:[],closed:false,layer:''};else if(v==='LINE')cur={t:'LINE',layer:''};else if(v==='ENDSEC'){flush();break;}else cur=null;continue;}
+    if(!cur)continue;
+    if(c===8&&!pend)cur.layer=v;
+    if(cur.t==='LW'){if(c===70)cur.closed=(parseInt(v)&1)===1;if(c===10)cur.pts.push([parseFloat(v),0]);if(c===20&&cur.pts.length)cur.pts[cur.pts.length-1][1]=parseFloat(v);}
+    else if(cur.t==='PL'){if(pend){if(c===10)pend.x=parseFloat(v);if(c===20){cur.pts.push([pend.x,parseFloat(v)]);}}else if(c===70)cur.closed=(parseInt(v)&1)===1;}
+    else if(cur.t==='LINE'){if(c===10)cur.a=[parseFloat(v),0];if(c===20&&cur.a)cur.a[1]=parseFloat(v);if(c===11)cur.b=[parseFloat(v),0];if(c===21&&cur.b)cur.b[1]=parseFloat(v);}}
+  return {polys,segs,ins};}
+const pArea=P=>Math.abs(P.reduce((a,[x,y],k)=>{const [x2,y2]=P[(k+1)%P.length];return a+x*y2-x2*y;},0))/2;
+$('siteDxf').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const txt=await f.text();
+  if(!/SECTION/.test(txt.slice(0,3000))){toast('這不是 ASCII DXF（DWG 或二進位 DXF 請在 CAD 另存成 ASCII DXF）');return;}
+  const d=parseDxf(txt);if(!d||!d.polys.length){toast('DXF 裡找不到封閉聚合線。請把場地邊界畫成封閉的聚合線（PLINE 最後按「C」閉合）');return;}
+  d.polys.sort((a,b)=>pArea(b.pts)-pArea(a.pts));DXFI=d;
+  const big=pArea(d.polys[0].pts);$('spUnit').value=d.ins===6?'1':d.ins===5?'0.01':d.ins===4?'0.001':(Math.sqrt(big)>3000?'0.001':Math.sqrt(big)>300?'0.01':'1');
+  const fill=()=>{const u=+$('spUnit').value;$('spPoly').innerHTML=d.polys.slice(0,30).map((p,k)=>'<option value="'+k+'">'+(k+1)+'. 圖層 '+(p.layer||'0')+'，'+p.pts.length+' 點，'+fmt(pArea(p.pts)*u*u,0)+' m²</option>').join('');};
+  fill();$('spUnit').onchange=fill;$('sitePick').hidden=false;toast('找到 '+d.polys.length+' 條封閉聚合線，預設選面積最大的。確認單位後按「套用為場地」');});
+$('spOk').addEventListener('click',()=>{if(!DXFI)return;const u=+$('spUnit').value,P0=DXFI.polys[+$('spPoly').value].pts;
+  let x0=1e18,y0=1e18,x1=-1e18,y1=-1e18;P0.forEach(([x,y])=>{x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);});
+  const T=([x,y])=>[Math.round((x-x0)*u*100)/100,Math.round((y1-y)*u*100)/100];     // DXF y up -> site z down, bbox corner at the origin
+  const P=P0.map(T).filter((q,k,a)=>k===0||Math.hypot(q[0]-a[k-1][0],q[1]-a[k-1][1])>.01);
+  const W=Math.ceil((x1-x0)*u),Ln=Math.ceil((y1-y0)*u);if(W<10||Ln<10||W>3000||Ln>3000){toast('尺寸 '+W+'×'+Ln+' m 不合理，請檢查單位');return;}
+  const dx=(S.poly?0:0);S.poly=P;S.W=Math.max(30,W);S.L=Math.max(30,Ln);
+  UNDER=null;if($('spUnder').checked){const pts=[],lim=12000;const pushSeg=(a,b)=>{if(pts.length<lim*2){const A=T(a),B=T(b);if(A[0]>-200&&A[0]<W+200&&A[1]>-200&&A[1]<Ln+200)pts.push(V(A[0],.03,A[1]),V(B[0],.03,B[1]));}};
+    DXFI.segs.forEach(([a,b])=>pushSeg(a,b));DXFI.polys.forEach((p,k)=>{if(p.pts===P0)return;p.pts.forEach((q,j)=>pushSeg(q,p.pts[(j+1)%p.pts.length]));});UNDER=pts;}
+  $('sitePick').hidden=true;syncSite();rebuildSite();update();frame(true);toast('已套用不規則場地，面積 '+fmt(polyArea(P),0)+' m²'+(UNDER?'；底圖只在本次顯示，不會存進檔案':''));});
+$('siteRect').addEventListener('click',()=>{delete S.poly;UNDER=null;syncSite();rebuildSite();update();frame(false);toast('已改回長方形場地');});
 $('sSup').addEventListener('change',e=>{S.support=e.target.value;update();});$('sBelt').addEventListener('change',e=>{S.beltStyle=e.target.value;update();});
 function renderZoneList(){const h=S.zones.map(z=>'<button type="button" class="silorow'+(selected===z.id?' on':'')+'" data-z="'+z.id+'"><span>'+z.name+'</span><span class="unit">'+fmt(z.w,0)+'×'+fmt(z.d,0)+' m</span></button>').join('')||'<p class="note">尚未設定。按「＋ 限制區」加入，拖曳到既有基礎或不可施工的位置，再改尺寸。</p>';
   if($('zoneList').dataset.h!==h){$('zoneList').innerHTML=h;$('zoneList').dataset.h=h;}}
@@ -5695,7 +5749,7 @@ function dxf(){const L=[],Y=z=>(S.L-z)*1000,X=x=>x*1000;const layers={SITE:7,EQU
   const text=(x,z,h,t,ly='TEXT')=>L.push('0','TEXT','8',ly,'7','CJK','10',X(x).toFixed(1),'20',Y(z).toFixed(1),'30','0','40',(h*1000).toFixed(0),'1',u(t),'72','1','11',X(x).toFixed(1),'21',Y(z).toFixed(1),'31','0');
   const circle=(x,z,r,ly)=>L.push('0','CIRCLE','8',ly,'10',X(x).toFixed(1),'20',Y(z).toFixed(1),'30','0','40',(r*1000).toFixed(1));
   const rect=(i,hx,hz,ly,ox=0,oz=0)=>poly([[-hx,-hz],[hx,-hz],[hx,hz],[-hx,hz]].map(([a,b])=>{const [p,q]=rotXZ(a+ox,b+oz,i.r||0);return [i.x+p,i.z+q];}),ly);
-  poly([[0,0],[S.W,0],[S.W,S.L],[0,S.L]],'SITE');if(S.m>0)poly([[S.m,S.m],[S.W-S.m,S.m],[S.W-S.m,S.L-S.m],[S.m,S.L-S.m]],'SITE');
+  if(S.poly&&S.poly.length>2)poly(S.poly,'SITE');else{poly([[0,0],[S.W,0],[S.W,S.L],[0,S.L]],'SITE');if(S.m>0)poly([[S.m,S.m],[S.W-S.m,S.m],[S.W-S.m,S.L-S.m],[S.m,S.L-S.m]],'SITE');}
   S.items.forEach(i=>{if(i.type==='silo'){if(i.sup==='bldg'&&i.base>0)rect(i,(i.cell||5.4)/2,(i.cell||5.4)/2,'EQUIP');circle(i.x,i.z,i.D/2,'SILO');text(i.x,i.z+i.D/2+1.2,.8,i.name);return;}
     if(i.type==='tower'){const d=TD(i);rect(i,d.hx,d.hz,'EQUIP');}
     else if(i.type==='blk'){for(let a=0;a<i.nx;a++)for(let b=0;b<i.nz;b++)rect(i,BLK.s/2-.02,BLK.s/2-.02,'EQUIP',(a+.5-i.nx/2)*BLK.s,(b+.5-i.nz/2)*BLK.s);}else if(i.type==='bins')rect(i,i.b.L/2,i.b.W/2,'EQUIP');else if(i.type==='rbin'){const G=rbinGeom(i),[a,b]=rbinHalf(i);rect(i,a,b,'EQUIP');rbinCells(G).forEach(c=>rect(i,c.sx/2-.05,c.sz/2-.05,'EQUIP',c.x,c.z));}else if(i.type==='hopper'){rect(i,2.9,2.9,'EQUIP');}
