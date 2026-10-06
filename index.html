@@ -257,13 +257,13 @@ fieldset.must{border-color:var(--accent);background:var(--accent-soft)}
           <li><b>雙向配料帶運機</b>：兩座骨材庫相鄰、共用一條入庫帶運機時，在骨材庫參數勾「與另一座骨材庫共用雙向配料帶」，入庫帶運機只進一條到兩庫中間，庫頂畫一條水平雙向帶運機分料到兩邊。</li>
           <li><b>不規則場地</b>：「場地設定 → 不規則場地」匯入 DXF（地籍界線畫成封閉聚合線），可選單位、選哪一條當邊界、其他線條當底圖；退縮線沿著邊界往內畫，設備超出就提醒。底圖不存檔，邊界會存檔。</li>
           <li><b>快速配置</b>：上方「快速配置」選一字型／N字型／L字型／ㄈ字型、粉體桶在主機樓兩旁或 L 角，依目前場地自動排出一套（帶運機自動拉到 ≤ 20°），之後再拖曳微調。設備擺放邊界預設退縮 1.5 m（依作業指導書，實際依當地法規確認）。</li>
-          <li><b>設計部規則</b>：骨材庫可選標準規格（□9／10／12 m），參數欄顯示建議帶運機寬度與 22°／18° 所需水平距離；水泥桶多了 Ø4370、Ø5800 各噸數規格；「檢查」會依拌合機（2 方 120 m³/h、3 方 180 m³/h）算 1 天 8 小時所需膠結材與砂石，對照水泥桶與骨材庫儲量；也會提醒大門寬 ≥10 m、雨水回收池 = 廠區面積 2.5%。邊界退縮預設 2 m。可加辦公室、司機休息室、雨水回收池。</li>
+          <li><b>配比與儲量</b>：「場地設定 → 配比與儲量」可改每 m³ 的膠結材、砂、石、水、藥劑與砂石比重；「檢查」用設備容積 × 比重算儲量，換算可供應多少 m³ 混凝土與盤數（不再用產能判斷足不足）。水泥桶可設定儲存材料（水泥 I 型／II 型、爐石、飛灰），每套少於 4 座會提醒。</li><li><b>設計部規則</b>：骨材庫可選標準規格（□9／10／12 m），參數欄顯示建議帶運機寬度與 22°／18° 所需水平距離；水泥桶多了 Ø4370、Ø5800 各噸數規格；「檢查」會依拌合機（2 方 120 m³/h、3 方 180 m³/h）算 1 天 8 小時所需膠結材與砂石，對照水泥桶與骨材庫儲量；也會提醒大門寬 ≥10 m、雨水回收池 = 廠區面積 2.5%。邊界退縮預設 2 m。可加辦公室、司機休息室、雨水回收池。</li>
           <li><b>機具／車輛</b>：拖到 RC 混凝土塊上會自動站在塊頂（例如怪手站在平台上餵料），也可關掉自動、手動輸入離地高度。上方「＋ 機具／車輛…」可放鏟裝機、怪手、小山貓、堆高機、預拌車、砂石車、水泥車，參數欄顯示常見規格，怪手有作業半徑圓圈。</li>
           <li><b>油漆顏色</b>：「場地 → 外觀配色」可改鋼構、水泥桶頂部／筒身／錐斗（預設頂部與錐斗同色）、骨材庫（預設跟鋼構同色，改了就整座一起變）、欄杆、浪板、輸送帶包覆。下方「輪廓線」可開關設備邊線。</li>
           <li><b>迴車倒車點</b>：上方「迴車倒車點」放在主機樓出口、卸料斗或洗車場附近，車輛會先開到圈內停下，再沿弧線倒車進站；拖曳圈改變迴車空間，參數「左右對調」換邊，可選預拌車或砂石車。</li>
           <li><b>洗胎池</b>：車輛照池上白色箭頭單向通過（A 進 B 出），方向不對就旋轉洗胎池。可以放一座或兩座，參數裡選「進場洗胎／離場洗胎／進出場都經過」；哪種車要洗胎在「動線與過磅」勾選。</li>
           <li><b>水泥車打料點</b>：上方「水泥車打料點」可放 1～2 處（或更多），拖曳定位、旋轉決定開進方向；水泥車依加入順序逐一停靠打料，不再自動找水泥桶而穿過主機樓。</li>
-          <li><b>局部放大</b>：滾輪會往滑鼠指的位置放大；滑鼠指著設備按 F 直接拉近置中；點主機樓，參數欄「放大看樓層」可直接跳到 1F～4F 內部（自動關閉外牆浪板）。右鍵拖曳平移。</li>
+          <li><b>回到全場</b>：畫面拉太遠或跑掉時，<b>連按兩下滑鼠滾輪</b>（中鍵）就回到全場置中。</li><li><b>局部放大</b>：滾輪會往滑鼠指的位置放大；滑鼠指著設備按 F 直接拉近置中；點主機樓，參數欄「放大看樓層」可直接跳到 1F～4F 內部（自動關閉外牆浪板）。右鍵拖曳平移。</li>
           <li><b>快捷鍵</b>：Ctrl+Z 復原、Ctrl+Y（或 Ctrl+Shift+Z）重做、Ctrl+C 複製、Ctrl+V 貼上（每貼一次往右下錯開 4 m）、Ctrl+X 剪下、Ctrl+D 直接複製一份、Ctrl+A 全選、Delete 刪除、Ctrl+S 存檔。Mac 用 ⌘。下方工具列也有 ↶ 復原／↷ 重做／複製／貼上按鈕。</li>
           <li>卸料斗、骨材庫、主機樓每套只能一個，貼上前先「＋ 新增一套」並切到那一套；大門、地磅、洗胎池、洗車場全廠只有一個。</li>
           <li>水泥桶參數會顯示「相對主機樓中心 ΔX／ΔY」。</li><li><b>主機樓型式</b>：新增預設為半高塔（7.15×7.05 m，1F RC），也可改回 6 層舊廠塔。主帶運機入料點固定在入料面內 3.0 m、高 15.2 m；骨材庫與主機樓沒對正時，輸送帶會斜著進去，參數裡會顯示夾角（90° = 垂直進入）。</li><li><b>水泥桶支撐</b>：全鋼構／RC 柱＋鋼構腳柱／<b>RC 建物</b>。RC 建物選 3F（17.9 m）筒倉直接坐在 RC 頂、沒有腳柱；2F（11.0 m）露出一節短腳柱；1F（7.3 m）腳柱更長。下方可填房間用途（電器室、空壓機室…）。預設 Ø4370，可改其他直徑。</li><li><b>骨材庫結構</b>：RC 倉體＋鋼構錐斗（預設），或全鋼構。主帶運機尾端固定在骨材庫軸線上、離遠端 3.3 m。</li></ul></details>
@@ -367,6 +367,18 @@ fieldset.must{border-color:var(--accent);background:var(--accent-soft)}
         <div class="row"><label for="sGap">支架間距 <span class="unit">m</span></label><input id="sGap" type="number" min="5" max="40" step="0.5"></div>
         <div class="row"><label for="sRot">旋轉按鈕每次 <span class="unit">°</span></label><input id="sRot" type="number" min="1" max="90" step="1"></div>
         <label class="chk sm"><input id="sFollow" type="checkbox"> 移動主機樓時，同一套的水泥桶一起移動</label>
+      </fieldset>
+      <fieldset>
+        <legend>配比與儲量（有預設值）</legend>
+        <p class="note" style="margin:0 0 6px">每 m³ 混凝土用量；拌合機 3 方一盤（工地型 2 方）。預設為常見 280 kgf/cm² 概算，請依各案配比設計書修改。「檢查」會用設備容積 × 比重算出儲量，並換算可供應多少 m³ 混凝土。</p>
+        <div class="row"><label for="mxB">膠結材（水泥＋爐石＋飛灰） <span class="unit">kg</span></label><input id="mxB" data-mx="binder" type="number" min="100" step="10"></div>
+        <div class="row"><label for="mxS">砂 <span class="unit">kg</span></label><input id="mxS" data-mx="sand" type="number" min="0" step="10"></div>
+        <div class="row"><label for="mxG">石 <span class="unit">kg</span></label><input id="mxG" data-mx="stone" type="number" min="0" step="10"></div>
+        <div class="row"><label for="mxW">水 <span class="unit">kg</span></label><input id="mxW" data-mx="water" type="number" min="0" step="5"></div>
+        <div class="row"><label for="mxA">藥劑 <span class="unit">kg</span></label><input id="mxA" data-mx="adm" type="number" min="0" step="0.5"></div>
+        <div class="row"><label for="mxD">砂石堆積密度 <span class="unit">t/m³</span></label><input id="mxD" data-mx="dens" type="number" min="1" max="2.2" step="0.05"></div>
+        <p class="note" style="margin:4px 0 0">粉體堆積比重：水泥 1.3、爐石 1.15、飛灰 0.9 t/m³（依水泥桶「儲存材料」）。</p>
+        <p class="note" id="mxSum"></p>
       </fieldset>
       <fieldset>
         <legend>動線與過磅（選填）</legend>
@@ -4720,6 +4732,9 @@ const transfer=(b,l)=>S.items.find(i=>i.type==='transfer'&&i.belt===b&&(i.line||
 /* ---------- geometry of the process chain ---------- */
 const LAYOUTS={'4':[2,2],'5':[3,2],'6':[3,3]};
 function binLayout(b){if(!b.cells)b.cells=(b.nx*b.nz>=6?'6':b.nx*b.nz===5?'5':'4');return LAYOUTS[b.cells]||LAYOUTS['4'];}
+const SILO_MATS=['水泥I型','水泥II型','爐石','飛灰'];const MIX0={binder:360,sand:880,stone:920,water:175,adm:4,dens:1.6};const MAT_DENS={'水泥I型':1.3,'水泥II型':1.3,'爐石':1.15,'飛灰':0.9,'其他':1.3};
+const siloTon=x=>siloVol(x)*(MAT_DENS[x.mat]||CEMENT_T);
+const mixOf=()=>Object.assign({},MIX0,S.mix||{});
 const binTop=b=>b.legH+b.hopH+b.boxH, topFeed=b=>binTop(b)+3.3;
 const siloTop=s=>s.base+s.bottom+s.cone+s.cyl, siloVol=s=>Math.PI*(s.D/2)**2*(s.cyl+s.cone/3), binVol=b=>b.L*b.W*(b.boxH+b.hopH/3);
 const TT=t=>t.tt==='half'?'half':t.tt==='site2'?'site2':'classic';
@@ -4806,7 +4821,7 @@ function buildObj(i){let g;
     const hit=mesh(new THREE.BoxGeometry(i.w,.3,i.d),new THREE.MeshBasicMaterial({visible:false}),false);hit.position.y=.15;g.add(hit);}
   tagPick(g,i.id);return g;}
 function labelText(i){return (i.locked?'📌 ':'')+labelText0(i);}
-function labelText0(i){if(i.type==='veh')return (VEH[i.kind]||VEH.loader).name.replace(/（.*）/,'');if(i.type==='tpt')return ROUTE_STYLE[i.kind||'mixer'].name+'迴車點';if(i.type==='wash')return TYPE.wash+({in:'（進場）',out:'（離場）',both:'（進出場）'})[i.dir||'out'];if(FAC.includes(i.type))return TYPE[i.type]+(i.type==='parking'?' '+i.n+' 格':i.type==='yard'?' '+i.bays+' 車位':'');return i.type==='blk'?(i.name||'RC混凝土塊')+' '+i.nx+'×'+i.nz+'×'+i.layers+'層':i.type==='rbin'?LN(i.line||1)+(i.name||TYPE.rbin):i.type==='silo'?i.name:i.type==='zone'?i.name:i.type==='bins'?LN(i.line||1)+'骨材庫 '+(binLayout(i.b),i.b.cells)+' 倉':i.type==='transfer'?'轉台 H'+fmt(i.top):i.type==='hopper'?LN(i.line||1)+'卡車卸料斗（地下）':LN(i.line||1)+'主機樓';}
+function labelText0(i){if(i.type==='veh')return (VEH[i.kind]||VEH.loader).name.replace(/（.*）/,'');if(i.type==='tpt')return ROUTE_STYLE[i.kind||'mixer'].name+'迴車點';if(i.type==='wash')return TYPE.wash+({in:'（進場）',out:'（離場）',both:'（進出場）'})[i.dir||'out'];if(FAC.includes(i.type))return TYPE[i.type]+(i.type==='parking'?' '+i.n+' 格':i.type==='yard'?' '+i.bays+' 車位':'');return i.type==='blk'?(i.name||'RC混凝土塊')+' '+i.nx+'×'+i.nz+'×'+i.layers+'層':i.type==='rbin'?LN(i.line||1)+(i.name||TYPE.rbin):i.type==='silo'?i.name+(i.mat?'（'+i.mat+'）':''):i.type==='zone'?i.name:i.type==='bins'?LN(i.line||1)+'骨材庫 '+(binLayout(i.b),i.b.cells)+' 倉':i.type==='transfer'?'轉台 H'+fmt(i.top):i.type==='hopper'?LN(i.line||1)+'卡車卸料斗（地下）':LN(i.line||1)+'主機樓';}
 function labelY(i){if(FAC.includes(i.type))return i.type==='veh'?((VEH[i.kind]||VEH.loader).H+1.2):{gate:4.2,scale:3.6,wash:2.6,parking:2,yard:5,cpad:1.6,tpt:1.4,office:8,rest:4.6,pond:1.4}[i.type];return i.type==='silo'?siloTop(i)+2.6:i.type==='bins'?binTop(i.b)+7.5:i.type==='transfer'?i.top+4:i.type==='tower'?TD(i).lab:i.type==='blk'?i.layers*BLK.h+1.2:i.type==='rbin'?rbinGeom(i).top+4.5:i.type==='zone'?.6:3;}
 // light edge lines on equipment (toggle 輪廓線)
 const OUTLINE_CACHE=new Map();M.outline=new THREE.LineBasicMaterial({color:'#2a3036',transparent:true,opacity:.32,depthWrite:false});
@@ -4886,9 +4901,11 @@ function evaluate(segs){
   lineIds().forEach(l=>{const rb=one('rbin',l),b=one('bins',l),t=one('tower',l);
     if(rb&&b&&t){const a=rbinOut(rb,transfer('main',l)||t),c=inPt(transfer('main',l)||t),bt=binTail(b,t),d=V(c.x-a.x,0,c.z-a.z),L2=d.lengthSq(),k=L2?Math.max(0,Math.min(1,((bt.x-a.x)*d.x+(bt.z-a.z)*d.z)/L2)):0,off=Math.hypot(a.x+d.x*k-bt.x,a.z+d.z*k-bt.z);
       if(off>1.5){W.push(['warn',LN(l)+'骨材庫出料點偏離主帶運機 '+fmt(off)+' m：主帶運機尾端延伸到再生粒料儲倉，骨材庫要放在這條線的正上方。']);bad.add(b.id);}}
-    if(t){const cap=TT(t)==='site2'?120:180,need=cap*8,binder=need*.3,agg=need*1.8,sT=silos().filter(x=>(x.line||1)===l).reduce((a,x)=>a+siloVol(x)*CEMENT_T,0);
-      const okB=sT>=binder;W.push([okB?'info':'warn',LN(l)+(TT(t)==='site2'?'2':'3')+' 方拌合機理論產能 '+cap+' m³/h，1 天 8 小時需膠結材約 '+fmt(binder,0)+' t（水泥 200＋飛爐 100 kg/m³），水泥桶合計約 '+fmt(sT,0)+' t'+(okB?'，足夠。':'，不足 '+fmt(binder-sT,0)+' t。')]);
-      if(b){const bT=binVol(b.b)*AGG_T,okA=bT>=agg;W.push([okA?'info':'warn',LN(l)+'1 天 8 小時需砂石約 '+fmt(agg,0)+' t（砂 900＋石 900 kg/m³），骨材庫約 '+fmt(bT,0)+' t'+(okA?'，足夠。':'，不足（有砂石堆置區或補料距離短可接受）。')]);}
+    if(t){const X=mixOf(),bm=TT(t)==='site2'?2:3,sl=silos().filter(x=>(x.line||1)===l),sT=sl.reduce((a,x)=>a+siloTon(x),0),cB=sT/(X.binder/1000);
+      W.push(['info',LN(l)+'水泥桶 '+sl.length+' 座，容積 '+fmt(sl.reduce((a,x)=>a+siloVol(x),0),0)+' m³ ≈ '+fmt(sT,0)+' t 膠結材，可供應約 <b>'+fmt(cB,0)+' m³</b> 混凝土（約 '+fmt(cB/bm,0)+' 盤，'+X.binder+' kg/m³）。']);
+      if(sl.length<4)W.push(['warn',LN(l)+'水泥桶只有 '+sl.length+' 座：膠結材通常有水泥 I 型、水泥 II 型、爐石、飛灰，每套至少 4 座。']);
+      else{const have=new Set(sl.map(x=>x.mat).filter(Boolean)),lack=SILO_MATS.filter(m=>!have.has(m));if(have.size&&lack.length)W.push(['info',LN(l)+'水泥桶尚未配置：'+lack.join('、')+'（在水泥桶參數「儲存材料」設定）。']);}
+      if(b){const v=binVol(b.b),bT=v*X.dens,cA=bT/((X.sand+X.stone)/1000);W.push(['info',LN(l)+'骨材庫容積 '+fmt(v,0)+' m³ ≈ '+fmt(bT,0)+' t 砂石（'+X.dens+' t/m³），可供應約 <b>'+fmt(cA,0)+' m³</b> 混凝土（約 '+fmt(cA/bm,0)+' 盤，砂 '+X.sand+'＋石 '+X.stone+' kg/m³）。']);}
       else if(rb)W.push(['info',LN(l)+'CLSM 回收料料性與補料方式不同，無法一次大量儲存，儲量請與業主溝通。']);}
     const miss=(rb?['tower']:sharedFeed(l)&&!one('hopper',l)?['bins','tower']:['hopper','bins','tower']).filter(k=>!one(k,l)).map(k=>TYPE[k]);
     if(miss.length)W.push(['info',LN(l)+'尚未加入：'+miss.join('、')+'。從上方「加入設備」點選。']);});
@@ -5230,7 +5247,7 @@ function renderInspector(){
     (i.sup==='bldg'?'<div class="irow"><label for="i-rcf">RC 樓層</label><select id="i-rcf" data-k="rcf"><option value="3">3F（17.9 m，無腳柱）</option><option value="2">2F（11.0 m，短腳柱）</option><option value="1">1F（7.3 m）</option></select></div>'+
       row('cell','RC 單元寬（桶距）','0.05','m')+'<div class="irow"><label for="i-room">1F 房間用途</label><input type="text" id="i-room" data-k="room" class="txt" placeholder="例：電器室"></div>':'')+
     row('base','RC 高度','0.5','m',{dis:!(i.base>0)||i.sup==='bldg'})+row('cbot','錐底離地','0.2','m')+sect('筒倉規格')+'<div class="irow"><label for="i-preset">規格範本</label><select id="i-preset" data-k="preset"><option value="">— 選擇 —</option>'+Object.keys(SILO_PRESET).map(k=>'<option>'+k+'</option>').join('')+'</select></div>'+
-    '<div class="irow"><label for="i-skirt">錐斗區</label><select id="i-skirt" data-k="sskirt"><option value="0">開放（腳柱外露）</option><option value="1">四周覆蓋浪板</option></select></div><div class="irow"><label for="i-topH">桶頂</label><select id="i-topH" data-k="topH"><option value="0">桶上集塵機＋護欄</option><option value="1">防雨集塵屋（工地型）</option></select></div>'+row('D','直徑','0.05','m')+row('cyl','筒身高','0.2','m')+row('cone','錐底高','0.1','m');
+    '<div class="irow"><label for="i-mat">儲存材料</label><select id="i-mat" data-k="mat"><option value="">— 未指定 —</option>'+SILO_MATS.concat(['其他']).map(m=>'<option>'+m+'</option>').join('')+'</select></div>'+'<div class="irow"><label for="i-skirt">錐斗區</label><select id="i-skirt" data-k="sskirt"><option value="0">開放（腳柱外露）</option><option value="1">四周覆蓋浪板</option></select></div><div class="irow"><label for="i-topH">桶頂</label><select id="i-topH" data-k="topH"><option value="0">桶上集塵機＋護欄</option><option value="1">防雨集塵屋（工地型）</option></select></div>'+row('D','直徑','0.05','m')+row('cyl','筒身高','0.2','m')+row('cone','錐底高','0.1','m');
   if(i.type==='rbin')h+=sect('儲倉型式')+'<div class="irow"><label for="i-rk">配置</label><select id="i-rk" data-k="rk"><option value="line">單排（水平計量皮帶沿倉排）</option><option value="twin">兩個儲倉左右對稱（往中間投料）</option></select></div>'+
     '<div class="irow"><label for="i-mt">安裝</label><select id="i-mt" data-k="mt"><option value="pit">埋地（卡車地面傾倒）</option><option value="frame">淺坑＋鋼架（鏟裝機投料）</option><option value="ground">地上鋼架，不挖坑（鏟裝機投料）</option></select></div>'+
     (i.mt==='ground'?row('lift','RC 混凝土塊墊高（層，每層 1 m）','1','層'):'')+row('n',i.rk==='twin'?'每側倉數':'倉數','1','倉')+row('P',i.rk==='twin'?'每倉長（往中間方向）':'每倉長（沿皮帶）','0.1','m')+row('W',i.rk==='twin'?'倉深（每側兩條計量皮帶）':'倉寬','0.1','m')+(i.rk==='twin'?row('gap','中間主帶運機通道寬','0.1','m'):row('ext','水平皮帶延伸到主帶運機','0.5','m'));
@@ -5255,7 +5272,7 @@ function fillInspector(){const i=byId(selected);if(!i||!$('i-x')||insEl.dataset.
   if($('i-rot')){set('rot',fmt(rotDeg(i.r||0),0));$('i-rot').disabled=!!i.locked;}
   if(i.type==='tower'){$('i-exit').value=i.exit||'S';$('i-mixr').value=String(i.mixRot||0);$('i-tt').value=TT(i);if($('i-inlet'))$('i-inlet').value=i.inlet||'auto';}
   if(i.type==='bins'){['L','W','legH','hopH','boxH'].forEach(k=>set(k,fmt(i.b[k])));binLayout(i.b);$('i-grid').value=i.b.cells;$('i-st').value=i.b.st==='rc'?'rc':'steel';$('i-bskirt').value=i.b.skirt?'1':'0';$('i-bpair').checked=!!binPair(i);}
-  if(i.type==='silo'){['D','cyl','cone','base'].forEach(k=>set(k,fmt(i[k],k==='D'?3:2)));set('cbot',fmt(i.base+i.bottom,2));if($('i-topH'))$('i-topH').value=i.topH?'1':'0';if($('i-skirt'))$('i-skirt').value=i.skirt?'1':'0';$('i-sup').value=i.sup==='bldg'?'bldg':i.base>0?'rc':'steel';$('i-base').disabled=!(i.base>0)||i.sup==='bldg';if($('i-rcf')){$('i-rcf').value=String(i.rcf||3);set('cell',fmt(i.cell||5.4,2));set('room',i.room||'');}}
+  if(i.type==='silo'){['D','cyl','cone','base'].forEach(k=>set(k,fmt(i[k],k==='D'?3:2)));set('cbot',fmt(i.base+i.bottom,2));if($('i-topH'))$('i-topH').value=i.topH?'1':'0';if($('i-skirt'))$('i-skirt').value=i.skirt?'1':'0';if($('i-mat'))$('i-mat').value=i.mat||'';$('i-sup').value=i.sup==='bldg'?'bldg':i.base>0?'rc':'steel';$('i-base').disabled=!(i.base>0)||i.sup==='bldg';if($('i-rcf')){$('i-rcf').value=String(i.rcf||3);set('cell',fmt(i.cell||5.4,2));set('room',i.room||'');}}
   if(i.type==='rbin'){$('i-rk').value=i.rk||'line';$('i-mt').value=i.mt||'pit';set('n',i.n);set('P',fmt(i.P,2));set('W',fmt(i.W,2));if($('i-ext'))set('ext',fmt(i.ext));if($('i-gap'))set('gap',fmt(i.gap));if($('i-lift'))set('lift',i.lift||0);}
   if(i.type==='transfer'){$('i-belt').value=i.belt;set('h',fmt(i.top));$('i-h').disabled=i.h==null;$('i-hauto').checked=i.h==null;}
   if(i.type==='zone'){set('w',fmt(i.w));set('d',fmt(i.d));}if(i.type==='blk'){set('nx',i.nx);set('nz',i.nz);set('layers',i.layers);}
@@ -5263,10 +5280,10 @@ function fillInspector(){const i=byId(selected);if(!i||!$('i-x')||insEl.dataset.
   if(i.type==='yard'){set('bays',i.bays);set('tanks',i.tanks);set('clear',i.clear==null?3:i.clear);$('i-sep').checked=!!i.sep;$('i-silt').checked=i.silt!==false;}
   if(i.type==='parking'){set('n',i.n);$('i-rows').value=i.rows;set('ang',fmt(i.ang,0));set('sw',fmt(i.sw));set('sl',fmt(i.sl));$('i-cars').checked=!!i.cars;}
   const c=$('i-calc');if(!c)return;
-  if(i.type==='silo'){const v=siloVol(i),r=screwRoute(i),ct=i.base+i.bottom+i.cone;c.innerHTML=(i.sup==='bldg'?'RC 建物 '+(i.rcf||3)+'F 高 <b>'+fmt(i.base)+' m</b>，'+(i.base>=ct-.05?'筒倉直接坐在 RC 頂（錐斗在頂樓內），無腳柱':'露出鋼構腳柱 <b>'+fmt(ct-i.base)+' m</b>')+'。<br>':'')+'總高 <b>'+fmt(siloTop(i)+1)+' m</b>　容積 <b>'+fmt(v,0)+' m³</b>，約 <b>'+fmt(v*CEMENT_T,0)+' 噸</b>水泥（1.3 t/m³）'+
+  if(i.type==='silo'){const v=siloVol(i),r=screwRoute(i),ct=i.base+i.bottom+i.cone;c.innerHTML=(i.sup==='bldg'?'RC 建物 '+(i.rcf||3)+'F 高 <b>'+fmt(i.base)+' m</b>，'+(i.base>=ct-.05?'筒倉直接坐在 RC 頂（錐斗在頂樓內），無腳柱':'露出鋼構腳柱 <b>'+fmt(ct-i.base)+' m</b>')+'。<br>':'')+'總高 <b>'+fmt(siloTop(i)+1)+' m</b>　容積 <b>'+fmt(v,0)+' m³</b>，約 <b>'+fmt(siloTon(i),0)+' 噸</b>'+(i.mat||'水泥')+'（'+(MAT_DENS[i.mat]||CEMENT_T)+' t/m³）'+
     (r?'<br>螺運機 <b>'+fmt(r.L)+' m</b>：'+({single:'單支',relay:'兩支接力（借「'+(r.via&&r.via.name)+'」腳柱）',nosupport:'需兩支但無腳柱可借',toolong:'超過兩支，需移近'})[r.kind]:'<br>尚未加入主機樓，無螺運機');}
   else if(i.type==='bins'){const v=binVol(i.b),L=belts(i.line||1).main;let ba='';if(L&&L[0]===i){const a=outPt(i,L[1]),b=inPt(L[1]),d=V(b.x-a.x,0,b.z-a.z).normalize(),[wx,wz]=rotXZ(0,1,i.r||0),ang=Math.acos(Math.min(1,Math.abs(d.x*wx+d.z*wz)))/D2R;
-      ba='<br>主帶運機與骨材庫軸線夾角 <b>'+fmt(ang,0)+'°</b>'+(ang<=2?'（平行，正對出料）':'（骨材庫沒有與輸送帶平行，輸送帶在倉下斜穿）');}c.innerHTML='倉頂 <b>'+fmt(binTop(i.b))+' m</b>，分料頂 <b>'+fmt(topFeed(i.b))+' m</b>　容積 <b>'+fmt(v,0)+' m³</b>，約 <b>'+fmt(v*AGG_T,0)+' 噸</b>（1.6 t/m³）<br>建議帶運機寬度 <b>'+beltW(i.b)+'</b>'+ba+(()=>{if(!(L&&L[0]===i))return '';const a=outPt(i,L[1]),b=inPt(L[1]),rise=b.y-a.y,h=hz(a,b);return '<br>主帶運機（尾輪 '+fmt(a.y)+' → 頭輪 '+fmt(b.y)+' m）：22° 需水平 ≥ <b>'+fmt(rise/Math.tan(22*D2R))+' m</b>、18° 需 ≥ <b>'+fmt(rise/Math.tan(18*D2R))+' m</b>，目前 '+fmt(h)+' m。';})();}
+      ba='<br>主帶運機與骨材庫軸線夾角 <b>'+fmt(ang,0)+'°</b>'+(ang<=2?'（平行，正對出料）':'（骨材庫沒有與輸送帶平行，輸送帶在倉下斜穿）');}c.innerHTML='倉頂 <b>'+fmt(binTop(i.b))+' m</b>，分料頂 <b>'+fmt(topFeed(i.b))+' m</b>　容積 <b>'+fmt(v,0)+' m³</b>，約 <b>'+fmt(v*mixOf().dens,0)+' 噸</b>（'+mixOf().dens+' t/m³）<br>建議帶運機寬度 <b>'+beltW(i.b)+'</b>'+ba+(()=>{if(!(L&&L[0]===i))return '';const a=outPt(i,L[1]),b=inPt(L[1]),rise=b.y-a.y,h=hz(a,b);return '<br>主帶運機（尾輪 '+fmt(a.y)+' → 頭輪 '+fmt(b.y)+' m）：22° 需水平 ≥ <b>'+fmt(rise/Math.tan(22*D2R))+' m</b>、18° 需 ≥ <b>'+fmt(rise/Math.tan(18*D2R))+' m</b>，目前 '+fmt(h)+' m。';})();}
   else if(i.type==='tower'){const ea=entryAngle(i),es=ea==null?'':'<br>主帶運機與入料面夾角 <b>'+fmt(ea,0)+'°</b>'+(ea>=88?'（垂直進入）':'（骨材庫與主機樓不平行／不對正，輸送帶斜進）');
     c.innerHTML=(TT(i)==='site2'?'簡易工地型-2方：開放式鋼構四柱 6.0 × 2.5 m，鋼基礎座（免開挖）。拌合層 5.2 m（攪拌車從下方通過接料、旁邊附控制室貨櫃），計量層 7.9 m、上層 10.6 m，橘色欄杆，單斜遮雨棚。<br>主帶運機入料點在<b>'+CN[faceCompass(i,inletFace(i))]+'面</b>、高 <b>10.9 m</b>。':TT(i)==='half'?'半高塔 7.15 × 7.05 m：1F RC（7.1 m）攪拌車接料；2F 攪拌機；3F 計量（骨材＋粉料×3＋水）11.0 m；4F 集塵 16.0 m；屋頂 20.3 m。<br>主帶運機入料點固定在<b>'+CN[faceCompass(i,inletFace(i))]+'面</b>、距中心 3.0 m、高 <b>15.2 m</b>。':
       '平面 11.2 × 10.1 m，6 層，主帶運機頭輪 5F <b>19.0 m</b>。')+'<br>混凝土車由<b>'+CN[i.exit||'S']+'面</b>倒車進入接料，對面封閉。'+es;}
@@ -5293,7 +5310,7 @@ function applyField(i,k,v){
   if(k==='name'){i.name=v||i.name;return;}
   if(k==='locked'){i.locked=!!v;return;}
   if(i.type==='blk'&&['nx','nz','layers'].includes(k)){const n=parseFloat(v);if(isFinite(n))i[k]=Math.max(1,Math.min(k==='layers'?6:30,Math.round(n)));return;}
-  if(k==='bpre'&&i.type==='bins'){if(BIN_STD[v])Object.assign(i.b,BIN_STD[v]);return;}if(k==='exit'){i.exit=v;return;}if(k==='topH'){i.topH=v==='1';return;}if(k==='sskirt'){i.skirt=v==='1';return;}if(k==='bpair'&&i.type==='bins'){const old=binPair(i);if(old)delete old.b.pair;delete i.b.pair;if(v){const q=S.items.filter(o=>o.type==='bins'&&o!==i).sort((a,c)=>hz(a,i)-hz(c,i))[0];if(q){i.b.pair=q.id;q.b.pair=i.id;}else toast('沒有其他骨材庫');}return;}if(k==='bskirt'&&i.type==='bins'){i.b.skirt=v==='1';return;}if(k==='gs'){i.gs=v;return;}if(k==='dir'&&i.type==='wash'){i.dir=v;return;}if(k==='kind'&&i.type==='tpt'){i.kind=v;return;}if(k==='vkind'&&i.type==='veh'){i.kind=v;return;}if(k==='yAuto'){i.yAuto=!!v;if(!v)i.y0=blkTopAt(i.x,i.z);return;}if(k==='y0'&&i.type==='veh'){const n=parseFloat(v);if(isFinite(n))i.y0=Math.max(0,Math.min(30,n));return;}if(k==='ring'){i.ring=!!v;return;}if(k==='rk'||k==='mt'){i[k]=v;if(k==='rk'&&v==='twin'&&i.n>3)i.n=2;return;}
+  if(k==='bpre'&&i.type==='bins'){if(BIN_STD[v])Object.assign(i.b,BIN_STD[v]);return;}if(k==='exit'){i.exit=v;return;}if(k==='topH'){i.topH=v==='1';return;}if(k==='sskirt'){i.skirt=v==='1';return;}if(k==='mat'&&i.type==='silo'){i.mat=v||undefined;return;}if(k==='bpair'&&i.type==='bins'){const old=binPair(i);if(old)delete old.b.pair;delete i.b.pair;if(v){const q=S.items.filter(o=>o.type==='bins'&&o!==i).sort((a,c)=>hz(a,i)-hz(c,i))[0];if(q){i.b.pair=q.id;q.b.pair=i.id;}else toast('沒有其他骨材庫');}return;}if(k==='bskirt'&&i.type==='bins'){i.b.skirt=v==='1';return;}if(k==='gs'){i.gs=v;return;}if(k==='dir'&&i.type==='wash'){i.dir=v;return;}if(k==='kind'&&i.type==='tpt'){i.kind=v;return;}if(k==='vkind'&&i.type==='veh'){i.kind=v;return;}if(k==='yAuto'){i.yAuto=!!v;if(!v)i.y0=blkTopAt(i.x,i.z);return;}if(k==='y0'&&i.type==='veh'){const n=parseFloat(v);if(isFinite(n))i.y0=Math.max(0,Math.min(30,n));return;}if(k==='ring'){i.ring=!!v;return;}if(k==='rk'||k==='mt'){i[k]=v;if(k==='rk'&&v==='twin'&&i.n>3)i.n=2;return;}
   if(i.type==='rbin'&&k==='lift'){const n=parseFloat(v);if(isFinite(n))i.lift=Math.max(0,Math.min(5,Math.round(n)));return;}
   if(i.type==='rbin'&&['n','P','W','ext','gap'].includes(k)){const n=parseFloat(v);if(!isFinite(n))return;i[k]=k==='n'?Math.max(1,Math.min(8,Math.round(n))):k==='ext'?Math.max(0,Math.min(30,n)):k==='gap'?Math.max(1.5,Math.min(8,n)):Math.max(2,Math.min(10,n));return;}if(k==='mixRot'){i.mixRot=(+v||0)%360;return;}if(k==='tt'){i.tt=v;if(!i.inlet)i.inlet='auto';return;}if(k==='inlet'){i.inlet=v;return;}if(k==='room'){i.room=String(v||'').slice(0,12);return;}
   if(k==='st'&&i.type==='bins'){const P=v==='rc'?BIN_RC:DEFAULT_BINS;Object.assign(i.b,{st:v==='rc'?'rc':undefined,legH:P.legH,hopH:P.hopH,boxH:P.boxH});if(v!=='rc')delete i.b.st;return;}
@@ -5359,7 +5376,8 @@ insEl.addEventListener('click',async e=>{const b=e.target.closest('[data-tp]');c
 /* ---------- left panel: site, zones, colours ---------- */
 const siteInputs={sW:'W',sL:'L',sM:'m',sMax:'max',sScrew:'screw',sRot:'rotStep',sGap:'supGap'};
 function rotLabels(){$('rotL').textContent='↺ '+S.rotStep+'°';$('rotR').textContent='↻ '+S.rotStep+'°';}
-function syncSite(){Object.entries(siteInputs).forEach(([id,k])=>$(id).value=S[k]);{const pl=S.poly&&S.poly.length>2;$('sW').disabled=pl;$('sL').disabled=pl;$('siteRect').hidden=!pl;$('siteInfo').hidden=!pl;if(pl)$('siteInfo').innerHTML='目前場地：CAD 匯入的不規則邊界，'+S.poly.length+' 個頂點、面積 <b>'+fmt(polyArea(S.poly),0)+' m²</b>（約 '+fmt(polyArea(S.poly)*.3025,0)+' 坪）。設備超出邊界或退縮線會提醒。';}$('sSup').value=S.support||'rc';$('sBelt').value=S.beltStyle||'gallery';rotLabels();$('sFollow').checked=S.siloFollow;renderColors();}
+function syncMix(){const X=mixOf();document.querySelectorAll('[data-mx]').forEach(el=>{const k=el.dataset.mx;if(el.type==='checkbox')el.checked=!!X[k];else if(document.activeElement!==el)el.value=X[k];});const tot=X.binder+X.sand+X.stone+X.water+X.adm;$('mxSum').innerHTML='每 m³ 合計約 <b>'+fmt(tot,0)+' kg</b>（砂石佔 '+fmt((X.sand+X.stone)/tot*100,0)+'%）；3 方一盤約 '+fmt(tot*3/1000,1)+' t。';}
+function syncSite(){syncMix();Object.entries(siteInputs).forEach(([id,k])=>$(id).value=S[k]);{const pl=S.poly&&S.poly.length>2;$('sW').disabled=pl;$('sL').disabled=pl;$('siteRect').hidden=!pl;$('siteInfo').hidden=!pl;if(pl)$('siteInfo').innerHTML='目前場地：CAD 匯入的不規則邊界，'+S.poly.length+' 個頂點、面積 <b>'+fmt(polyArea(S.poly),0)+' m²</b>（約 '+fmt(polyArea(S.poly)*.3025,0)+' 坪）。設備超出邊界或退縮線會提醒。';}$('sSup').value=S.support||'rc';$('sBelt').value=S.beltStyle||'gallery';rotLabels();$('sFollow').checked=S.siloFollow;renderColors();}
 Object.entries(siteInputs).forEach(([id,k])=>$(id).addEventListener('change',()=>{const v=parseFloat($(id).value);if(isFinite(v))S[k]=k==='W'||k==='L'?Math.max(30,v):k==='rotStep'?Math.min(90,Math.max(1,v)):v;rotLabels();renderInspector();rebuildSite();update();}));
 $('sFollow').addEventListener('change',e=>{S.siloFollow=e.target.checked;save();});
 /* ---------- import an irregular site boundary from a DXF (ASCII) ---------- */
@@ -5397,6 +5415,7 @@ $('spOk').addEventListener('click',()=>{if(!DXFI)return;const u=+$('spUnit').val
     DXFI.segs.forEach(([a,b])=>pushSeg(a,b));DXFI.polys.forEach((p,k)=>{if(p.pts===P0)return;p.pts.forEach((q,j)=>pushSeg(q,p.pts[(j+1)%p.pts.length]));});UNDER=pts;}
   $('sitePick').hidden=true;syncSite();rebuildSite();update();frame(true);toast('已套用不規則場地，面積 '+fmt(polyArea(P),0)+' m²'+(UNDER?'；底圖只在本次顯示，不會存進檔案':''));});
 $('siteRect').addEventListener('click',()=>{delete S.poly;UNDER=null;syncSite();rebuildSite();update();frame(false);toast('已改回長方形場地');});
+document.querySelectorAll('[data-mx]').forEach(el=>el.addEventListener('change',()=>{S.mix=S.mix||{};const k=el.dataset.mx;if(el.type==='checkbox')S.mix[k]=el.checked;else{const v=parseFloat(el.value);if(isFinite(v))S.mix[k]=v;}syncMix();update();}));
 $('sSup').addEventListener('change',e=>{S.support=e.target.value;update();});$('sBelt').addEventListener('change',e=>{S.beltStyle=e.target.value;update();});
 function renderZoneList(){const h=S.zones.map(z=>'<button type="button" class="silorow'+(selected===z.id?' on':'')+'" data-z="'+z.id+'"><span>'+z.name+'</span><span class="unit">'+fmt(z.w,0)+'×'+fmt(z.d,0)+' m</span></button>').join('')||'<p class="note">尚未設定。按「＋ 限制區」加入，拖曳到既有基礎或不可施工的位置，再改尺寸。</p>';
   if($('zoneList').dataset.h!==h){$('zoneList').innerHTML=h;$('zoneList').dataset.h=h;}}
@@ -5440,8 +5459,8 @@ function loadExample5(){S.W=100;S.L=50;S.m=1.5;S.zones=[];S.support='rc';S.beltS
     it.push({id:'b'+l,type:'bins',x:75.3,z,r:0,auto:false,line:l,b:Object.assign({},BIN_RC,{L:12,W:12,skirt:true,pair:l===1?'b2':'b1'})});});
   it.push({id:'h1',type:'hopper',x:10.4,z:41.5,r:-Math.PI/2,auto:false,line:1},
     {id:'tr1',type:'transfer',belt:'inc',x:87.5,z:41.5,r:0,auto:false,h:22,line:1},{id:'tr2',type:'transfer',belt:'inc',x:87.5,z:22.3,r:0,auto:false,h:23.5,line:1});
-  const rows=[[9.0,1],[22.3,1],[35.5,2]];let k=0;
-  rows.forEach(([z,l])=>[29.1,34.3,39.4].forEach(x=>{k++;it.push({id:'s'+k,type:'silo',line:l,name:'水泥桶 #'+k,x,z,D:4.37,cyl:10.4,cone:3.7,base:RCH[2],bottom:14.2-RCH[2],sup:'bldg',rcf:2,cell:5.1,skirt:true});}));
+  const rows=[[9.0,[1,1,1]],[22.3,[1,2,2]],[35.5,[2,2,2]]],MT=['水泥I型','水泥II型','爐石','飛灰','水泥I型','水泥II型','爐石','飛灰','水泥I型'];let k=0;   // middle row is shared: 4 silos for line 1, 5 for line 2
+  rows.forEach(([z,ls])=>[29.1,34.3,39.4].forEach((x,j)=>{const l=ls[j];k++;it.push({id:'s'+k,type:'silo',line:l,mat:MT[k-1],name:'水泥桶 #'+k,x,z,D:4.37,cyl:10.4,cone:3.7,base:RCH[2],bottom:14.2-RCH[2],sup:'bldg',rcf:2,cell:5.1,skirt:true});}));
   it.push({id:'yd1',type:'yard',x:55,z:22.3,r:0,bays:2,tanks:4,clear:3,sep:true,silt:true},{id:'g1',type:'gate',x:.5,z:42,r:Math.PI/2,w:12,gs:'retract'});
   S.items=it;selected=null;renderLineSel();syncSite();rebuildSite();renderInspector();update();frame(false);}
 function loadExample4(){S.W=56;S.L=36;S.m=2;S.zones=[];S.support='steel';S.beltStyle='open';S.colors=colorsFix(Object.assign({},S.colors,{steel:'#9aa3aa',siloTop:'#b4babe',siloCone:'#b4babe',siloLink:true,body:'#d7dadc',binLink:true,rail:'#ee8a2a',clad:'#f2f3f3'}));applyColors();
@@ -5479,7 +5498,7 @@ function autoLayout(type,siloPos,nS,size,binKey,fac){
   const P=SILO_PRESET[size],c=Math.max(5.4,P.D+.9),hx=HT.hx+.3+c/2,list=[];
   if(siloPos==='side'){const per=[Math.ceil(nS/2),Math.floor(nS/2)];[-1,1].forEach((sg,k)=>{for(let j=0;j<per[k];j++)list.push([sg*hx,(j-(per[k]-1)/2)*c]);});}
   else{const row=Math.ceil(nS/2),col=nS-row,cx=HT.hx+.3+c/2,cz=HT.hz+.3+c/2;for(let j=0;j<row;j++)list.push([cx-j*c,-cz]);for(let j=0;j<col;j++)list.push([cx,-cz+(j+1)*c]);}
-  list.forEach(([dx,dz],k)=>S.items.push(Object.assign({id:'s'+(k+1),type:'silo',line:1,name:'水泥桶 #'+(k+1),x:t.x+dx,z:t.z+dz,sup:'steel',base:0},JSON.parse(JSON.stringify(P)))));
+  list.forEach(([dx,dz],k)=>S.items.push(Object.assign({id:'s'+(k+1),type:'silo',line:1,mat:['水泥I型','水泥II型','爐石','飛灰','水泥I型','爐石'][k],name:'水泥桶 #'+(k+1),x:t.x+dx,z:t.z+dz,sup:'steel',base:0},JSON.parse(JSON.stringify(P)))));
   // stretch belts until every slope is within 20°
   for(let it=0;it<6;it++){transferTops();const segs=segments();let moved=false;
     segs.forEach(sg=>{if(sg.ang<=20.2)return;const need=sg.rise/Math.tan(20*D2R)-sg.hz+.5,d=V(sg.a.x-sg.b.x,0,sg.a.z-sg.b.z).normalize();
@@ -5562,6 +5581,9 @@ function focusAt(p,dist){const d=camera.position.clone().sub(controls.target);if
 // press F with the mouse over something: centre the view on it and move in close
 let lastMouse=null;renderer.domElement.addEventListener('pointermove',e=>{lastMouse=e;});
 addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)||e.ctrlKey||e.metaKey||e.altKey)return;if((e.key==='f'||e.key==='F')&&lastMouse){const p=pickPoint(lastMouse);if(p)focusAt(p,Math.min(18,camera.position.distanceTo(controls.target)*.5+3));}});
+// double-click the mouse wheel (middle button): zoom back to the whole site, centred
+let midLast=0;renderer.domElement.addEventListener('pointerdown',e=>{if(e.button!==1)return;e.preventDefault();const t=performance.now();if(t-midLast<450){midLast=0;frame(topMode);toast('畫面已回到全場中間');}else midLast=t;});
+renderer.domElement.addEventListener('auxclick',e=>{if(e.button===1)e.preventDefault();});
 function setPtr(e){const r=renderer.domElement.getBoundingClientRect();ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ptr,camera);}
 function pick(){const ms=[];Object.values(OBJ).forEach(o=>o.g.traverse(c=>{if(c.isMesh)ms.push(c);}));const h=ray.intersectObjects(ms,false);
   const hit=h.find(x=>byId(x.object.userData.key)&&byId(x.object.userData.key).type!=='zone')||h[0];return hit?hit.object.userData.key:null;}
