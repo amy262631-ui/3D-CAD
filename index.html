@@ -4612,7 +4612,7 @@ function buildSilo(s,door){ // s.base = RC height (0 = steel legs to the ground)
   // ---- shell: cone, cylinder with stiffener rings, red top band, low cone roof with guard rail, dust collector ----
   cone(g,r,.3,s.cone,M.red,0,cb,0);cyl(g,r,s.cyl,M.silo,0,ct+s.cyl/2,0,32);cyl(g,r+.05,.18,M.steel,0,ct+.09,0,32);
   const band=Math.min(3.2,s.cyl*.18);cyl(g,r+.02,band,M.redTop,0,top-band/2,0,32);
-  for(let y=ct+1.5;y<top-band-.3;y+=1.5)cyl(g,r+.035,.07,M.silo2,0,y,0,32);
+  for(let y=ct+SILO_LAYER;y<top-.2;y+=SILO_LAYER)cyl(g,r+.035,.07,M.silo2,0,y,0,32);   // seam at every 1.5 m layer
   const lid=mesh(new THREE.ConeGeometry(r,.35,32),M.redTop);lid.position.set(0,top+.175,0);g.add(lid);
   const [ddx,ddz]=faceVec(door||'+z');                       // ladder / fill pipe side faces away from the tower
   if(s.topH){const hw=r*2+.4,hh=2.8;box(g,hw,hh,hw*.75,M.silo2,0,top+hh/2+.2,-hw*.12);const rf=mesh(UB,M.troof);rf.scale.set(hw+.6,.12,hw*.75+.8);rf.position.set(0,top+hh+.45,-hw*.12);rf.rotation.x=.12;g.add(rf);
@@ -5453,7 +5453,7 @@ $('colors').addEventListener('change',e=>{const k=e.target.dataset.cl;if(!k)retu
 /* ---------- example & clear ---------- */
 function loadExample(){S.W=80;S.L=150;S.m=3;S.zones=[];
   const t={id:'t1',type:'tower',x:40,z:12.6,r:0,auto:false},b={id:'b1',type:'bins',x:40,z:61.8,r:0,auto:false,b:Object.assign({},DEFAULT_BINS)},h={id:'h1',type:'hopper',x:40,z:120.9,r:0,auto:false};
-  const sl=[['水泥桶 580T',10.02,5.05,7.65,18.2,5.8,6,0],['水泥桶 300T #1',7.64,-1.06,4.8,13.8,3.9,4.3,5.5],['水泥桶 300T #2',7.64,-6.26,4.8,13.8,3.9,4.3,5.5],['水泥桶 160T #1',-8.14,-2.85,3.5,10.6,2.8,13,0],['水泥桶 160T #2',-8.14,1.4,3.5,10.6,2.8,13,0]];
+  const sl=[['水泥桶 #1',10.02,5.05,7.65,18,coneH(7.65),6,0],['水泥桶 #2',7.64,-1.06,4.8,13.5,coneH(4.8),4.3,5.5],['水泥桶 #3',7.64,-6.26,4.8,13.5,coneH(4.8),4.3,5.5],['水泥桶 #4',-8.14,-2.85,3.535,10.5,coneH(3.535),13,0],['水泥桶 #5',-8.14,1.4,3.535,10.5,coneH(3.535),13,0]];
   // example tower faces +z (towards the bins); silo offsets are in tower-local axes
   [h,b,t].forEach(o=>o.line=1);S.lines=1;S.cur=1;S.items=[h,b,t].concat(sl.map(([n,lx,lz,D,cyl,cone,bottom,base],k)=>({id:'s'+(k+1),type:'silo',line:1,name:n,x:t.x+lx,z:t.z+lz,D,cyl,cone,bottom,base})));
   selected=null;renderLineSel();syncSite();rebuildSite();renderInspector();update();frame(false);}
@@ -5463,7 +5463,7 @@ function loadExample2(){S.W=80;S.L=150;S.m=3;S.zones=[];
   const t={id:'t1',type:'tower',tt:'half',exit:'W',inlet:'auto',x:40,z:16,r:0,auto:false},b={id:'b1',type:'bins',x:40,z:62,r:0,auto:false,b:Object.assign({},BIN_RC)},h={id:'h1',type:'hopper',x:40,z:131,r:0,auto:false};
   const P=[[-3.75,-7.05,'倉庫室'],[1.65,-7.05,'控制室'],[7.05,-7.05,'電器室'],[7.05,-1.65,'空壓機室'],[7.05,3.75,'藥劑室']];
   [h,b,t].forEach(o=>o.line=1);S.lines=1;S.cur=1;
-  S.items=[h,b,t].concat(P.map(([lx,lz,room],k)=>({id:'s'+(k+1),type:'silo',line:1,name:'水泥桶 #'+(k+1),x:t.x+lx,z:t.z+lz,D:4.37,cyl:10.4,cone:3.7,base:RCH[3],bottom:14.2-RCH[3],sup:'bldg',rcf:3,cell:5.4,room})));
+  S.items=[h,b,t].concat(P.map(([lx,lz,room],k)=>({id:'s'+(k+1),type:'silo',line:1,name:'水泥桶 #'+(k+1),x:t.x+lx,z:t.z+lz,D:4.37,cyl:10.5,cone:coneH(4.37),base:RCH[3],bottom:14.2-RCH[3],sup:'bldg',rcf:3,cell:5.4,room})));
   selected=null;renderLineSel();syncSite();rebuildSite();renderInspector();update();frame(false);}
 
 // 吉鼎第一套: recycled-aggregate storage (shallow pit + steel frame) feeds the main belt tail, which is extended underground beneath the aggregate bins
@@ -5479,14 +5479,14 @@ function loadExample5(){S.W=100;S.L=50;S.m=1.5;S.zones=[];S.support='rc';S.beltS
   it.push({id:'h1',type:'hopper',x:10.4,z:41.5,r:-Math.PI/2,auto:false,line:1},
     {id:'tr1',type:'transfer',belt:'inc',x:87.5,z:41.5,r:0,auto:false,h:22,line:1},{id:'tr2',type:'transfer',belt:'inc',x:87.5,z:22.3,r:0,auto:false,h:23.5,line:1});
   const rows=[[9.0,[1,1,1]],[22.3,[1,0,2]],[35.5,[2,2,2]]],MT=['水泥I型','水泥II型','爐石','飛灰','水泥I型','飛灰','水泥II型','爐石','水泥I型'];let k=0;   // middle silo of the middle row has a dual-outlet screw: 5 binders per line
-  rows.forEach(([z,ls])=>[29.1,34.3,39.4].forEach((x,j)=>{const l=ls[j];k++;it.push({id:'s'+k,type:'silo',line:l||1,dual:l===0||undefined,mat:MT[k-1],name:'水泥桶 #'+k,x,z,D:4.37,cyl:10.4,cone:3.7,base:RCH[2],bottom:14.2-RCH[2],sup:'bldg',rcf:2,cell:5.1,skirt:true});}));
+  rows.forEach(([z,ls])=>[29.1,34.3,39.4].forEach((x,j)=>{const l=ls[j];k++;it.push({id:'s'+k,type:'silo',line:l||1,dual:l===0||undefined,mat:MT[k-1],name:'水泥桶 #'+k,x,z,D:4.37,cyl:10.5,cone:coneH(4.37),base:RCH[2],bottom:14.2-RCH[2],sup:'bldg',rcf:2,cell:5.1,skirt:true});}));
   it.push({id:'yd1',type:'yard',x:55,z:22.3,r:0,bays:2,tanks:4,clear:3,sep:true,silt:true},{id:'g1',type:'gate',x:.5,z:42,r:Math.PI/2,w:12,gs:'retract'});
   S.items=it;selected=null;renderLineSel();syncSite();rebuildSite();renderInspector();update();frame(false);}
 function loadExample4(){S.W=56;S.L=36;S.m=2;S.zones=[];S.support='steel';S.beltStyle='open';S.colors=colorsFix(Object.assign({},S.colors,{steel:'#9aa3aa',siloTop:'#b4babe',siloCone:'#b4babe',siloLink:true,body:'#d7dadc',binLink:true,rail:'#ee8a2a',clad:'#f2f3f3'}));applyColors();
   const rb=Object.assign({id:'rb1',type:'rbin',x:15,z:20,r:0,auto:false},JSON.parse(JSON.stringify(RBIN_PRESET.s))),
     t={id:'t1',type:'tower',tt:'site2',exit:'S',inlet:'auto',x:42.8,z:20-(7.11/2+1.9),r:0,auto:false},
     bk={id:'bk1',type:'blk',name:'鏟裝機作業平台（RC塊）',x:8.1,z:20,r:0,nx:3,nz:4,layers:2},
-    sl={id:'s1',type:'silo',line:1,name:'水泥桶 #1',x:t.x+.6,z:t.z+5.75,D:3.06,cyl:7.5,cone:2.6,bottom:9.0,base:0,sup:'steel',topH:true};
+    sl={id:'s1',type:'silo',line:1,name:'水泥桶 #1',x:t.x+.6,z:t.z+5.75,D:3.06,cyl:7.5,cone:coneH(3.06),bottom:9.0,base:0,sup:'steel',topH:true};
   [rb,t].forEach(o=>o.line=1);S.lines=1;S.cur=1;S.items=[bk,rb,t,sl];
   selected=null;renderLineSel();syncSite();rebuildSite();renderInspector();update();frame(false);}
 function loadExample3(){S.W=100;S.L=70;S.m=3;S.zones=[];
@@ -5498,7 +5498,7 @@ function loadExample3(){S.W=100;S.L=70;S.m=3;S.zones=[];
     rb=Object.assign({id:'rb1',type:'rbin',x:16.6,z:34.7,r:0,auto:false},JSON.parse(JSON.stringify(RBIN_PRESET.j)));
   [h,b,t,rb,tr].forEach(o=>o.line=1);S.lines=1;S.cur=1;
   const SP=[[-2.55,-6.62],[2.42,-6.62],[6.87,-2.44],[6.87,2.53],[11.84,2.53]];
-  S.items=[h,tr,b,rb,t].concat(SP.map(([dx,dz],k)=>({id:'s'+(k+1),type:'silo',line:1,name:'水泥桶 #'+(k+1),x:t.x+dx,z:t.z+dz,D:4.37,cyl:10.4,cone:3.7,bottom:12.915,base:0,sup:'steel'})));
+  S.items=[h,tr,b,rb,t].concat(SP.map(([dx,dz],k)=>({id:'s'+(k+1),type:'silo',line:1,name:'水泥桶 #'+(k+1),x:t.x+dx,z:t.z+dz,D:4.37,cyl:10.5,cone:coneH(4.37),bottom:12.915,base:0,sup:'steel'})));
   selected=null;renderLineSel();syncSite();rebuildSite();renderInspector();update();frame(false);}
 /* ---------- quick layout (配置圖作業指導書: 一字／N字／L字／ㄈ字) ---------- */
 $('bAuto').addEventListener('click',()=>{$('autoDlg').hidden=false;$('aMsg').textContent='';});$('autoX').addEventListener('click',()=>$('autoDlg').hidden=true);
