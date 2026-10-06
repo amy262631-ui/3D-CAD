@@ -250,7 +250,7 @@ fieldset.must{border-color:var(--accent);background:var(--accent-soft)}
           <li><b>點一下</b>設備：選取，上方出現「⚙ 參數／📌 固定／✕ 刪除」。</li>
           <li><b>點兩下</b>設備：直接打開右邊參數欄，用 −／＋ 或輸入數字調整。</li>
           <li><b>拖曳</b>設備：移動位置；靠近其他設備（水泥桶優先對其他水泥桶）的中心線時會自動對齊並出現藍色虛線，按住 Alt 可暫時不對齊。📌 固定後就不會被拖動。</li>
-          <li><b>多選</b>：按「框選」後在空白處拉框，或按住 Shift 點設備；拖曳其中一個整組移動，或在參數欄輸入 ΔX／ΔY。按 Esc 取消選取。</li>
+          <li><b>多選</b>：按下方「⬚ 框選」後拉框，或按住 Ctrl／Shift 在空白處拖曳拉框；按住 Ctrl／Shift 點設備可加選或取消。拖曳其中一個整組移動，方向鍵每次移 0.5 m（加 Shift 0.1 m），Q／E 整組旋轉，Delete 整組刪除，也可在參數欄輸入 ΔX／ΔY。按 Esc 取消選取。</li>
           <li>旋轉：↺ ↻ 按鈕或鍵盤 Q／E；每次角度在「場地 → 旋轉按鈕每次」設定。</li>
           <li><b>再生粒料儲倉</b>：「東南高良」埋地、水平計量皮帶直接接主帶運機（CLSM 不用卸料斗與骨材庫）；「吉鼎」淺坑鋼架、鏟裝機投料，主帶運機尾端延伸到地下接它，骨材庫要放在主帶運機正上方；「對稱雙儲倉」兩側各自往中間的主帶運機投料（預設地上鋼架、不挖坑）。倉數、倉長寬、埋地／鋼架都能改。按下方「地下透視」可以看到地下坑與皮帶。</li>
           <li><b>簡易工地型-2方／RC 混凝土塊</b>：主機樓型式可選「簡易工地型-2方」（鋼構四柱、攪拌車從拌合層下方通過）；「RC混凝土塊」可堆成平台、擋牆或墊高（每塊 2×2×1 m）；工地型骨材倉可設定用幾層混凝土塊墊高。範例：「簡易工地型-2方（外島）」。輸送帶外觀可在「場地」改成「開放桁架」。</li>
@@ -406,7 +406,7 @@ fieldset.must{border-color:var(--accent);background:var(--accent-soft)}
 
   <div id="bar">
     <div class="grp"><button class="btn on site" id="tParams" type="button">場地設定</button><button class="btn on" id="tCheck" type="button">參數／檢查</button></div>
-    <div class="grp"><span class="gl">編輯</span><button class="btn" id="bUndo" type="button" title="復原（Ctrl+Z）" disabled>↶</button><button class="btn" id="bRedo" type="button" title="重做（Ctrl+Y）" disabled>↷</button><button class="btn" id="rotL" type="button" title="逆時針旋轉（Q）">↺</button><button class="btn" id="rotR" type="button" title="順時針旋轉（E）">↻</button><button class="btn" id="bDel" type="button" title="刪除（Delete）">刪除</button><div class="menu"><button class="btn mbtn" type="button" data-menu="mEdit">更多 ▾</button><div class="pop up" id="mEdit" hidden><button class="btn" id="bCopy" type="button" title="Ctrl+C">複製</button><button class="btn" id="bPaste" type="button" title="Ctrl+V" disabled>貼上</button><button class="btn" id="bBox" type="button">框選多個</button><button class="btn" id="bAll" type="button">全選</button></div></div></div>
+    <div class="grp"><span class="gl">編輯</span><button class="btn" id="bUndo" type="button" title="復原（Ctrl+Z）" disabled>↶</button><button class="btn" id="bRedo" type="button" title="重做（Ctrl+Y）" disabled>↷</button><button class="btn" id="rotL" type="button" title="逆時針旋轉（Q）">↺</button><button class="btn" id="rotR" type="button" title="順時針旋轉（E）">↻</button><button class="btn" id="bBox" type="button" title="框選多個設備（或按住 Ctrl／Shift 在空白處拖曳）">⬚ 框選</button><button class="btn" id="bDel" type="button" title="刪除（Delete）">刪除</button><div class="menu"><button class="btn mbtn" type="button" data-menu="mEdit">更多 ▾</button><div class="pop up" id="mEdit" hidden><button class="btn" id="bCopy" type="button" title="Ctrl+C">複製</button><button class="btn" id="bPaste" type="button" title="Ctrl+V" disabled>貼上</button><button class="btn" id="bAll" type="button">全選</button></div></div></div>
     <div class="grp"><button class="btn" id="bTraffic" type="button">🚚 動線模擬</button><button class="btn trk" id="tr-dump" type="button" hidden><i class="sw" style="background:#d99a1c"></i>砂石車</button><button class="btn trk" id="tr-mixer" type="button" hidden><i class="sw" style="background:#c8342c"></i>預拌車</button><button class="btn trk" id="tr-cement" type="button" hidden><i class="sw" style="background:#3b7ab8"></i>水泥車</button></div>
     <div class="grp"><span class="gl">檢視</span><button class="btn" id="vTop" type="button">俯視</button><button class="btn" id="vPersp" type="button">全景</button><div class="menu"><button class="btn mbtn" type="button" data-menu="mView">顯示 ▾</button><div class="pop up keep" id="mView" hidden><button class="btn on" id="bDims" type="button">尺寸</button><button class="btn on" id="bLabels" type="button">標籤</button><button class="btn on" id="bClad" type="button" title="關閉後看得到主機樓內部">外牆浪板</button><button class="btn on" id="bOutline" type="button">輪廓線</button><button class="btn" id="bXray" type="button" title="地面半透明，看地下設備">地下透視</button><button class="btn" id="bTheme" type="button">外觀：暗色</button></div></div><button class="btn" id="bFull" type="button">全螢幕</button></div>
   </div>
@@ -5502,7 +5502,7 @@ function loadExample3(){S.W=100;S.L=70;S.m=3;S.zones=[];
   selected=null;renderLineSel();syncSite();rebuildSite();renderInspector();update();frame(false);}
 /* ---------- quick layout (配置圖作業指導書: 一字／N字／L字／ㄈ字) ---------- */
 $('bAuto').addEventListener('click',()=>{$('autoDlg').hidden=false;$('aMsg').textContent='';});$('autoX').addEventListener('click',()=>$('autoDlg').hidden=true);
-[...$('aSize').options].forEach(o=>{if(SILO_PRESET[o.value])o.textContent=specLabel(o.value);});
+$('aSize').innerHTML=Object.keys(SILO_PRESET).map(k=>'<option value="'+k+'"'+(k==='Ø4370×6層'?' selected':'')+'>'+specLabel(k)+'</option>').join('');
 $('aGo').addEventListener('click',()=>{const msg=autoLayout($('aType').value,$('aSilo').value,+$('aN').value,$('aSize').value,$('aBin').value,$('aFac').checked);$('aMsg').textContent=msg;if(!/無法/.test(msg))setTimeout(()=>{$('autoDlg').hidden=true;toast(msg);},400);});
 function autoLayout(type,siloPos,nS,size,binKey,fac){
   const W=S.W,L=S.L,m=S.m;S.zones=[];S.lines=1;S.cur=1;
@@ -5590,7 +5590,9 @@ addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)
   else if(k==='v'){e.preventDefault();pasteClip();}else if(k==='d'){e.preventDefault();if(copySel())pasteClip();}
   else if(k==='a'){e.preventDefault();$('bAll').click();}});
 addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;if(e.key==='q'||e.key==='Q')rotateSel(15);if(e.key==='e'||e.key==='E')rotateSel(-15);
-  if((e.key==='Delete'||e.key==='Backspace')&&selected)$('bDel').click();});
+  if((e.key==='Delete'||e.key==='Backspace')&&(selected||selSet.size>1))$('bDel').click();});
+addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;if(/^Arrow/.test(e.key)&&(selected||selSet.size>1)){e.preventDefault();e.stopImmediatePropagation();const st=e.shiftKey?.1:.5,dx=e.key==='ArrowLeft'?-st:e.key==='ArrowRight'?st:0,dz=e.key==='ArrowUp'?-st:e.key==='ArrowDown'?st:0;
+    if(selSet.size>1)moveGroup(dx,dz);else{const i=byId(selected);if(!i||i.locked){if(i)toast('已固定，請先解除固定');return;}moveItem(i,dx,dz);}update();}},true);   // capture: arrow keys nudge the selection instead of panning the camera
 const ray=new THREE.Raycaster(),ptr=new THREE.Vector2(),gplane=new THREE.Plane(V(0,1,0),0);let drag=null;
 // zoom toward what is under the mouse (OrbitControls r128 only zooms to the orbit centre)
 function pickPoint(e){setPtr(e);const hits=ray.intersectObjects(Object.values(OBJ).map(o=>o.g),true).filter(h=>{const m=h.object.material;return h.object.isMesh&&m&&m.visible!==false&&!(m.transparent&&m.opacity<.5)&&h.object.visible;});
@@ -5609,9 +5611,9 @@ function pick(){const ms=[];Object.values(OBJ).forEach(o=>o.g.traverse(c=>{if(c.
   const hit=h.find(x=>byId(x.object.userData.key)&&byId(x.object.userData.key).type!=='zone')||h[0];return hit?hit.object.userData.key:null;}
 let boxS=null;
 renderer.domElement.addEventListener('pointerdown',e=>{setPtr(e);const k=pick();
-  if(!k&&(boxMode||e.shiftKey)){boxS={x:e.clientX,y:e.clientY,add:e.shiftKey};controls.enabled=false;renderer.domElement.setPointerCapture(e.pointerId);const b=$('boxSel');b.hidden=false;b.style.left=e.clientX+'px';b.style.top=e.clientY+'px';b.style.width=b.style.height='0px';return;}
+  if(e.button===0&&(boxMode||(!k&&(e.shiftKey||e.ctrlKey||e.metaKey)))){boxS={x:e.clientX,y:e.clientY,add:e.shiftKey||e.ctrlKey||e.metaKey};controls.enabled=false;renderer.domElement.setPointerCapture(e.pointerId);const b=$('boxSel');b.hidden=false;b.style.left=e.clientX+'px';b.style.top=e.clientY+'px';b.style.width=b.style.height='0px';return;}
   if(!k){if(selected||selSet.size){selected=null;selSet.clear();renderInspector();update();}return;}
-  if(e.shiftKey){const ids=new Set(selSet.size?selSet:(selected?[selected]:[]));ids.has(k)?ids.delete(k):ids.add(k);setGroup([...ids]);return;}
+  if(e.shiftKey||e.ctrlKey||e.metaKey){const ids=new Set(selSet.size?selSet:(selected?[selected]:[]));ids.has(k)?ids.delete(k):ids.add(k);setGroup([...ids]);return;}
   if(selSet.size>1&&selSet.has(k)){const hit=V();ray.ray.intersectPlane(gplane,hit);drag={group:true,lx:hit.x,lz:hit.z};controls.enabled=false;renderer.domElement.setPointerCapture(e.pointerId);renderer.domElement.style.cursor='grabbing';return;}
   selSet.clear();
   const i=byId(k);const hit=V();ray.ray.intersectPlane(gplane,hit);drag=i.locked?null:{k,dx:i.x-hit.x,dz:i.z-hit.z};if(selected!==k){selected=k;renderInspector();}if(!drag){update();return;}controls.enabled=false;
@@ -5631,13 +5633,13 @@ renderer.domElement.addEventListener('pointermove',e=>{if(boxS){const b=$('boxSe
   moveItem(i,nx-i.x,nz-i.z);update();});
 const snapG=new THREE.Group();scene.add(snapG);
 const endDrag=e=>{clearGroup(snapG);$('snapTip').hidden=true;if(boxS){const r=renderer.domElement.getBoundingClientRect(),x0=Math.min(e.clientX,boxS.x),x1=Math.max(e.clientX,boxS.x),y0=Math.min(e.clientY,boxS.y),y1=Math.max(e.clientY,boxS.y);
-    const ids=new Set(boxS.add?[...selSet,...(selected?[selected]:[])]:[]);if(x1-x0>4||y1-y0>4)S.items.concat(S.zones).forEach(i=>{const p=V(i.x,0,i.z).project(camera);const sx=r.left+(p.x+1)/2*r.width,sy=r.top+(1-p.y)/2*r.height;if(sx>=x0&&sx<=x1&&sy>=y0&&sy<=y1)ids.add(i.id);});
+    const ids=new Set(boxS.add?[...selSet,...(selected?[selected]:[])]:[]);if(x1-x0>4||y1-y0>4)S.items.concat(S.zones).forEach(i=>{const p=V(i.x,0,i.z).project(camera);const sx=r.left+(p.x+1)/2*r.width,sy=r.top+(1-p.y)/2*r.height;if(sx>=x0&&sx<=x1&&sy>=y0&&sy<=y1)ids.add(i.id);});if(ids.size)toast('已選 '+ids.size+' 項：拖曳其中任一個整組移動，方向鍵微調，Q／E 旋轉');
     boxS=null;$('boxSel').hidden=true;controls.enabled=true;setGroup([...ids]);if(boxMode){boxMode=false;$('bBox').classList.remove('on');}return;}
   if(!drag)return;drag=null;controls.enabled=true;renderer.domElement.style.cursor='';};
 renderer.domElement.addEventListener('dblclick',e=>{setPtr(e);const k=pick();if(k)openIns(k);});
 renderer.domElement.addEventListener('pointerup',endDrag);
 addEventListener('keydown',e=>{if(e.key==='Escape'&&(selSet.size||selected)){selSet.clear();selected=null;renderInspector();update();}});
-$('bBox').addEventListener('click',()=>{boxMode=!boxMode;$('bBox').classList.toggle('on',boxMode);toast(boxMode?'在場地空白處拖出一個框，框內的設備會被選取':'已取消框選');});
+$('bBox').addEventListener('click',()=>{boxMode=!boxMode;$('bBox').classList.toggle('on',boxMode);toast(boxMode?'在畫面上拖出一個框，框內的設備會被選取（之後拖曳其中一個就整組移動）':'已取消框選');});
 $('bAll').addEventListener('click',()=>setGroup(S.items.map(i=>i.id)));renderer.domElement.addEventListener('pointercancel',e=>{if(boxS){boxS=null;$('boxSel').hidden=true;controls.enabled=true;}if(drag){drag=null;controls.enabled=true;}});
 
 /* ---------- panels, views ---------- */
