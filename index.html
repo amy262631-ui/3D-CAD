@@ -206,7 +206,7 @@ fieldset.must{border-color:var(--accent);background:var(--accent-soft)}
     <div class="row"><label for="aType">配置型式</label><select id="aType"><option value="I">一字型</option><option value="L">L字型</option><option value="U">ㄈ字型</option><option value="N">N字型</option></select></div>
     <div class="row"><label for="aSilo">粉體桶位置</label><select id="aSilo"><option value="side">主機樓兩旁</option><option value="corner">主機樓 L 角</option></select></div>
     <div class="row"><label for="aN">粉體桶數量</label><select id="aN"><option>4</option><option selected>5</option><option>6</option></select></div>
-    <div class="row"><label for="aSize">粉體桶規格</label><select id="aSize"><option value="Ø4370-250T">Ø4370 250T</option><option value="Ø4370-300T">Ø4370 300T</option><option value="Ø5800-300T">Ø5800 300T</option></select></div>
+    <div class="row"><label for="aSize">粉體桶規格</label><select id="aSize"><option value="Ø4370×6層">Ø4370×6層</option><option value="Ø4370×7層">Ø4370×7層</option><option value="Ø5800×5層">Ø5800×5層</option></select></div>
     <div class="row"><label for="aBin">骨材庫</label><select id="aBin"><option value="□10 m／700 m³">□10 m／700 m³</option><option value="□12 m／1300 m³" selected>□12 m／1300 m³</option><option value="□12 m／1000 m³">□12 m／1000 m³</option><option value="□9 m／500 m³">□9 m／500 m³</option></select></div>
     <label class="chk sm"><input type="checkbox" id="aFac" checked> 一併放大門、地磅、辦公室、預拌車停車區、洗胎池、雨水回收池</label>
     <div class="iacts" style="margin-top:10px"><button class="primary sm" type="button" id="aGo">產生配置</button></div>
@@ -4695,9 +4695,20 @@ scene.add(new THREE.HemisphereLight(0xf2f5f7,0x8a8f86,.75));
 const sun=new THREE.DirectionalLight(0xffffff,.85);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);scene.add(sun,sun.target);
 const ground=mesh(new THREE.PlaneGeometry(4000,4000),M.ground,false);ground.rotation.x=-Math.PI/2;ground.position.y=-.03;scene.add(ground);
 const siteG=new THREE.Group(),beltG=new THREE.Group(),dimG=new THREE.Group();scene.add(siteG,beltG,dimG);let flows=[];
-const DROP=1.5,CEMENT_T=1.3,AGG_T=1.6;
+const DROP=1.5,CEMENT_T=1.33,AGG_T=1.6;
 const TYPE={blk:'RC混凝土塊',hopper:'卡車卸料斗',bins:'骨材庫',rbin:'再生粒料儲倉',tower:'主機樓',silo:'水泥桶',transfer:'轉台',zone:'限制區'};
-const SILO_PRESET={'120T':{D:3.535,cyl:9,cone:2.78,bottom:12.915},'250T':{D:4.8,cyl:9,cone:3.875,bottom:12.915},'350T':{D:7.65,cyl:7.5,cone:6.344,bottom:12.915},'D4370':{D:4.37,cyl:10.4,cone:3.7,bottom:14.2},'S3060':{D:3.06,cyl:7.5,cone:2.6,bottom:9.0},'Ø4370-200T':{D:4.37,cyl:7.5,cone:3.508,bottom:12.915},'Ø4370-250T':{D:4.37,cyl:9,cone:3.508,bottom:12.915},'Ø4370-300T':{D:4.37,cyl:10.5,cone:3.508,bottom:12.915},'Ø5800-300T':{D:5.8,cyl:7.5,cone:4.747,bottom:12.915},'Ø5800-350T':{D:5.8,cyl:9,cone:4.747,bottom:12.915}};
+const SILO_PRESET={};   // unified names: Ø直徑×層數 (每層 1.5 m)，錐斗 60°、出料口 Ø305
+
+const SILO_OUT=.305,SILO_LAYER=1.5,coneH=D=>Math.round((D/2-SILO_OUT/2)*Math.tan(60*D2R)*100)/100,SILO_DIA=[3.06,3.535,4.37,4.8,5.8,7.65].map(D=>({D,cone:coneH(D)}));
+const specKey=(D,n)=>'Ø'+Math.round(D*1000)+'×'+n+'層';
+[[3.06,5,9.0],[3.535,6],[4.37,5],[4.37,6],[4.37,7],[4.8,6],[5.8,5],[5.8,6],[7.65,5]].forEach(([D,n,bot])=>{SILO_PRESET[specKey(D,n)]={D,cyl:n*SILO_LAYER,cone:coneH(D),bottom:bot||12.915};});
+function specLabel(k){const p=SILO_PRESET[k],v=siloVol(p);return k+' – '+fmt(v,1)+' m³ – '+fmt(v*CEMENT_T,1)+' T';}
+function siloSpecName(i){const n=i.cyl/SILO_LAYER,v=siloVol(i);return 'Ø'+Math.round(i.D*1000)+(Math.abs(n-Math.round(n))<.01?'×'+Math.round(n)+'層':'×筒身'+fmt(i.cyl)+'m')+' – '+fmt(v,1)+' m³ – '+fmt(v*CEMENT_T,1)+' T';}
+function specOf(i){return Object.keys(SILO_PRESET).find(k=>{const p=SILO_PRESET[k];return Math.abs(p.D-i.D)<.01&&Math.abs(p.cyl-i.cyl)<.01&&Math.abs(p.cone-i.cone)<.02;})||'';}
+function siloSpecOpts(i){const d=SILO_DIA.find(o=>Math.abs(o.D-i.D)<.01),n=Math.round(i.cyl/SILO_LAYER),okN=Math.abs(n*SILO_LAYER-i.cyl)<.01,
+  dia='<option value="c"'+(d?'':' selected')+'>自訂 Ø'+Math.round(i.D*1000)+'</option>'+SILO_DIA.map(o=>'<option value="'+o.D+'"'+(o===d?' selected':'')+'>Ø'+Math.round(o.D*1000)+'（錐斗 '+o.cone.toFixed(2)+' m）</option>').join(''),
+  lay=(okN?'':'<option value="c" selected>自訂 筒身 '+fmt(i.cyl)+' m</option>')+[3,4,5,6,7,8,9,10].map(k=>{const v=siloVol({D:i.D,cyl:k*SILO_LAYER,cone:i.cone});return '<option value="'+k+'"'+(okN&&k===n?' selected':'')+'>'+k+' 層（筒身 '+fmt(k*SILO_LAYER)+' m）– '+fmt(v,1)+' m³ 約 '+fmt(v*CEMENT_T,1)+' T</option>';}).join('');
+  return {dia,lay};}
 const PALETTES={'標準灰':{steel:'#9aa3aa',siloTop:'#c8342c',siloCone:'#c8342c',body:'#f0f1ef',rail:'#e0b020',clad:'#f7f7f5',gallery:'#f3f4f2'},
   '紅白':{steel:'#c0302a',siloTop:'#c8342c',siloCone:'#c8342c',body:'#f0f1ef',rail:'#e0b020',clad:'#f7f7f5',gallery:'#f3f4f2'},
   '藍白':{steel:'#2f5d9b',siloTop:'#2f6fb5',siloCone:'#2f6fb5',body:'#f0f2f4',rail:'#e0b020',clad:'#f7f7f5',gallery:'#eef2f6'},
@@ -4733,11 +4744,11 @@ const transfer=(b,l)=>S.items.find(i=>i.type==='transfer'&&i.belt===b&&(i.line||
 const LAYOUTS={'4':[2,2],'5':[3,2],'6':[3,3]};
 function colW(b,n){const c=(b.cw||[]).map(Number);if(c.length===n&&c.every(v=>v>0)){const t=c.reduce((a,v)=>a+v,0);return c.map(v=>v*b.L/t);}return Array(n).fill(b.L/n);}
 function binLayout(b){if(!b.cells)b.cells=(b.nx*b.nz>=6?'6':b.nx*b.nz===5?'5':'4');return LAYOUTS[b.cells]||LAYOUTS['4'];}
-const SILO_MATS=['水泥I型','水泥II型','爐石','飛灰'];const MIX0={binder:360,sand:880,stone:920,water:175,adm:4,dens:1.6};const MAT_DENS={'水泥I型':1.3,'水泥II型':1.3,'爐石':1.15,'飛灰':0.9,'其他':1.3};
+const SILO_MATS=['水泥I型','水泥II型','爐石','飛灰'];const MIX0={binder:360,sand:880,stone:920,water:175,adm:4,dens:1.6};const MAT_DENS={'水泥I型':1.33,'水泥II型':1.33,'爐石':1.15,'飛灰':0.9,'其他':1.3};
 const siloTon=x=>siloVol(x)*(MAT_DENS[x.mat]||CEMENT_T);
 const mixOf=()=>Object.assign({},MIX0,S.mix||{});
 const binTop=b=>b.legH+b.hopH+b.boxH, topFeed=b=>binTop(b)+3.3;
-const siloTop=s=>s.base+s.bottom+s.cone+s.cyl, siloVol=s=>Math.PI*(s.D/2)**2*(s.cyl+s.cone/3), binVol=b=>b.L*b.W*(b.boxH+b.hopH/3);
+const siloTop=s=>s.base+s.bottom+s.cone+s.cyl, siloVol=s=>{const R=s.D/2,r=SILO_OUT/2;return Math.PI*R*R*s.cyl+Math.PI*s.cone/3*(R*R+R*r+r*r);}, binVol=b=>b.L*b.W*(b.boxH+b.hopH/3);
 const TT=t=>t.tt==='half'?'half':t.tt==='site2'?'site2':'classic';
 function TD(t){if(TT(t)==='site2')return {hx:ST2.hx,hz:ST2.hz,sx:ST2.hx+.1,sz:ST2.hz+.1,sy:ST2.f2+1.2,R:4.2,lab:16.5};return TT(t)==='half'?{hx:HT.hx,hz:HT.hz,sx:HT.hx+.1,sz:HT.hz+.1,sy:HT.f3+2.5,R:5.2,lab:23.5}:{hx:5.6,hz:5.05,sx:5.3,sz:4.75,sy:FL['3F']+3.4,R:8,lab:29};}
 function localFace(t,c){const d=COMPASS[c];const [lx,lz]=rotXZ(d[0],d[1],-(t.r||0));return Math.abs(lx)>Math.abs(lz)?(lx>0?'+x':'-x'):(lz>0?'+z':'-z');}
@@ -5183,7 +5194,7 @@ function addItem(type){let it;const t=one('tower'),b=one('bins'),h=one('hopper')
   else if(type==='tower')it={type,tt:'half',exit:'S',inlet:'auto',...freeSpot(11,{x:S.lines>1?S.m+16+(S.cur-1)*34:S.W/2,z:S.m+12}),r:0,auto:false};
   else if(type==='bins')it={type,...freeSpot(9,{x:t?t.x:S.W/2,z:t?t.z+50:S.L*.45}),r:0,auto:false,b:Object.assign({},BIN_RC)};
   else if(type==='hopper')it={type,...freeSpot(5,{x:b?b.x:t?t.x:S.W/2,z:b?Math.min(S.L-S.m-20,b.z+58):S.L-S.m-20}),r:0,auto:false};
-  else if(type==='silo'){const base=byId(selected)&&byId(selected).type==='silo'?byId(selected):silos()[silos().length-1];const spec=base?{D:base.D,cyl:base.cyl,cone:base.cone,bottom:base.bottom,base:base.sup==='bldg'?base.base:0,sup:base.sup==='bldg'?'bldg':'steel',rcf:base.rcf,cell:base.cell}:{D:4.37,cyl:10.4,cone:3.7,base:RCH[3],bottom:14.2-RCH[3],sup:'bldg',rcf:3,cell:5.4};if(!spec.rcf)delete spec.rcf;if(!spec.cell)delete spec.cell;
+  else if(type==='silo'){const base=byId(selected)&&byId(selected).type==='silo'?byId(selected):silos()[silos().length-1];const spec=base?{D:base.D,cyl:base.cyl,cone:base.cone,bottom:base.bottom,base:base.sup==='bldg'?base.base:0,sup:base.sup==='bldg'?'bldg':'steel',rcf:base.rcf,cell:base.cell}:{D:4.37,cyl:10.5,cone:coneH(4.37),base:RCH[3],bottom:14.2-RCH[3],sup:'bldg',rcf:3,cell:5.4};if(!spec.rcf)delete spec.rcf;if(!spec.cell)delete spec.cell;
     it={type,name:LN(S.cur)+'水泥桶 #'+(silos().filter(x=>(x.line||1)===S.cur).length+1),...spec,...freeSpot(spec.D/2+.5,t?{x:t.x-9,z:t.z}:{x:S.W/2,z:S.L/2})};}
   else if(type==='transfer'){const belt=!transfer('inc')&&h&&b?'inc':!transfer('main')&&b&&t?'main':!transfer('inc')?'inc':'main';const A=belt==='inc'?h:b,B=belt==='inc'?b:t;
     const m=A&&B?{x:(A.x+B.x)/2+8,z:(A.z+B.z)/2}:{x:S.W/2,z:S.L/2};it={type,belt,x:m.x,z:m.z,r:0,auto:false,h:null};}
@@ -5249,8 +5260,8 @@ function renderInspector(){
   if(i.type==='silo')h+=sect('支撐')+'<div class="irow"><label for="i-sup">支撐形式</label><select id="i-sup" data-k="sup"><option value="steel">全鋼構（鐵管腳柱到地面）</option><option value="rc">RC 柱＋鋼構腳柱</option><option value="bldg">RC 建物（下方當電器室、空壓機室等）</option></select></div>'+
     (i.sup==='bldg'?'<div class="irow"><label for="i-rcf">RC 樓層</label><select id="i-rcf" data-k="rcf"><option value="3">3F（17.9 m，無腳柱）</option><option value="2">2F（11.0 m，短腳柱）</option><option value="1">1F（7.3 m）</option></select></div>'+
       row('cell','RC 單元寬（桶距）','0.05','m')+'<div class="irow"><label for="i-room">1F 房間用途</label><input type="text" id="i-room" data-k="room" class="txt" placeholder="例：電器室"></div>':'')+
-    row('base','RC 高度','0.5','m',{dis:!(i.base>0)||i.sup==='bldg'})+row('cbot','錐底離地','0.2','m')+sect('筒倉規格')+'<div class="irow"><label for="i-preset">規格範本</label><select id="i-preset" data-k="preset"><option value="">— 選擇 —</option>'+Object.keys(SILO_PRESET).map(k=>'<option>'+k+'</option>').join('')+'</select></div>'+
-    (S.lines>1?'<label class="chk sm"><input type="checkbox" id="i-dual" data-k="dual"> 雙出口螺運機（一支往第 1 套、一支往第 2 套，兩套共用）</label>':'')+
+    row('base','RC 高度','0.5','m',{dis:!(i.base>0)||i.sup==='bldg'})+row('cbot','錐底離地','0.2','m')+sect('筒倉規格')+(()=>{const o=siloSpecOpts(i),v=siloVol(i);const sk=specOf(i);return '<div class="irow"><label for="i-preset">常用規格</label><select id="i-preset" data-k="preset"><option value=""'+(sk?'':' selected')+'>自訂（用下方直徑／層數）</option>'+Object.keys(SILO_PRESET).map(k=>'<option value="'+k+'"'+(k===sk?' selected':'')+'>'+specLabel(k)+'</option>').join('')+'</select></div><div class="irow"><label for="i-sdia">直徑</label><select id="i-sdia" data-k="sdia">'+o.dia+'</select></div><div class="irow"><label for="i-slay">層數（每層 '+fmt(SILO_LAYER)+' m）</label><select id="i-slay" data-k="slay">'+o.lay+'</select></div><div class="hint sm" style="margin:-2px 0 6px">Ø'+Math.round(i.D*1000)+(Math.abs(i.cyl/SILO_LAYER-Math.round(i.cyl/SILO_LAYER))<.01?' × '+Math.round(i.cyl/SILO_LAYER)+' 層':'，筒身 '+fmt(i.cyl)+' m')+' = <b>'+fmt(v,1)+' m³</b>，約 <b>'+fmt(v*CEMENT_T,1)+' T</b>（以水泥比重 '+CEMENT_T+' 計）</div>';})()+
+    '<div class="irow"><label for="i-dual">螺運機出口</label><select id="i-dual" data-k="dual"><option value="0">單出口（預設）</option><option value="1"'+(S.lines>1?'':' disabled')+'>雙出口（兩套共用）</option></select></div>'+(S.lines>1?'':'<div class="hint sm" style="opacity:.7;margin:-2px 0 6px">雙出口要在兩套以上的配置才能選（每套各接一支螺運機）。</div>')+
     '<div class="irow"><label for="i-mat">儲存材料</label><select id="i-mat" data-k="mat"><option value="">— 未指定 —</option>'+SILO_MATS.concat(['其他']).map(m=>'<option>'+m+'</option>').join('')+'</select></div>'+'<div class="irow"><label for="i-skirt">錐斗區</label><select id="i-skirt" data-k="sskirt"><option value="0">開放（腳柱外露）</option><option value="1">四周覆蓋浪板</option></select></div><div class="irow"><label for="i-topH">桶頂</label><select id="i-topH" data-k="topH"><option value="0">桶上集塵機＋護欄</option><option value="1">防雨集塵屋（工地型）</option></select></div>'+row('D','直徑','0.05','m')+row('cyl','筒身高','0.2','m')+row('cone','錐底高','0.1','m');
   if(i.type==='rbin')h+=sect('儲倉型式')+'<div class="irow"><label for="i-rk">配置</label><select id="i-rk" data-k="rk"><option value="line">單排（水平計量皮帶沿倉排）</option><option value="twin">兩個儲倉左右對稱（往中間投料）</option></select></div>'+
     '<div class="irow"><label for="i-mt">安裝</label><select id="i-mt" data-k="mt"><option value="pit">埋地（卡車地面傾倒）</option><option value="frame">淺坑＋鋼架（鏟裝機投料）</option><option value="ground">地上鋼架，不挖坑（鏟裝機投料）</option></select></div>'+
@@ -5276,7 +5287,7 @@ function fillInspector(){const i=byId(selected);if(!i||!$('i-x')||insEl.dataset.
   if($('i-rot')){set('rot',fmt(rotDeg(i.r||0),0));$('i-rot').disabled=!!i.locked;}
   if(i.type==='tower'){$('i-exit').value=i.exit||'S';$('i-mixr').value=String(i.mixRot||0);$('i-tt').value=TT(i);if($('i-inlet'))$('i-inlet').value=i.inlet||'auto';}
   if(i.type==='bins'){['L','W','legH','hopH','boxH'].forEach(k=>set(k,fmt(i.b[k])));binLayout(i.b);$('i-grid').value=i.b.cells;$('i-cw').value=(i.b.cw||[]).join('/');$('i-st').value=i.b.st==='rc'?'rc':'steel';$('i-bskirt').value=i.b.skirt?'1':'0';$('i-bpair').checked=!!binPair(i);}
-  if(i.type==='silo'){['D','cyl','cone','base'].forEach(k=>set(k,fmt(i[k],k==='D'?3:2)));set('cbot',fmt(i.base+i.bottom,2));if($('i-topH'))$('i-topH').value=i.topH?'1':'0';if($('i-skirt'))$('i-skirt').value=i.skirt?'1':'0';if($('i-mat'))$('i-mat').value=i.mat||'';if($('i-dual'))$('i-dual').checked=!!i.dual;$('i-sup').value=i.sup==='bldg'?'bldg':i.base>0?'rc':'steel';$('i-base').disabled=!(i.base>0)||i.sup==='bldg';if($('i-rcf')){$('i-rcf').value=String(i.rcf||3);set('cell',fmt(i.cell||5.4,2));set('room',i.room||'');}}
+  if(i.type==='silo'){['D','cyl','cone','base'].forEach(k=>set(k,fmt(i[k],k==='D'?3:2)));set('cbot',fmt(i.base+i.bottom,2));if($('i-topH'))$('i-topH').value=i.topH?'1':'0';if($('i-skirt'))$('i-skirt').value=i.skirt?'1':'0';if($('i-mat'))$('i-mat').value=i.mat||'';if($('i-dual'))$('i-dual').value=i.dual?'1':'0';$('i-sup').value=i.sup==='bldg'?'bldg':i.base>0?'rc':'steel';$('i-base').disabled=!(i.base>0)||i.sup==='bldg';if($('i-rcf')){$('i-rcf').value=String(i.rcf||3);set('cell',fmt(i.cell||5.4,2));set('room',i.room||'');}}
   if(i.type==='rbin'){$('i-rk').value=i.rk||'line';$('i-mt').value=i.mt||'pit';set('n',i.n);set('P',fmt(i.P,2));set('W',fmt(i.W,2));if($('i-ext'))set('ext',fmt(i.ext));if($('i-gap'))set('gap',fmt(i.gap));if($('i-lift'))set('lift',i.lift||0);}
   if(i.type==='transfer'){$('i-belt').value=i.belt;set('h',fmt(i.top));$('i-h').disabled=i.h==null;$('i-hauto').checked=i.h==null;}
   if(i.type==='zone'){set('w',fmt(i.w));set('d',fmt(i.d));}if(i.type==='blk'){set('nx',i.nx);set('nz',i.nz);set('layers',i.layers);}
@@ -5314,7 +5325,7 @@ function applyField(i,k,v){
   if(k==='name'){i.name=v||i.name;return;}
   if(k==='locked'){i.locked=!!v;return;}
   if(i.type==='blk'&&['nx','nz','layers'].includes(k)){const n=parseFloat(v);if(isFinite(n))i[k]=Math.max(1,Math.min(k==='layers'?6:30,Math.round(n)));return;}
-  if(k==='bpre'&&i.type==='bins'){if(BIN_STD[v])Object.assign(i.b,BIN_STD[v]);return;}if(k==='exit'){i.exit=v;return;}if(k==='topH'){i.topH=v==='1';return;}if(k==='sskirt'){i.skirt=v==='1';return;}if(k==='dual'&&i.type==='silo'){if(v)i.dual=true;else delete i.dual;return;}if(k==='mat'&&i.type==='silo'){i.mat=v||undefined;return;}if(k==='bpair'&&i.type==='bins'){const old=binPair(i);if(old)delete old.b.pair;delete i.b.pair;if(v){const q=S.items.filter(o=>o.type==='bins'&&o!==i).sort((a,c)=>hz(a,i)-hz(c,i))[0];if(q){i.b.pair=q.id;q.b.pair=i.id;}else toast('沒有其他骨材庫');}return;}if(k==='bskirt'&&i.type==='bins'){i.b.skirt=v==='1';return;}if(k==='gs'){i.gs=v;return;}if(k==='dir'&&i.type==='wash'){i.dir=v;return;}if(k==='kind'&&i.type==='tpt'){i.kind=v;return;}if(k==='vkind'&&i.type==='veh'){i.kind=v;return;}if(k==='yAuto'){i.yAuto=!!v;if(!v)i.y0=blkTopAt(i.x,i.z);return;}if(k==='y0'&&i.type==='veh'){const n=parseFloat(v);if(isFinite(n))i.y0=Math.max(0,Math.min(30,n));return;}if(k==='ring'){i.ring=!!v;return;}if(k==='rk'||k==='mt'){i[k]=v;if(k==='rk'&&v==='twin'&&i.n>3)i.n=2;return;}
+  if(k==='bpre'&&i.type==='bins'){if(BIN_STD[v])Object.assign(i.b,BIN_STD[v]);return;}if(k==='exit'){i.exit=v;return;}if(k==='topH'){i.topH=v==='1';return;}if(k==='sskirt'){i.skirt=v==='1';return;}if(k==='dual'&&i.type==='silo'){if((v===true||v==='1')&&S.lines>1)i.dual=true;else delete i.dual;return;}if(k==='mat'&&i.type==='silo'){i.mat=v||undefined;return;}if(k==='bpair'&&i.type==='bins'){const old=binPair(i);if(old)delete old.b.pair;delete i.b.pair;if(v){const q=S.items.filter(o=>o.type==='bins'&&o!==i).sort((a,c)=>hz(a,i)-hz(c,i))[0];if(q){i.b.pair=q.id;q.b.pair=i.id;}else toast('沒有其他骨材庫');}return;}if(k==='bskirt'&&i.type==='bins'){i.b.skirt=v==='1';return;}if(k==='gs'){i.gs=v;return;}if(k==='dir'&&i.type==='wash'){i.dir=v;return;}if(k==='kind'&&i.type==='tpt'){i.kind=v;return;}if(k==='vkind'&&i.type==='veh'){i.kind=v;return;}if(k==='yAuto'){i.yAuto=!!v;if(!v)i.y0=blkTopAt(i.x,i.z);return;}if(k==='y0'&&i.type==='veh'){const n=parseFloat(v);if(isFinite(n))i.y0=Math.max(0,Math.min(30,n));return;}if(k==='ring'){i.ring=!!v;return;}if(k==='rk'||k==='mt'){i[k]=v;if(k==='rk'&&v==='twin'&&i.n>3)i.n=2;return;}
   if(i.type==='rbin'&&k==='lift'){const n=parseFloat(v);if(isFinite(n))i.lift=Math.max(0,Math.min(5,Math.round(n)));return;}
   if(i.type==='rbin'&&['n','P','W','ext','gap'].includes(k)){const n=parseFloat(v);if(!isFinite(n))return;i[k]=k==='n'?Math.max(1,Math.min(8,Math.round(n))):k==='ext'?Math.max(0,Math.min(30,n)):k==='gap'?Math.max(1.5,Math.min(8,n)):Math.max(2,Math.min(10,n));return;}if(k==='mixRot'){i.mixRot=(+v||0)%360;return;}if(k==='tt'){i.tt=v;if(!i.inlet)i.inlet='auto';return;}if(k==='inlet'){i.inlet=v;return;}if(k==='room'){i.room=String(v||'').slice(0,12);return;}
   if(k==='st'&&i.type==='bins'){const P=v==='rc'?BIN_RC:DEFAULT_BINS;Object.assign(i.b,{st:v==='rc'?'rc':undefined,legH:P.legH,hopH:P.hopH,boxH:P.boxH});if(v!=='rc')delete i.b.st;return;}
@@ -5333,6 +5344,9 @@ function applyField(i,k,v){
   if(k==='cars'){i.cars=v;return;}if(k==='sep'){i.sep=v;return;}if(k==='silt'){i.silt=v;return;}if(k==='bays'){i.bays=Math.max(1,Math.min(3,Math.round(parseFloat(v)||1)));return;}if(k==='tanks'){i.tanks=Math.max(2,Math.min(6,Math.round(parseFloat(v)||4)));return;}if(k==='clear'){i.clear=Math.max(0,Math.min(5,Math.round(parseFloat(v)||0)));return;}if(k==='rows'){i.rows=+v;return;}
   if(k==='cw'&&i.type==='bins'){const a=String(v).split(/[\/,，、\s]+/).map(parseFloat).filter(n=>n>0);if(a.length>1)i.b.cw=a;else delete i.b.cw;return;}
   if(k==='grid'){i.b.cells=v;if(v!=='4'&&i.b.L<15)i.b.L=Math.max(i.b.L,v==='4'?12:16.5);return;}
+  if(k==='sdia'&&i.type==='silo'){const d=SILO_DIA.find(o=>Math.abs(o.D-parseFloat(v))<.01);if(!d)return;const cb=i.base+i.bottom;i.D=d.D;i.cone=d.cone;
+    if(i.sup==='bldg'){i.base=RCH[i.rcf||3];i.bottom=(RCH[3]-i.cone)-i.base;if(i.cell<i.D+.2)i.cell=Math.round((i.D+1)*20)/20;}else i.bottom=cb-i.base;return;}
+  if(k==='slay'&&i.type==='silo'){const n=parseInt(v);if(n>0)i.cyl=n*SILO_LAYER;return;}
   if(k==='preset'){if(SILO_PRESET[v]){const b=i.base||0;Object.assign(i,SILO_PRESET[v]);if(i.sup==='bldg'){i.base=RCH[i.rcf||3];i.bottom=(RCH[3]-i.cone)-i.base;if(i.cell<i.D+.2)i.cell=Math.round((i.D+1)*20)/20;}else{i.base=Math.min(b,i.bottom-1>0?b:0);i.bottom=SILO_PRESET[v].bottom-i.base;}}return;}
   v=parseFloat(v);if(!isFinite(v))return;
   if(k==='x'||k==='z'){const dx=k==='x'?v-i.x:0,dz=k==='z'?v-i.z:0;moveItem(i,dx,dz);}
@@ -5345,7 +5359,7 @@ function applyField(i,k,v){
 }
 function moveItem(i,dx,dz){i.x+=dx;i.z+=dz;if(i.type==='tower'&&S.siloFollow)silos().filter(s=>(s.line||1)===(i.line||1)&&!s.locked).forEach(s=>{s.x+=dx;s.z+=dz;});}
 insEl.addEventListener('change',e=>{if(selSet.size>1)return;const t=e.target,k=t.dataset.k,i=byId(selected);if(!k||!i||insEl.dataset.id!==i.id)return;applyField(i,k,t.type==='checkbox'?t.checked:t.value);
-  if(['auto','hauto','preset','grid','belt','line','rows','cars','locked','sup','exit','sep','silt','tt','inlet','st','rcf','rk','mt','mixRot','dir','kind','vkind','ring','bpre','yAuto','gs','sskirt','bskirt','bpair'].includes(k))renderInspector();update();});
+  if(['auto','hauto','preset','sdia','slay','D','cyl','cone','grid','belt','line','rows','cars','locked','sup','exit','sep','silt','tt','inlet','st','rcf','rk','mt','mixRot','dir','kind','vkind','ring','bpre','yAuto','gs','sskirt','bskirt','bpair'].includes(k))renderInspector();update();});
 insEl.addEventListener('click',e=>{const bf=e.target.closest('[data-fl]');if(bf){const t=byId(selected);if(t){if($('bClad').classList.contains('on'))$('bClad').click();if(topMode)frame(false);focusAt(V(t.x,+bf.dataset.fl,t.z),11);toast('已關閉外牆浪板，按「外牆浪板」可再打開');}return;}const b0=e.target.closest('button');if(b0&&selSet.size>1){const g=b0.dataset.g;
     if(b0.dataset.step){const el=$('i-'+b0.dataset.step);el.value=(parseFloat(el.value)||0)+parseFloat(b0.dataset.d);return;}
     if(g==='move'){moveGroup(parseFloat($('i-gdx').value)||0,parseFloat($('i-gdz').value)||0);$('i-gdx').value=0;$('i-gdz').value=0;update();}
@@ -5488,6 +5502,7 @@ function loadExample3(){S.W=100;S.L=70;S.m=3;S.zones=[];
   selected=null;renderLineSel();syncSite();rebuildSite();renderInspector();update();frame(false);}
 /* ---------- quick layout (配置圖作業指導書: 一字／N字／L字／ㄈ字) ---------- */
 $('bAuto').addEventListener('click',()=>{$('autoDlg').hidden=false;$('aMsg').textContent='';});$('autoX').addEventListener('click',()=>$('autoDlg').hidden=true);
+[...$('aSize').options].forEach(o=>{if(SILO_PRESET[o.value])o.textContent=specLabel(o.value);});
 $('aGo').addEventListener('click',()=>{const msg=autoLayout($('aType').value,$('aSilo').value,+$('aN').value,$('aSize').value,$('aBin').value,$('aFac').checked);$('aMsg').textContent=msg;if(!/無法/.test(msg))setTimeout(()=>{$('autoDlg').hidden=true;toast(msg);},400);});
 function autoLayout(type,siloPos,nS,size,binKey,fac){
   const W=S.W,L=S.L,m=S.m;S.zones=[];S.lines=1;S.cur=1;
@@ -5740,7 +5755,7 @@ function coverSheet(total){return sheet('配置總表',(g,a)=>{const FONT='"Noto
   const table=(x,y,w,head,rows,widths)=>{const rh=46;g.font='600 26px '+FONT;g.fillStyle='#eef1f3';g.fillRect(x,y,w,rh);g.fillStyle='#1d252c';let cx=x;head.forEach((h,k)=>{g.fillText(h,cx+10,y+10,widths[k]-16);cx+=widths[k];});
     g.font='25px '+FONT;rows.forEach((r,n)=>{const yy=y+rh*(n+1);if(n%2){g.fillStyle='#f8f9fa';g.fillRect(x,yy,w,rh);}g.fillStyle=r._bad?'#c8342c':'#1d252c';let cx=x;r.forEach((c,k)=>{g.fillText(String(c),cx+10,yy+10,widths[k]-16);cx+=widths[k];});});
     g.strokeStyle='#c9d0d6';g.lineWidth=1;g.strokeRect(x,y,w,rh*(rows.length+1));return y+rh*(rows.length+1);};
-  const spec=i=>i.type==='rbin'?(()=>{const G=rbinGeom(i);return G.n+(G.twin?'×2':'')+' 倉　'+(G.pit?'埋地':G.gnd?'地上鋼架':'淺坑鋼架')+'　主帶尾 '+(G.tail>=0?'+':'GL')+fmt(G.tail);})():i.type==='bins'?(binLayout(i.b),i.b.cells)+' 倉　'+fmt(i.b.L)+'×'+fmt(i.b.W)+' m　倉頂 '+fmt(binTop(i.b))+' m':i.type==='silo'?(towerFor(i)?'距主機樓 ('+fmt(i.x-towerFor(i).x)+', '+fmt(i.z-towerFor(i).z)+')　':'')+'Ø'+fmt(i.D,2)+'　總高 '+fmt(siloTop(i)+1)+' m　約 '+fmt(siloVol(i)*CEMENT_T,0)+' t':
+  const spec=i=>i.type==='rbin'?(()=>{const G=rbinGeom(i);return G.n+(G.twin?'×2':'')+' 倉　'+(G.pit?'埋地':G.gnd?'地上鋼架':'淺坑鋼架')+'　主帶尾 '+(G.tail>=0?'+':'GL')+fmt(G.tail);})():i.type==='bins'?(binLayout(i.b),i.b.cells)+' 倉　'+fmt(i.b.L)+'×'+fmt(i.b.W)+' m　倉頂 '+fmt(binTop(i.b))+' m':i.type==='silo'?(towerFor(i)?'距主機樓 ('+fmt(i.x-towerFor(i).x)+', '+fmt(i.z-towerFor(i).z)+')　':'')+siloSpecName(i)+'　總高 '+fmt(siloTop(i)+1)+' m':
     i.type==='tower'?(TT(i)==='site2'?'簡易工地型-2方 6.0×2.5 m　入料點 10.9 m':TT(i)==='half'?'半高塔 7.15×7.05 m　1F RC　入料點 15.2 m':'11.2×10.1 m　6F　頭輪 19.0 m')+(entryAngle(i)!=null?'　進入角 '+fmt(entryAngle(i),0)+'°':''):i.type==='transfer'?'高 '+fmt(i.top)+' m':i.type==='parking'?i.n+' 格　'+fmt(i.ang,0)+'°　'+fmt(i.sw)+'×'+fmt(i.sl)+' m':i.type==='scale'||i.type==='wash'?fmt(i.L)+'×'+fmt(i.W)+' m':i.type==='gate'?'門寬 '+fmt(i.w)+' m':i.type==='hopper'?'地下受料坑 -3.0 m':'';
   const eq=S.items.map(i=>[nm(i),spec(i),fmt(i.x),fmt(i.z),fmt(rotDeg(i.r||0),0)+'°']);
   const colW=Math.floor(a.w*.56);let y2=table(a.x+30,y,colW,['設備','規格','X (m)','Y (m)','旋轉'],eq.slice(0,24),[colW*.3,colW*.4,colW*.1,colW*.1,colW*.1]);
