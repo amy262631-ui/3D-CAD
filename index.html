@@ -4572,11 +4572,11 @@ function buildBinsP(b,near){   // near: +1/-1 = local-z side facing the main bel
   // Each row's gates drop into one weigh hopper (計量桶) hung on load cells, which discharges onto the belt.
   const NB=near&&near.s?near:{s:0,k:0},zt=-NB.s*Math.max(0,hz_-3.3),beltY=z=>OUT_Y+Math.abs(z-zt)*NB.k,yF=b.legH+b.hopH,rows=[];
   for(let j=0;j<NZ;j++){const CW=colW(b,LAY[j]);let x0=-hx;const zc=-hz_+cd*(j+.5),oz=Math.sign(zc)*Math.min(Math.abs(zc),1.4),
-      yH=beltY(oz)+.45,yHt=yH+2.0,yO=Math.min(yF-1.8,Math.max(b.legH-1.5,yHt+.45));rows.push({oz,yH,yHt,yO});
+      yH=beltY(oz)+1.45,yHt=yH+1.8,yO=Math.min(yF-1.8,Math.max(b.legH-1.5,yHt+.45));rows.push({oz,yH,yHt,yO});
     for(let i=0;i<LAY[j];i++){const cw=CW[i],x=x0+cw/2,z=zc;cells.push([x,z]);const ox=Math.sign(x)*Math.min(Math.abs(x),.7);
       frustum(g,x0,x0+cw,z-cd/2,z+cd/2,yF,ox,oz,yO,.5,M.silo2);x0+=cw;
       box(g,.62,.4,.62,M.binBand,ox,yO-.2,oz);member(g,V(ox+.3,yO-.25,oz),V(ox+.9,yO-.75,oz+.25),.09,M.red);}   // gate + air cylinder
-    const r=rows[j],ww=Math.min(2.2,b.L*.25),wd=Math.min(1.7,cd*.4),yb2=r.yH+1.35,oo=r.oz+NB.s*.35;
+    const r=rows[j],ww=Math.min(2.2,b.L*.25),wd=Math.min(1.7,cd*.4),yb2=r.yH+1.2,oo=r.oz+NB.s*.35;
     box(g,ww,r.yHt-yb2,wd,M.silo2,0,(yb2+r.yHt)/2,r.oz);frustum(g,-ww/2,ww/2,r.oz-wd/2,r.oz+wd/2,yb2,0,oo,r.yH,.45,M.silo2);
     box(g,ww+.24,.12,wd+.24,M.steel,0,r.yHt+.06,r.oz);
     [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{const px=sx*(ww/2+.2),pz=r.oz+sz*(wd/2+.2);box(g,.2,.22,.2,M.red,px,r.yHt+.15,pz);member(g,V(px,r.yHt+.26,pz),V(px,r.yO-.3,pz),.06,M.steel);});
