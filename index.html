@@ -4548,21 +4548,26 @@ function buildBinsP(b,near){   // near: +1/-1 = local-z side facing the main bel
   // ribbed bin body, translucent steel house on top covering the rotating distributor
   const g=new THREE.Group(),hx=b.L/2,hz_=b.W/2,top=b.legH+b.hopH+b.boxH,PED=1.2,LAY=binLayout(b),NX=Math.max(...LAY),NZ=LAY.length;
   const xs=[-hx],zs=[];colW(b,NX).forEach(w=>xs.push(xs[xs.length-1]+w));for(let j=0;j<=NZ;j++)zs.push(-hz_+b.W*j/NZ);
+  const edgeX=x=>Math.abs(Math.abs(x)-hx)<.01,edgeZ=z=>Math.abs(Math.abs(z)-hz_)<.01,NS=near&&near.s||0;
   const tiers=Math.max(2,Math.round((b.legH-PED)/3.2)),lv=[];for(let k=0;k<=tiers;k++)lv.push(PED+(b.legH-PED)*k/tiers);
   const YB=b.legH+b.hopH;
   const RC=b.st==='rc';
   if(RC){const C=.8,yW=b.legH+b.hopH*.6;
-    xs.forEach(x=>zs.forEach(z=>box(g,C,yW,C,M.rc,x,yW/2,z)));
-    [b.legH,yW-.4].forEach(y=>{xs.forEach(x=>box(g,.5,.7,b.W,M.rc,x,y,0));zs.forEach(z=>box(g,b.L,.7,.5,M.rc,0,y,z));});
+    // RC only on the perimeter (frame / walls); the inside is steel (4 columns on anchor bolts around the centre, see 骨材庫基礎)
+    xs.forEach(x=>zs.forEach(z=>{if(edgeX(x)||edgeZ(z))box(g,C,yW,C,M.rc,x,yW/2,z);}));
+    [b.legH,yW-.4].forEach((y,lvI)=>{[xs[0],xs[xs.length-1]].forEach(x=>box(g,.5,.7,b.W,M.rc,x,y,0));
+      [zs[0],zs[zs.length-1]].forEach(z=>{if(lvI===0&&NS&&Math.sign(z)===NS){[[-hx,-1.9],[1.9,hx]].forEach(([p,q])=>box(g,q-p,.7,.5,M.rc,(p+q)/2,y,z));}else box(g,b.L,.7,.5,M.rc,0,y,z);});});   // opening for the main belt on the tower face
     box(g,b.L+C,top-yW,b.W+C,M.binBody,0,(yW+top)/2,0);
     for(let y=yW+3;y<top-.5;y+=3)box(g,b.L+C+.08,.1,b.W+C+.08,M.binBand,0,y,0).castShadow=false;
   }
   if(!RC){
-  xs.forEach(x=>zs.forEach(z=>{box(g,1.3,PED,1.3,M.rc,x,PED/2,z);member(g,V(x,PED,z),V(x,YB,z),.55,M.binF);}));
+  xs.forEach(x=>zs.forEach(z=>{if(!(edgeX(x)||edgeZ(z)))return;box(g,1.3,PED,1.3,M.rc,x,PED/2,z);member(g,V(x,PED,z),V(x,YB,z),.55,M.binF);}));
   [YB-.2].forEach(y=>{xs.forEach(x=>member(g,V(x,y,-hz_),V(x,y,hz_),.4,M.binF));zs.forEach(z=>member(g,V(-hx,y,z),V(hx,y,z),.4,M.binF));});
-  lv.forEach((y,k)=>{if(k===0)return;xs.forEach(x=>member(g,V(x,y,-hz_),V(x,y,hz_),.3,M.binF));zs.forEach(z=>member(g,V(-hx,y,z),V(hx,y,z),.3,M.binF));});
+  const beltBay=i=>xs[i]<1.9&&xs[i+1]>-1.9;
+  lv.forEach((y,k)=>{if(k===0)return;[xs[0],xs[xs.length-1]].forEach(x=>member(g,V(x,y,-hz_),V(x,y,hz_),.3,M.binF));
+    [zs[0],zs[zs.length-1]].forEach(z=>{for(let i=0;i<NX;i++){if(NS&&Math.sign(z)===NS&&beltBay(i))continue;member(g,V(xs[i],y,z),V(xs[i+1],y,z),.3,M.binF);}});});
   for(let k=0;k<tiers;k++){const y0=lv[k],y1=lv[k+1];
-    for(let i=0;i<NX;i++)[-hz_,hz_].forEach(z=>{member(g,V(xs[i],y0,z),V(xs[i+1],y1,z),.16,M.binF);member(g,V(xs[i+1],y0,z),V(xs[i],y1,z),.16,M.binF);});
+    for(let i=0;i<NX;i++)[-hz_,hz_].forEach(z=>{if(NS&&Math.sign(z)===NS&&beltBay(i))return;member(g,V(xs[i],y0,z),V(xs[i+1],y1,z),.16,M.binF);member(g,V(xs[i+1],y0,z),V(xs[i],y1,z),.16,M.binF);});
     for(let j=0;j<NZ;j++)[-hx,hx].forEach(x=>{member(g,V(x,y0,zs[j]),V(x,y1,zs[j+1]),.16,M.binF);member(g,V(x,y0,zs[j+1]),V(x,y1,zs[j]),.16,M.binF);});}
   }
   const cd=b.W/NZ,cells=[];
@@ -4571,6 +4576,7 @@ function buildBinsP(b,near){   // near: +1/-1 = local-z side facing the main bel
   // (tail on the far side), so the row towards the tower (stone) sits higher → shorter cones; the far row (sand) longer cones.
   // Each row's gates drop into one weigh hopper (計量桶) hung on load cells, which discharges onto the belt.
   const NB=near&&near.s?near:{s:0,k:0},zt=-NB.s*Math.max(0,hz_-3.3),beltY=z=>OUT_Y+Math.abs(z-zt)*NB.k,yF=b.legH+b.hopH,rows=[];
+  const yPf=Math.max(...[-1,1].map(sg=>beltY(sg*Math.min(hz_/2,1.4))))+1.45+1.8+.35;   // service platform just above the higher weigh hopper
   for(let j=0;j<NZ;j++){const CW=colW(b,LAY[j]);let x0=-hx;const zc=-hz_+cd*(j+.5),oz=Math.sign(zc)*Math.min(Math.abs(zc),1.4),
       yH=beltY(oz)+1.45,yHt=yH+1.8,yO=Math.min(yF-1.8,Math.max(b.legH-1.5,yHt+.45));rows.push({oz,yH,yHt,yO});
     for(let i=0;i<LAY[j];i++){const cw=CW[i],x=x0+cw/2,z=zc;cells.push([x,z]);const ox=Math.sign(x)*Math.min(Math.abs(x),.7);
@@ -4579,8 +4585,16 @@ function buildBinsP(b,near){   // near: +1/-1 = local-z side facing the main bel
     const r=rows[j],ww=Math.min(2.2,b.L*.25),wd=Math.min(1.7,cd*.4),yb2=r.yH+1.2,oo=r.oz+NB.s*.35;
     box(g,ww,r.yHt-yb2,wd,M.silo2,0,(yb2+r.yHt)/2,r.oz);frustum(g,-ww/2,ww/2,r.oz-wd/2,r.oz+wd/2,yb2,0,oo,r.yH,.45,M.silo2);
     box(g,ww+.24,.12,wd+.24,M.steel,0,r.yHt+.06,r.oz);
-    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{const px=sx*(ww/2+.2),pz=r.oz+sz*(wd/2+.2);box(g,.2,.22,.2,M.red,px,r.yHt+.15,pz);member(g,V(px,r.yHt+.26,pz),V(px,r.yO-.3,pz),.06,M.steel);});
+    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{const px=sx*(ww/2+.2),pz=r.oz+sz*(wd/2+.2);box(g,.2,.22,.2,M.red,px,r.yHt+.15,pz);member(g,V(px,r.yHt+.26,pz),V(px,yPf,pz),.06,M.steel);});
     box(g,.5,.3,.5,M.binBand,0,r.yH-.1,oo);}
+  // steel inside (photos): 4 round pipe columns on anchor bolts under the cone junctions, service platform (grating + railing) at the weigh hoppers
+  {const cx=Math.min(2.55,hx-1.4),cz=Math.min(2.4,hz_-1.4),yO=Math.max(...rows.map(r=>r.yO)),yTop=Math.min(RC?b.legH+b.hopH*.6:YB,(yF+yO)/2);
+   [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{box(g,.9,.1,.9,M.steel,sx*cx,.05,sz*cz);cyl(g,.32,yTop,M.steel,sx*cx,yTop/2,sz*cz,16);box(g,.9,.12,.9,M.steel,sx*cx,yTop+.06,sz*cz);});
+   const px=cx+.6,pz=cz+.3;[-pz,pz].forEach(z=>member(g,V(-px,yPf,z),V(px,yPf,z),.3,M.steel));[-cx,cx].forEach(x=>member(g,V(x,yPf,-pz),V(x,yPf,pz),.3,M.steel));
+   rows.forEach(r=>{const wd=Math.min(1.7,cd*.4);[-1,1].forEach(sz=>member(g,V(-cx,yPf,r.oz+sz*(wd/2+.2)),V(cx,yPf,r.oz+sz*(wd/2+.2)),.2,M.steel));});
+   [-1,1].forEach(sx=>{const x0=sx*cx,x1=sx*px,xm=(x0+x1)/2;box(g,Math.abs(x1-x0)+.3,.06,2*pz,M.grate,xm,yPf+.18,0).castShadow=false;
+     member(g,V(x1,yPf+1.25,-pz),V(x1,yPf+1.25,pz),.05,M.rail);member(g,V(x1,yPf+.7,-pz),V(x1,yPf+.7,pz),.04,M.rail);
+     for(let z=-pz;z<=pz+.01;z+=pz/3)member(g,V(x1,yPf+.2,z),V(x1,yPf+1.25,z),.05,M.rail);});}
   const yb=b.legH+b.hopH;if(!RC){box(g,b.L,b.boxH,b.W,M.binBody,0,yb+b.boxH/2,0);
   for(let x=-hx+1;x<hx;x+=1){box(g,.08,b.boxH,.12,M.binBand,x,yb+b.boxH/2,-hz_-.05).castShadow=false;box(g,.08,b.boxH,.12,M.binBand,x,yb+b.boxH/2,hz_+.05).castShadow=false;}
   for(let z=-hz_+1;z<hz_;z+=1){box(g,.12,b.boxH,.08,M.binBand,-hx-.05,yb+b.boxH/2,z).castShadow=false;box(g,.12,b.boxH,.08,M.binBand,hx+.05,yb+b.boxH/2,z).castShadow=false;}
