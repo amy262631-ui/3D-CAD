@@ -4343,6 +4343,9 @@ const M={ground:std('#bfc5bc',{roughness:1}),site:std('#d9dcd6',{roughness:.95})
   fence:std('#e0a526',{roughness:.6}),sel:new THREE.MeshBasicMaterial({color:'#c8342c',transparent:true,opacity:.18,depthWrite:false}),
   bad:new THREE.MeshBasicMaterial({color:'#ff2d1f',transparent:true,opacity:.22,depthWrite:false})};
 const UB=new THREE.BoxGeometry(1,1,1),UC=new THREE.CylinderGeometry(1,1,1,28),MOUND=new THREE.SphereGeometry(1,12,6,0,Math.PI*2,0,Math.PI/2);
+function frustum(g,x0,x1,z0,z1,yT,ox,oz,yB,s,m){const T=[[x0,z0],[x1,z0],[x1,z1],[x0,z1]],h=s/2,B=[[ox-h,oz-h],[ox+h,oz-h],[ox+h,oz+h],[ox-h,oz+h]],p=[];
+  for(let k=0;k<4;k++){const a=T[k],b=T[(k+1)%4],c=B[(k+1)%4],d=B[k],q=[[a[0],yT,a[1]],[b[0],yT,b[1]],[c[0],yB,c[1]],[d[0],yB,d[1]]];[[0,1,2],[0,2,3],[0,2,1],[0,3,2]].forEach(t=>t.forEach(v=>p.push(...q[v])));}
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(p,3));geo.computeVertexNormals();const o=mesh(geo,m);g.add(o);return o;}
 function mesh(g,m,sh=true){const o=new THREE.Mesh(g,m);o.castShadow=sh;o.receiveShadow=true;return o;}
 function box(g,w,h,d,m,x,y,z){const o=mesh(UB,m);o.scale.set(w,h,d);o.position.set(x,y,z);g.add(o);return o;}
 function member(g,a,b,t,m){const L=a.distanceTo(b);if(L<1e-3)return null;const o=mesh(UB,m);o.scale.set(t,t,L);o.position.copy(a).add(b).multiplyScalar(.5);o.lookAt(b);g.add(o);return o;}
@@ -4540,7 +4543,7 @@ function buildTransfer(top){
   return g;
 }
 
-function buildBinsP(b){
+function buildBinsP(b,near){   // near: +1/-1 = local-z side facing the main belt exit (tower) — that row holds stone, short cones; the far row sand, long cones
   // aggregate bins: RC pedestals, steel columns (perimeter + interior), braced in tiers, walkway at hopper outlets,
   // ribbed bin body, translucent steel house on top covering the rotating distributor
   const g=new THREE.Group(),hx=b.L/2,hz_=b.W/2,top=b.legH+b.hopH+b.boxH,PED=1.2,LAY=binLayout(b),NX=Math.max(...LAY),NZ=LAY.length;
@@ -4564,8 +4567,20 @@ function buildBinsP(b){
   }
   const cd=b.W/NZ,cells=[];
   const pg=new THREE.CylinderGeometry(Math.SQRT1_2,.09,1,4,1);pg.rotateY(Math.PI/4);
-  for(let j=0;j<NZ;j++){const CW=colW(b,LAY[j]);let x0=-hx;for(let i=0;i<LAY[j];i++){const cw=CW[i],x=x0+cw/2,z=-hz_+cd*(j+.5);x0+=cw;cells.push([x,z]);
-    const h=mesh(pg,M.silo2);h.scale.set(cw,b.hopH,cd);h.position.set(x,b.legH+b.hopH/2,z);g.add(h);box(g,.9,.5,.9,M.binBand,x,b.legH-.25,z);}}
+  // cones lean towards the bin centre: outlets cluster over the main belt (local x=0). The main belt already climbs under the bins
+  // (tail on the far side), so the row towards the tower (stone) sits higher → shorter cones; the far row (sand) longer cones.
+  // Each row's gates drop into one weigh hopper (計量桶) hung on load cells, which discharges onto the belt.
+  const NB=near&&near.s?near:{s:0,k:0},zt=-NB.s*Math.max(0,hz_-3.3),beltY=z=>OUT_Y+Math.abs(z-zt)*NB.k,yF=b.legH+b.hopH,rows=[];
+  for(let j=0;j<NZ;j++){const CW=colW(b,LAY[j]);let x0=-hx;const zc=-hz_+cd*(j+.5),oz=Math.sign(zc)*Math.min(Math.abs(zc),1.4),
+      yH=beltY(oz)+.45,yHt=yH+2.0,yO=Math.min(yF-1.8,Math.max(b.legH-1.5,yHt+.45));rows.push({oz,yH,yHt,yO});
+    for(let i=0;i<LAY[j];i++){const cw=CW[i],x=x0+cw/2,z=zc;cells.push([x,z]);const ox=Math.sign(x)*Math.min(Math.abs(x),.7);
+      frustum(g,x0,x0+cw,z-cd/2,z+cd/2,yF,ox,oz,yO,.5,M.silo2);x0+=cw;
+      box(g,.62,.4,.62,M.binBand,ox,yO-.2,oz);member(g,V(ox+.3,yO-.25,oz),V(ox+.9,yO-.75,oz+.25),.09,M.red);}   // gate + air cylinder
+    const r=rows[j],ww=Math.min(2.2,b.L*.25),wd=Math.min(1.7,cd*.4),yb2=r.yH+1.35,oo=r.oz+NB.s*.35;
+    box(g,ww,r.yHt-yb2,wd,M.silo2,0,(yb2+r.yHt)/2,r.oz);frustum(g,-ww/2,ww/2,r.oz-wd/2,r.oz+wd/2,yb2,0,oo,r.yH,.45,M.silo2);
+    box(g,ww+.24,.12,wd+.24,M.steel,0,r.yHt+.06,r.oz);
+    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{const px=sx*(ww/2+.2),pz=r.oz+sz*(wd/2+.2);box(g,.2,.22,.2,M.red,px,r.yHt+.15,pz);member(g,V(px,r.yHt+.26,pz),V(px,r.yO-.3,pz),.06,M.steel);});
+    box(g,.5,.3,.5,M.binBand,0,r.yH-.1,oo);}
   const yb=b.legH+b.hopH;if(!RC){box(g,b.L,b.boxH,b.W,M.binBody,0,yb+b.boxH/2,0);
   for(let x=-hx+1;x<hx;x+=1){box(g,.08,b.boxH,.12,M.binBand,x,yb+b.boxH/2,-hz_-.05).castShadow=false;box(g,.08,b.boxH,.12,M.binBand,x,yb+b.boxH/2,hz_+.05).castShadow=false;}
   for(let z=-hz_+1;z<hz_;z+=1){box(g,.12,b.boxH,.08,M.binBand,-hx-.05,yb+b.boxH/2,z).castShadow=false;box(g,.12,b.boxH,.08,M.binBand,hx+.05,yb+b.boxH/2,z).castShadow=false;}
@@ -4763,6 +4778,7 @@ function headOf(t){if(TT(t)==='site2'){const f=inletFace(t),[nx,nz]=faceVec(f),d
 function entryAngle(t){const u=mainUp(t);if(!u)return null;const a=outPt(u,t),b=headOf(t),d=V(b.x-a.x,0,b.z-a.z).normalize(),fv=faceVec(inletFace(t)),[wx,wz]=rotXZ(fv[0],fv[1],t.r||0);
   return Math.asin(Math.min(1,Math.abs(d.x*wx+d.z*wz)))/D2R;}
 // main belt tail under the bins: fixed on the bins' local z axis, 3.3 m in from the far edge
+function binNear(n){const l=n.line||1,nx=transfer('main',l)||one('tower',l);if(!nx)return null;const [lx,lz]=rotXZ(nx.x-n.x,nx.z-n.z,-(n.r||0)),sg=lz>0?1:-1,t=binTail(n,nx),p=inPt(nx),d=hz(t,p);return {s:sg,k:d>1?Math.round(Math.max(0,(p.y-t.y)/d)*100)/100:0};}
 function binTail(n,nx){let sg=1;if(nx){const [lx,lz]=rotXZ(nx.x-n.x,nx.z-n.z,-(n.r||0));sg=lz>0?-1:1;}const off=sg*Math.max(0,n.b.W/2-3.3),[a,b]=rotXZ(0,off,n.r||0);return V(n.x+a,OUT_Y,n.z+b);}
 const transfersOf=(b,l)=>S.items.filter(i=>i.type==='transfer'&&i.belt===b&&(i.line||1)===l);   // several transfers on one belt, in placing order
 function sharedFeed(l){for(let k=1;k<=S.lines;k++){if(k===l)continue;if(one('hopper',k)){const t=transfersOf('inc',k);if(t.length)return t[t.length-1];}}return null;}
@@ -4820,13 +4836,13 @@ function screwRoute(s,tw){
 
 /* ---------- 3D objects per item ---------- */
 const OBJ={};  // id -> {g,key}
-function objKey(i){if(i.type==='veh')return 'veh'+i.kind+(i.ring===false?0:1);if(i.type==='yard')return JSON.stringify(['yard',i.bays,i.tanks,i.sep,i.clear,i.silt]);if(i.type==='tower')return 'tower'+TT(i)+towerFace(i)+(TT(i)!=='classic'?inletFace(i):'')+'m'+(i.mixRot||0);if(FAC.includes(i.type))return JSON.stringify([i.w,i.L,i.W,i.n,i.rows,i.ang,i.sw,i.sl,i.cars,i.gs||'']);if(i.type==='bins')return JSON.stringify(i.b);if(i.type==='blk')return JSON.stringify(['blk',i.nx,i.nz,i.layers]);if(i.type==='rbin')return JSON.stringify(['rb',i.rk,i.mt,i.n,i.P,i.W,i.ext,i.gap,i.lift||0,rbinSg(i)]);if(i.type==='silo')return JSON.stringify([i.D,i.cyl,i.cone,i.bottom,i.base,i.sup||'',i.cell||0,i.room||'',doorOf(i),i.topH?1:0,i.skirt?1:0]);
+function objKey(i){if(i.type==='veh')return 'veh'+i.kind+(i.ring===false?0:1);if(i.type==='yard')return JSON.stringify(['yard',i.bays,i.tanks,i.sep,i.clear,i.silt]);if(i.type==='tower')return 'tower'+TT(i)+towerFace(i)+(TT(i)!=='classic'?inletFace(i):'')+'m'+(i.mixRot||0);if(FAC.includes(i.type))return JSON.stringify([i.w,i.L,i.W,i.n,i.rows,i.ang,i.sw,i.sl,i.cars,i.gs||'']);if(i.type==='bins')return JSON.stringify(i.b)+JSON.stringify(binNear(i));if(i.type==='blk')return JSON.stringify(['blk',i.nx,i.nz,i.layers]);if(i.type==='rbin')return JSON.stringify(['rb',i.rk,i.mt,i.n,i.P,i.W,i.ext,i.gap,i.lift||0,rbinSg(i)]);if(i.type==='silo')return JSON.stringify([i.D,i.cyl,i.cone,i.bottom,i.base,i.sup||'',i.cell||0,i.room||'',doorOf(i),i.topH?1:0,i.skirt?1:0]);
   if(i.type==='transfer')return fmt(i.top);if(i.type==='zone')return JSON.stringify([i.w,i.d]);return i.type;}
 const COMPASS={N:[0,-1],S:[0,1],E:[1,0],W:[-1,0]},CN={N:'北',S:'南',E:'東',W:'西'};
 function towerFace(t){const d=COMPASS[t.exit||'S'];const [lx,lz]=rotXZ(d[0],d[1],-(t.r||0));return Math.abs(lx)>Math.abs(lz)?(lx>0?'+x':'-x'):(lz>0?'+z':'-z');}
 function faceVec(f){return {'+z':[0,1],'-z':[0,-1],'+x':[1,0],'-x':[-1,0]}[f];}
 function buildObj(i){let g;
-  if(i.type==='hopper')g=buildHopper();else if(i.type==='tower')g=TT(i)==='site2'?buildTowerSite2(towerFace(i),inletFace(i),i.mixRot||0):TT(i)==='half'?buildTowerHalf(towerFace(i),inletFace(i),i.mixRot||0):buildTower(towerFace(i),i.mixRot||0);else if(i.type==='bins')g=buildBinsP(i.b);else if(i.type==='rbin')g=buildRbin(i,rbinSg(i));
+  if(i.type==='hopper')g=buildHopper();else if(i.type==='tower')g=TT(i)==='site2'?buildTowerSite2(towerFace(i),inletFace(i),i.mixRot||0):TT(i)==='half'?buildTowerHalf(towerFace(i),inletFace(i),i.mixRot||0):buildTower(towerFace(i),i.mixRot||0);else if(i.type==='bins')g=buildBinsP(i.b,binNear(i));else if(i.type==='rbin')g=buildRbin(i,rbinSg(i));
   else if(FAC.includes(i.type))g=buildFacility(i);
   else if(i.type==='silo')g=buildSilo(i,doorOf(i));else if(i.type==='blk'){g=new THREE.Group();blockStack(g,-i.nx*BLK.s/2,i.nx*BLK.s/2,-i.nz*BLK.s/2,i.nz*BLK.s/2,i.layers,0);}else if(i.type==='transfer')g=buildTransfer(i.top);
   else if(i.type==='zone'){g=new THREE.Group();const p=mesh(new THREE.PlaneGeometry(i.w,i.d),M.zone,false);p.rotation.x=-Math.PI/2;p.position.y=.04;g.add(p);
