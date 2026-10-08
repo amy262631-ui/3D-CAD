@@ -4522,8 +4522,8 @@ function buildRbin(i,sg){const g=new THREE.Group(),G=rbinGeom(i),C=rbinCells(G),
       else{[B.z0,B.z1].forEach(z=>box(g,lx,1.5,.08,M.binBand,mx,hT+.75,z));[B.x0,B.x1].forEach(x=>box(g,.06,1.3,lz,M.silo2,x,hT+.65,mz));zs.slice(1,-1).forEach(z=>box(g,lx,1.1,.06,M.silo2,mx,hT+.55,z));}}
     else{ // upstand plates on the three non-feeding sides (feeding face stays open for the loader bucket)
       const lx=B.x1-B.x0,lz=B.z1-B.z0,mx=(B.x0+B.x1)/2,mz=(B.z0+B.z1)/2,wy=G.top+.75;
-      if(B.alongX){box(g,lx,1.5,.08,M.silo2,mx,wy,sg*G.W/2);[B.x0,B.x1].forEach(x=>box(g,.08,1.5,lz,M.silo2,x,wy,mz));}
-      else{box(g,.08,1.5,lz,M.silo2,B.x1,wy,mz);[B.z0,B.z1].forEach(z=>box(g,lx,1.5,.08,M.silo2,mx,wy,z));}}});
+      if(B.alongX){box(g,lx,1.5,.08,M.silo2,mx,wy,sg*G.W/2);xs.forEach(x=>box(g,.08,1.5,lz,M.silo2,x,wy,mz));}   // ends + partitions between cells
+      else{box(g,.08,1.5,lz,M.silo2,B.x1,wy,mz);zs.forEach(z=>box(g,lx,1.5,.08,M.silo2,mx,wy,z));}}});
   if(G.pit){if(G.twin)box(g,G.gap-.2,.45,G.W+.4,M.rc,0,.22,0);else box(g,.35,1.2,G.L,M.rc,-px,.6,0);
     const cov=G.twin?[]:[[2*px,sg>0?G.L/2+.15:pz0,sg>0?pz1:-G.L/2-.15]];cov.forEach(([w,a,b])=>{if(b-a>.2)box(g,w,.25,b-a,M.rc,0,.1,(a+b)/2);});}
   if(G.twin&&G.gnd){const a=-sg*(G.W/2+.4),b=-sg*(G.W/2+10);box(g,2*(G.gap/2+G.L)+2,.15,Math.abs(b-a),M.rc,0,.07,(a+b)/2);} // loader pad behind
