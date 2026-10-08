@@ -297,6 +297,7 @@ fieldset.must{border-color:var(--accent);background:var(--accent-soft)}
     <div class="xcard">
       <header><h2>存檔與輸出</h2><button class="hbtn" id="xClose" type="button">關閉 ✕</button></header>
       <div class="xbody">
+        <div class="irow"><label for="xCo">公司名稱（圖框）</label><input class="txt" id="xCo" type="text" value="何鑫實業股份有限公司"></div>
         <div class="irow"><label for="xName">專案名稱</label><input class="txt" id="xName" type="text" value="預拌廠配置"></div>
         <div class="irow"><label for="xNote">圖面備註</label><input class="txt" id="xNote" type="text" placeholder="例：業主、地點、版次"></div>
         <div class="isect">存到共用資料庫（後端）</div>
@@ -395,7 +396,7 @@ fieldset.must{border-color:var(--accent);background:var(--accent-soft)}
         <div id="palettes"></div>
         <div class="flowline" id="colors"></div>
       </fieldset>
-      <p class="note">高差沿用本廠設計：受料坑 <b>-3.0</b>、骨材庫出料 <b>1.9</b>、主機樓 5F 頭輪 <b>19.0</b>、螺運機接主機樓 3F 計量 <b>14.4</b>。原點在場地左上角，方位 0° 為畫面上方。</p>
+      <p class="note">標準高差：受料坑 <b>-3.0</b>、骨材庫出料 <b>1.9</b>、主機樓 5F 頭輪 <b>19.0</b>（各設備可在「帶運機銜接高度」個別改）、螺運機接主機樓 3F 計量 <b>14.4</b>。原點在場地左上角，方位 0° 為畫面上方。</p>
     </div>
   </aside>
 
@@ -4503,7 +4504,7 @@ function buildRbin(i,sg){const g=new THREE.Group(),G=rbinGeom(i),C=rbinCells(G),
   if(G.lift>0){const bx=Math.max(2,Math.ceil((2*px+2.6)/BLK.s))*BLK.s/2,bz=Math.max(2,Math.ceil((pl)/BLK.s))*BLK.s/2;blockStack(g,-bx,bx,pm-bz,pm+bz,G.lift,0);}  // stacked RC blocks under the bins
   if(pd<0){box(g,2*px,.3,pl,M.rcU,0,pd-.15,pm);[-1,1].forEach(s=>box(g,T,-pd,pl,M.rcU,s*px,pd/2,pm));[pz0,pz1].forEach(z=>box(g,2*px,-pd,T,M.rcU,0,pd/2,z));}   // pit walls flush with the ground (no curb ring)
   const pg=new THREE.CylinderGeometry(Math.SQRT1_2,.09,1,4,1,true);pg.rotateY(Math.PI/4);
-  const hT=G.gnd?G.top-1.3:G.top,outs=c=>G.twin?[[c.x,-G.W/4],[c.x,G.W/4]]:[[c.x,c.z]];
+  const hT=G.gnd?G.top-1.3:G.top,outs=c=>G.twin?(i.wb===1?[[c.x,0]]:[[c.x,-G.W/4],[c.x,G.W/4]]):[[c.x,c.z]];
   C.forEach(c=>{const h=mesh(pg,M.hopIn);h.scale.set(c.sx-.15,hT-G.out,c.sz-.15);h.position.set(c.x,(hT+G.out)/2,c.z);g.add(h);
     outs(c).forEach(([x,z])=>box(g,.6,G.out-G.belt-.1,.6,M.equip,x,(G.out+G.belt)/2+.1,z));
     if(G.pit){const gr=box(g,c.sx-.2,.06,c.sz-.2,M.grate,c.x,.05,c.z);gr.castShadow=false;}});
@@ -4528,7 +4529,7 @@ function buildRbin(i,sg){const g=new THREE.Group(),G=rbinGeom(i),C=rbinCells(G),
     const cov=G.twin?[]:[[2*px,sg>0?G.L/2+.15:pz0,sg>0?pz1:-G.L/2-.15]];cov.forEach(([w,a,b])=>{if(b-a>.2)box(g,w,.25,b-a,M.rc,0,.1,(a+b)/2);});}
   if(G.twin&&G.gnd){const a=-sg*(G.W/2+.4),b=-sg*(G.W/2+10);box(g,2*(G.gap/2+G.L)+2,.15,Math.abs(b-a),M.rc,0,.07,(a+b)/2);} // loader pad behind
   // weigh belts
-  if(G.twin){[-1,1].forEach(s=>[-G.W/4,G.W/4].forEach(z=>{const x0=s*(G.gap/2+G.L-.3),x1=s*.5,len=Math.abs(x0-x1);box(g,len,.12,.9,M.belt,(x0+x1)/2,G.belt,z);box(g,len,.3,1.1,M.steel,(x0+x1)/2,G.belt-.25,z);}));
+  if(G.twin){[-1,1].forEach(s=>(i.wb===1?[0]:[-G.W/4,G.W/4]).forEach(z=>{const x0=s*(G.gap/2+G.L-.3),x1=s*.5,len=Math.abs(x0-x1);box(g,len,.12,.9,M.belt,(x0+x1)/2,G.belt,z);box(g,len,.3,1.1,M.steel,(x0+x1)/2,G.belt-.25,z);}));
     box(g,G.gap-.4,Math.max(.6,G.belt-G.tail+.6),G.W*.8,M.silo2,0,(G.belt+G.tail)/2+.3,0);} // central receiving chute over the main belt
   else{const za=-sg*(G.L/2+.4),zb=sg*(G.L/2+G.ext),len=Math.abs(zb-za);box(g,1,.12,len,M.belt,0,G.belt,(za+zb)/2);box(g,1.2,.3,len,M.steel,0,G.belt-.25,(za+zb)/2);
     box(g,.9,G.belt-G.tail,.9,M.silo2,0,(G.belt+G.tail)/2,zb);}
@@ -4885,7 +4886,7 @@ function screwRoute(s,tw){
 
 /* ---------- 3D objects per item ---------- */
 const OBJ={};  // id -> {g,key}
-function objKey(i){if(i.type==='veh')return 'veh'+i.kind+(i.ring===false?0:1);if(i.type==='yard')return JSON.stringify(['yard',i.bays,i.tanks,i.sep,i.clear,i.silt]);if(i.type==='tower')return 'tower'+TT(i)+towerFace(i)+(TT(i)!=='classic'?inletFace(i):'')+'m'+(i.mixRot||0);if(FAC.includes(i.type))return JSON.stringify([i.w,i.L,i.W,i.n,i.rows,i.ang,i.sw,i.sl,i.cars,i.gs||'']);if(i.type==='bins')return JSON.stringify(i.b)+JSON.stringify(binNear(i));if(i.type==='blk')return JSON.stringify(['blk',i.nx,i.nz,i.layers]);if(i.type==='rbin')return JSON.stringify(['rb',i.rk,i.mt,i.n,i.P,i.W,i.ext,i.gap,i.lift||0,rbinSg(i),i.house?1:0,i.houseH||7]);if(i.type==='silo')return JSON.stringify([i.D,i.cyl,i.cone,i.bottom,i.base,i.sup||'',i.cell||0,i.room||'',doorOf(i),i.topH?1:0,i.skirt?1:0]);
+function objKey(i){if(i.type==='veh')return 'veh'+i.kind+(i.ring===false?0:1);if(i.type==='yard')return JSON.stringify(['yard',i.bays,i.tanks,i.sep,i.clear,i.silt]);if(i.type==='tower')return 'tower'+TT(i)+towerFace(i)+(TT(i)!=='classic'?inletFace(i):'')+'m'+(i.mixRot||0);if(FAC.includes(i.type))return JSON.stringify([i.w,i.L,i.W,i.n,i.rows,i.ang,i.sw,i.sl,i.cars,i.gs||'']);if(i.type==='bins')return JSON.stringify(i.b)+JSON.stringify(binNear(i));if(i.type==='blk')return JSON.stringify(['blk',i.nx,i.nz,i.layers]);if(i.type==='rbin')return JSON.stringify(['rb',i.wb||2,i.rk,i.mt,i.n,i.P,i.W,i.ext,i.gap,i.lift||0,rbinSg(i),i.house?1:0,i.houseH||7]);if(i.type==='silo')return JSON.stringify([i.D,i.cyl,i.cone,i.bottom,i.base,i.sup||'',i.cell||0,i.room||'',doorOf(i),i.topH?1:0,i.skirt?1:0]);
   if(i.type==='transfer')return fmt(i.top);if(i.type==='zone')return JSON.stringify([i.w,i.d]);return i.type;}
 const COMPASS={N:[0,-1],S:[0,1],E:[1,0],W:[-1,0]},CN={N:'北',S:'南',E:'東',W:'西'};
 function towerFace(t){const d=COMPASS[t.exit||'S'];const [lx,lz]=rotXZ(d[0],d[1],-(t.r||0));return Math.abs(lx)>Math.abs(lz)?(lx>0?'+x':'-x'):(lz>0?'+z':'-z');}
@@ -5337,7 +5338,7 @@ function renderInspector(){
   if(i.type==='rbin')h+=sect('儲倉型式')+'<div class="irow"><label for="i-rk">配置</label><select id="i-rk" data-k="rk"><option value="line">單排（水平計量皮帶沿倉排）</option><option value="twin">兩個儲倉左右對稱（往中間投料）</option></select></div>'+
     '<div class="irow"><label for="i-mt">安裝</label><select id="i-mt" data-k="mt"><option value="pit">埋地（卡車地面傾倒）</option><option value="frame">淺坑＋鋼架（鏟裝機投料）</option><option value="ground">地上鋼架，不挖坑（鏟裝機投料）</option></select></div>'+
     '<div class="irow"><label for="i-house">鋼構鐵屋</label><select id="i-house" data-k="house"><option value="0">不加</option><option value="1">加（三面浪板＋單斜屋頂，投料面開放）</option></select></div>'+row('houseH','鐵屋高（倉頂以上）','0.5','m')+
-    (i.mt==='ground'?row('lift','RC 混凝土塊墊高（層，每層 1 m）','1','層'):'')+row('n',i.rk==='twin'?'每側倉數':'倉數','1','倉')+row('P',i.rk==='twin'?'每倉長（往中間方向）':'每倉長（沿皮帶）','0.1','m')+row('W',i.rk==='twin'?'倉深（每側兩條計量皮帶）':'倉寬','0.1','m')+(i.rk==='twin'?row('gap','中間主帶運機通道寬','0.1','m'):row('ext','水平皮帶延伸到主帶運機','0.5','m'));
+    (i.mt==='ground'?row('lift','RC 混凝土塊墊高（層，每層 1 m）','1','層'):'')+row('n',i.rk==='twin'?'每側倉數':'倉數','1','倉')+row('P',i.rk==='twin'?'每倉長（往中間方向）':'每倉長（沿皮帶）','0.1','m')+row('W',i.rk==='twin'?'倉深':'倉寬','0.1','m')+(i.rk==='twin'?'<div class="irow"><label for="i-wb">底部水平計量皮帶</label><select id="i-wb" data-k="wb"><option value="2">每側兩條</option><option value="1">每側一條</option></select></div>'+row('gap','中間主帶運機通道寬','0.1','m'):row('ext','水平皮帶延伸到主帶運機','0.5','m'));
   if(i.type==='transfer')h+=sect('轉台')+'<div class="irow"><label for="i-belt">屬於</label><select id="i-belt" data-k="belt"><option value="inc">入庫帶運機</option><option value="main">主帶運機</option></select></div>'+
     row('h','高度','0.5','m',{dis:i.h==null})+'<label class="chk sm"><input type="checkbox" id="i-hauto" data-k="hauto"> 自動高度（前後坡度相同）</label>';
   if(i.type==='zone')h+=sect('範圍')+row('w','寬','1','m')+row('d','長','1','m');
@@ -5361,7 +5362,7 @@ function fillInspector(){const i=byId(selected);if(!i||!$('i-x')||insEl.dataset.
   if(i.type==='hopper')set('bh_pit',fmt(hopPit(i),2));if(i.type==='tower')set('bh_head',fmt(towerHead(i),2));if(i.type==='rbin')set('bh_rtail',fmt(rbinGeom(i).tail,2));
   if(i.type==='bins'){set('bh_feed',fmt(binFeedY(i.b),2));set('bh_out',fmt(binOutY(i.b),2));set('bh_toff',fmt(binTailOff(i.b),1));['L','W','legH','hopH','boxH'].forEach(k=>set(k,fmt(i.b[k])));binLayout(i.b);$('i-grid').value=i.b.cells;$('i-cw').value=(i.b.cw||[]).join('/');$('i-st').value=i.b.st==='rc'?'rc':'steel';$('i-bskirt').value=i.b.skirt?'1':'0';$('i-bpair').checked=!!binPair(i);}
   if(i.type==='silo'){['D','cyl','cone','base'].forEach(k=>set(k,fmt(i[k],k==='D'?3:2)));set('cbot',fmt(i.base+i.bottom,2));if($('i-topH'))$('i-topH').value=i.topH?'1':'0';if($('i-skirt'))$('i-skirt').value=i.skirt?'1':'0';if($('i-mat'))$('i-mat').value=i.mat||'';if($('i-dual'))$('i-dual').value=i.dual?'1':'0';$('i-sup').value=i.sup==='bldg'?'bldg':i.base>0?'rc':'steel';$('i-base').disabled=!(i.base>0)||i.sup==='bldg';if($('i-rcf')){$('i-rcf').value=String(i.rcf||3);set('cell',fmt(i.cell||5.4,2));set('room',i.room||'');}}
-  if(i.type==='rbin'){if($('i-house'))$('i-house').value=i.house?'1':'0';set('houseH',fmt(i.houseH||7));$('i-rk').value=i.rk||'line';$('i-mt').value=i.mt||'pit';set('n',i.n);set('P',fmt(i.P,2));set('W',fmt(i.W,2));if($('i-ext'))set('ext',fmt(i.ext));if($('i-gap'))set('gap',fmt(i.gap));if($('i-lift'))set('lift',i.lift||0);}
+  if(i.type==='rbin'){if($('i-wb'))$('i-wb').value=i.wb===1?'1':'2';if($('i-house'))$('i-house').value=i.house?'1':'0';set('houseH',fmt(i.houseH||7));$('i-rk').value=i.rk||'line';$('i-mt').value=i.mt||'pit';set('n',i.n);set('P',fmt(i.P,2));set('W',fmt(i.W,2));if($('i-ext'))set('ext',fmt(i.ext));if($('i-gap'))set('gap',fmt(i.gap));if($('i-lift'))set('lift',i.lift||0);}
   if(i.type==='transfer'){$('i-belt').value=i.belt;set('h',fmt(i.top));$('i-h').disabled=i.h==null;$('i-hauto').checked=i.h==null;}
   if(i.type==='zone'){set('w',fmt(i.w));set('d',fmt(i.d));}if(i.type==='blk'){set('nx',i.nx);set('nz',i.nz);set('layers',i.layers);}
   if(i.type==='gate'){set('w',fmt(i.w));$('i-gs').value=i.gs||'';}if(['scale','wash','office','rest','pond'].includes(i.type)){set('L',fmt(i.L));set('W',fmt(i.W));}if(i.type==='pond')set('n',i.n||2);if(i.type==='wash')$('i-wdir').value=i.dir||'out';if(i.type==='tpt')$('i-tkind').value=i.kind||'mixer';if(i.type==='veh'){$('i-vk').value=i.kind;$('i-yauto').checked=i.yAuto!==false;set('y0',fmt(baseY(i)));$('i-y0').disabled=i.yAuto!==false;if($('i-ring'))$('i-ring').checked=i.ring!==false;}
@@ -5379,7 +5380,7 @@ function fillInspector(){const i=byId(selected);if(!i||!$('i-x')||insEl.dataset.
     c.innerHTML=cells+' 倉，'+(G.pit?'埋地，倉口與地面齊平，卡車直接傾倒':G.gnd?'地上鋼架、不挖坑，倉口 +'+fmt(G.top)+' m，鏟裝機投料':'淺坑 GL'+fmt(G.floor)+'，鋼架儲斗口 +'+fmt(G.top)+' m，鏟裝機投料')+'。<br>儲斗容積約 <b>'+fmt(v,0)+' m³</b>（只算錐斗）。<br>水平計量皮帶 '+(G.belt>=0?'+':'GL')+'<b>'+fmt(G.belt)+'</b> → 主帶運機尾端 '+(G.tail>=0?'+':'GL')+'<b>'+fmt(G.tail)+'</b>'+
       (G.twin?'（主帶運機從兩排中間穿過）':'')+'。'+(b?'<br>同一套有骨材庫：主帶運機尾端延伸到這裡，骨材庫要放在主帶運機正上方。':'<br>沒有骨材庫（CLSM）：直接接主帶運機到主機樓。')+(L&&L[0]===i?'':'<br>尚未接主機樓。');}
   else if(i.type==='blk')c.innerHTML=i.nx*i.nz*i.layers+' 塊，佔地 '+fmt(i.nx*BLK.s)+' × '+fmt(i.nz*BLK.s)+' m、高 '+fmt(i.layers*BLK.h)+' m。堆疊式免基礎，可當料場平台、擋牆或設備墊高。不參與碰撞檢查。';
-  else if(i.type==='hopper')c.innerHTML='地下受料坑，坑底 <b>-3.0 m</b>。砂石車由背離輸送帶的一側倒車卸料。';
+  else if(i.type==='hopper')c.innerHTML='地下受料坑，坑底出料點 <b>'+fmt(hopPit(i),2)+' m</b>。砂石車由背離輸送帶的一側倒車卸料。';
   else if(i.type==='transfer')c.innerHTML='自動建議高度 <b>'+fmt(i.autoTop)+' m</b>，前後皮帶落差 '+DROP+' m。';
   else if(i.type==='parking'){const P=parkGeom(i);c.innerHTML='佔地約 <b>'+fmt(P.width)+' × '+fmt(P.band*i.rows)+' m</b>（含 9 m 車道）。車頭朝車道停放，出場直接前進。';}
   else if(i.type==='yard'){const G=yardGeom(i);c.innerHTML='露天，佔地約 <b>'+fmt(G.W)+' × '+fmt(G.D)+' m</b>（依砂／石／汙水回收設備配置圖）。預拌車倒車上洗車爬坡，罐尾對入料槽洗罐排料；'+(i.sep?'回收機分出砂、石落入回收斜坑，':'')+'汙水進 '+G.mix+' 格攪拌池'+(G.cl?'，後排 '+G.cl+' 格清水池':'')+(G.silt?'，左側淤泥沉澱斜坑':'')+'。';}
@@ -5398,6 +5399,7 @@ function applyField(i,k,v){
   if(k==='name'){i.name=v||i.name;return;}if(k==='label'){if(String(v).trim())i.label=String(v).trim();else delete i.label;return;}
   if(k==='locked'){i.locked=!!v;return;}
   if(i.type==='blk'&&['nx','nz','layers'].includes(k)){const n=parseFloat(v);if(isFinite(n))i[k]=Math.max(1,Math.min(k==='layers'?6:30,Math.round(n)));return;}
+  if(i.type==='rbin'&&k==='wb'){if(v==='1')i.wb=1;else delete i.wb;return;}
   if(i.type==='rbin'&&k==='house'){if(v==='1')i.house=true;else delete i.house;return;}if(i.type==='rbin'&&k==='houseH'){const n=parseFloat(v);if(isFinite(n))i.houseH=Math.max(4,Math.min(15,n));return;}
   if(k.startsWith('bh_')){const n=parseFloat(v);if(!isFinite(n))return;
     if(k==='bh_pit')i.pit=Math.max(-8,Math.min(0,n));else if(k==='bh_head')i.head=Math.max(5,Math.min(30,n));else if(k==='bh_rtail')i.tailY=Math.max(-8,Math.min(5,n));
@@ -5436,7 +5438,7 @@ function applyField(i,k,v){
 }
 function moveItem(i,dx,dz){i.x+=dx;i.z+=dz;if(i.type==='tower'&&S.siloFollow)silos().filter(s=>(s.line||1)===(i.line||1)&&!s.locked).forEach(s=>{s.x+=dx;s.z+=dz;});}
 insEl.addEventListener('change',e=>{if(selSet.size>1)return;const t=e.target,k=t.dataset.k,i=byId(selected);if(!k||!i||insEl.dataset.id!==i.id)return;applyField(i,k,t.type==='checkbox'?t.checked:t.value);
-  if(['house','auto','hauto','preset','sdia','slay','D','cyl','cone','grid','belt','line','rows','cars','locked','sup','exit','sep','silt','tt','inlet','st','rcf','rk','mt','mixRot','dir','kind','vkind','ring','bpre','yAuto','gs','sskirt','bskirt','bpair'].includes(k))renderInspector();update();});
+  if(['wb','house','auto','hauto','preset','sdia','slay','D','cyl','cone','grid','belt','line','rows','cars','locked','sup','exit','sep','silt','tt','inlet','st','rcf','rk','mt','mixRot','dir','kind','vkind','ring','bpre','yAuto','gs','sskirt','bskirt','bpair'].includes(k))renderInspector();update();});
 insEl.addEventListener('click',e=>{const bh=e.target.closest('[data-bh]');if(bh){const t=byId(selected);if(t){delete t.pit;delete t.head;delete t.tailY;if(t.b){delete t.b.feedY;delete t.b.outY;delete t.b.tail;}renderInspector();update();save();}return;}const bf=e.target.closest('[data-fl]');if(bf){const t=byId(selected);if(t){if($('bClad').classList.contains('on'))$('bClad').click();if(topMode)frame(false);focusAt(V(t.x,+bf.dataset.fl,t.z),11);toast('已關閉外牆浪板，按「外牆浪板」可再打開');}return;}const b0=e.target.closest('button');if(b0&&selSet.size>1){const g=b0.dataset.g;
     if(b0.dataset.step){const el=$('i-'+b0.dataset.step);el.value=(parseFloat(el.value)||0)+parseFloat(b0.dataset.d);return;}
     if(g==='move'){moveGroup(parseFloat($('i-gdx').value)||0,parseFloat($('i-gdz').value)||0);$('i-gdx').value=0;$('i-gdz').value=0;update();}
@@ -5451,7 +5453,7 @@ insEl.addEventListener('click',e=>{const bh=e.target.closest('[data-bh]');if(bh)
   if(b.dataset.act==='dup'){const c=Object.assign({},i,{id:newId('s'),name:i.name+'（複製）',x:i.x+i.D+1.5});S.items.push(c);select(c.id);}});
 
 /* ---------- equipment templates (shared when a backend is connected) ---------- */
-const TPL_KEYS={office:['W','L'],rest:['W','L'],pond:['W','L','n'],veh:['kind'],blk:['nx','nz','layers'],rbin:['rk','mt','n','P','W','ext','gap','lift','house','houseH','tailY'],silo:['D','cyl','cone','bottom','base','sup','rcf','cell','topH','skirt'],bins:['b'],tower:['tt','exit','inlet','mixRot','head'],hopper:['pit'],transfer:['h'],yard:['bays','tanks','clear','sep','silt'],parking:['n','rows','ang','sw','sl','cars'],scale:['L','W'],wash:['L','W','dir'],gate:['w'],zone:['w','d']};
+const TPL_KEYS={office:['W','L'],rest:['W','L'],pond:['W','L','n'],veh:['kind'],blk:['nx','nz','layers'],rbin:['rk','mt','n','P','W','ext','gap','lift','house','houseH','tailY','wb'],silo:['D','cyl','cone','bottom','base','sup','rcf','cell','topH','skirt'],bins:['b'],tower:['tt','exit','inlet','mixRot','head'],hopper:['pit'],transfer:['h'],yard:['bays','tanks','clear','sep','silt'],parking:['n','rows','ang','sw','sl','cars'],scale:['L','W'],wash:['L','W','dir'],gate:['w'],zone:['w','d']};
 let TPL=(()=>{try{return JSON.parse(localStorage.getItem('rmc-tpl')||'[]');}catch(e){return [];}})(),DBREF=null;
 async function tplPersist(){try{localStorage.setItem('rmc-tpl',JSON.stringify(TPL));}catch(e){}
   try{if(DBREF)await DBREF.doc('templates/all').set({list:TPL});else if(SHEET.on){const j=await sheetCall(null,{action:'save',id:SHEET.tplId||'',name:'__TEMPLATES__',saved:Date.now(),summary:'設備範本',state:{list:TPL},thumb:''});SHEET.tplId=j.id;}}
@@ -5786,6 +5788,9 @@ async function saveFile(name,data){
   if(dl){try{await dl.save({filename:name,data});toast('已輸出 '+name);}catch(e){toast(e&&e.code==='declined'?'已取消下載':'無法輸出：'+((e&&e.message)||(e&&e.code)||e));}return;}
   const blob=data instanceof Blob?data:new Blob([data]);const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
   setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);toast('已下載 '+name);}
+const coName=()=>($('xCo')&&$('xCo').value.trim())||'何鑫實業股份有限公司';
+try{const v=localStorage.getItem('rmc-co');if(v&&$('xCo'))$('xCo').value=v;}catch(e){}
+if($('xCo'))$('xCo').addEventListener('change',()=>{try{localStorage.setItem('rmc-co',$('xCo').value);}catch(e){}});
 const projName=()=>($('xName').value||'預拌廠配置').replace(/[\\/:*?"<>|]/g,'_');
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
 
@@ -5842,9 +5847,9 @@ const PW=2800,PH=1980;
 function sheet(title,drawFn,idx,total){const cv=document.createElement('canvas');cv.width=PW;cv.height=PH;const g=cv.getContext('2d');const FONT='"Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif';
   g.fillStyle='#fff';g.fillRect(0,0,PW,PH);g.strokeStyle='#1d252c';g.lineWidth=4;g.strokeRect(40,40,PW-80,PH-80);g.lineWidth=2;g.strokeRect(56,56,PW-112,PH-112);
   drawFn(g,{x:70,y:70,w:PW-140,h:PH-140-230});
-  const ty=PH-56-220,cols=[[56,720,'專案名稱',$('xName').value||'預拌廠配置'],[720,1560,'圖名',title],[1560,2020,'比例','示意（詳比例尺）'],[2020,2360,'日期',today()],[2360,PW-56,'圖號',String(idx).padStart(2,'0')+' / '+String(total).padStart(2,'0')]];
+  const ty=PH-56-220,cols=[[56,640,'設計單位',coName()],[640,1180,'專案名稱',$('xName').value||'預拌廠配置'],[1180,1880,'圖名',title],[1880,2200,'比例','示意（詳比例尺）'],[2200,2480,'日期',today()],[2480,PW-56,'圖號',String(idx).padStart(2,'0')+' / '+String(total).padStart(2,'0')]];
   g.lineWidth=2;g.beginPath();g.moveTo(56,ty);g.lineTo(PW-56,ty);g.stroke();cols.forEach(([x0,x1,k,v],j)=>{if(j){g.beginPath();g.moveTo(x0,ty);g.lineTo(x0,PH-56);g.stroke();}
-    g.fillStyle='#5d6b76';g.font='26px '+FONT;g.textAlign='left';g.textBaseline='top';g.fillText(k,x0+20,ty+18);g.fillStyle='#1d252c';g.font='700 '+(j===1?44:38)+'px '+FONT;g.fillText(v,x0+20,ty+70,x1-x0-40);});
+    g.fillStyle='#5d6b76';g.font='26px '+FONT;g.textAlign='left';g.textBaseline='top';g.fillText(k,x0+20,ty+18);g.fillStyle='#1d252c';g.font='700 '+(j===2?44:38)+'px '+FONT;g.fillText(v,x0+20,ty+70,x1-x0-40);});
   g.fillStyle='#5d6b76';g.font='24px '+FONT;g.fillText(($('xNote').value?$('xNote').value+'　':'')+'本圖為配置示意，非施工圖；尺寸以實際設計為準。',76,ty+160);
   return cv;}
 function coverSheet(total){return sheet('配置總表',(g,a)=>{const FONT='"Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif';let y=a.y+40;g.textBaseline='top';g.textAlign='left';
@@ -5854,14 +5859,14 @@ function coverSheet(total){return sheet('配置總表',(g,a)=>{const FONT='"Noto
     g.font='25px '+FONT;rows.forEach((r,n)=>{const yy=y+rh*(n+1);if(n%2){g.fillStyle='#f8f9fa';g.fillRect(x,yy,w,rh);}g.fillStyle=r._bad?'#c8342c':'#1d252c';let cx=x;r.forEach((c,k)=>{g.fillText(String(c),cx+10,yy+10,widths[k]-16);cx+=widths[k];});});
     g.strokeStyle='#c9d0d6';g.lineWidth=1;g.strokeRect(x,y,w,rh*(rows.length+1));return y+rh*(rows.length+1);};
   const spec=i=>i.type==='rbin'?(()=>{const G=rbinGeom(i);return G.n+(G.twin?'×2':'')+' 倉　'+(G.pit?'埋地':G.gnd?'地上鋼架':'淺坑鋼架')+'　主帶尾 '+(G.tail>=0?'+':'GL')+fmt(G.tail);})():i.type==='bins'?(binLayout(i.b),i.b.cells)+' 倉　'+fmt(i.b.L)+'×'+fmt(i.b.W)+' m　倉頂 '+fmt(binTop(i.b))+' m':i.type==='silo'?(towerFor(i)?'距主機樓 ('+fmt(i.x-towerFor(i).x)+', '+fmt(i.z-towerFor(i).z)+')　':'')+siloSpecName(i)+'　總高 '+fmt(siloTop(i)+1)+' m':
-    i.type==='tower'?(TT(i)==='site2'?'簡易工地型-2方 6.0×2.5 m　入料點 10.9 m':TT(i)==='half'?'半高塔 7.15×7.05 m　1F RC　入料點 15.2 m':'11.2×10.1 m　6F　頭輪 19.0 m')+(entryAngle(i)!=null?'　進入角 '+fmt(entryAngle(i),0)+'°':''):i.type==='transfer'?'高 '+fmt(i.top)+' m':i.type==='parking'?i.n+' 格　'+fmt(i.ang,0)+'°　'+fmt(i.sw)+'×'+fmt(i.sl)+' m':i.type==='scale'||i.type==='wash'?fmt(i.L)+'×'+fmt(i.W)+' m':i.type==='gate'?'門寬 '+fmt(i.w)+' m':i.type==='hopper'?'地下受料坑 -3.0 m':'';
+    i.type==='tower'?(TT(i)==='site2'?'簡易工地型-2方 6.0×2.5 m　入料點 '+fmt(towerHead(i))+' m':TT(i)==='half'?'半高塔 7.15×7.05 m　1F RC　入料點 '+fmt(towerHead(i))+' m':'11.2×10.1 m　6F　頭輪 '+fmt(towerHead(i))+' m')+(entryAngle(i)!=null?'　進入角 '+fmt(entryAngle(i),0)+'°':''):i.type==='transfer'?'高 '+fmt(i.top)+' m':i.type==='parking'?i.n+' 格　'+fmt(i.ang,0)+'°　'+fmt(i.sw)+'×'+fmt(i.sl)+' m':i.type==='scale'||i.type==='wash'?fmt(i.L)+'×'+fmt(i.W)+' m':i.type==='gate'?'門寬 '+fmt(i.w)+' m':i.type==='hopper'?'地下受料坑 '+fmt(hopPit(i))+' m':'';
   const eq=S.items.map(i=>[nm(i),spec(i),fmt(i.x),fmt(i.z),fmt(rotDeg(i.r||0),0)+'°']);
   const colW=Math.floor(a.w*.56);let y2=table(a.x+30,y,colW,['設備','規格','X (m)','Y (m)','旋轉'],eq.slice(0,24),[colW*.3,colW*.4,colW*.1,colW*.1,colW*.1]);
   const segs=segments(),bx=a.x+60+colW,bw=a.w-colW-90;
   let y3=table(bx,y,bw,['輸送帶','水平','斜長','高差','坡度'],segs.map(s=>{const r=[s.name,fmt(s.hz)+' m',fmt(s.len)+' m',fmt(s.rise)+' m',fmt(s.ang)+'°'];r._bad=over(s.ang);return r;}),[bw*.36,bw*.16,bw*.16,bw*.16,bw*.16]);
   const ev=evaluate(segs);y3+=40;g.font='600 28px '+FONT;g.fillStyle='#1d252c';g.fillText('檢查結果',bx,y3);y3+=48;g.font='24px '+FONT;
-  ev.W.slice(0,14).forEach(([c,t])=>{g.fillStyle=c==='bad'?'#c8342c':c==='warn'?'#b85c00':c==='ok'?'#2e7d4f':'#5d6b76';const words=[...t];let line='';
-    words.forEach(ch=>{if(g.measureText(line+ch).width>bw-30){g.fillText(line,bx+20,y3);y3+=34;line='';}line+=ch;});g.fillText('• '+line,bx,y3);y3+=40;});},1,total);}
+  ev.W.slice(0,14).forEach(([c,t])=>{t=RN(String(t).replace(/<[^>]+>/g,''));g.fillStyle=c==='bad'?'#c8342c':c==='warn'?'#b85c00':c==='ok'?'#2e7d4f':'#5d6b76';const words=[...t];let line='';
+    let first=true;words.forEach(ch=>{if(g.measureText(line+ch).width>bw-30){g.fillText(first?'• '+line:line,first?bx:bx+20,y3);first=false;y3+=34;line='';}line+=ch;});g.fillText(first?'• '+line:line,first?bx:bx+20,y3);y3+=40;});},1,total);}
 async function buildSheets(keys,onStep){const total=keys.length+1,out=[coverSheet(total)];
   for(let k=0;k<keys.length;k++){onStep&&onStep(k+1,total);await new Promise(r=>setTimeout(r,20));const key=keys[k];
     out.push(sheet(VIEWS3[key].t,(g,a)=>{const {canvas}=renderView(key,a.w,a.h);g.drawImage(canvas,a.x,a.y);g.strokeStyle='#c9d0d6';g.lineWidth=1;g.strokeRect(a.x,a.y,a.w,a.h);},k+2,total));}
@@ -5902,6 +5907,8 @@ function dxf(){const L=[],Y=z=>(S.L-z)*1000,X=x=>x*1000;const layers={SITE:7,EQU
     line([s.a.x,s.a.z],[s.b.x,s.b.z],'BELT');[1,-1].forEach(k=>line([s.a.x+n.x*k,s.a.z+n.z*k],[s.b.x+n.x*k,s.b.z+n.z*k],'BELT'));
     text((s.a.x+s.b.x)/2+n.x*2.5,(s.a.z+s.b.z)/2+n.z*2.5,.9,s.name+' '+fmt(s.ang)+'° L='+fmt(s.len)+'m');});
   ROUTES.forEach(r=>{const P=r.sp||r.pts;for(let k=1;k<P.length;k++)line([P[k-1].p.x,P[k-1].p.z],[P[k].p.x,P[k].p.z],'ROUTE');});
+  {const z0=S.L+3,z1=S.L+9,x1=Math.max(S.W,60);[[0,z0,x1,z0],[x1,z0,x1,z1],[x1,z1,0,z1],[0,z1,0,z0],[x1*.38,z0,x1*.38,z1],[x1*.75,z0,x1*.75,z1]].forEach(([a,b,c,d])=>line([a,b],[c,d],'TEXT'));   // title block
+   text(1,z0+3.6,1.6,coName());text(x1*.38+1,z0+2.6,1.2,$('xName').value||'預拌廠配置');text(x1*.38+1,z0+4.8,.9,'配置平面圖　'+($('xNote').value||''));text(x1*.75+1,z0+2.6,.9,'日期 '+today());text(x1*.75+1,z0+4.8,.9,'單位 mm（1:1）');}
   const head=['0','SECTION','2','HEADER','9','$ACADVER','1','AC1009','9','$DWGCODEPAGE','3','ANSI_950','9','$INSUNITS','70','4','0','ENDSEC','0','SECTION','2','TABLES','0','TABLE','2','STYLE','70','1','0','STYLE','2','CJK','70','0','40','0','41','1','50','0','71','0','42','2.5','3','mingliu.ttc','4','','0','ENDTAB','0','TABLE','2','LAYER','70',String(Object.keys(layers).length)];
   Object.entries(layers).forEach(([n,c])=>head.push('0','LAYER','2',n,'70','0','62',String(c),'6','CONTINUOUS'));head.push('0','ENDTAB','0','ENDSEC','0','SECTION','2','ENTITIES');
   return head.concat(L,['0','ENDSEC','0','EOF']).join('\r\n');}
@@ -5962,7 +5969,7 @@ function dxfElevation(key){const E=ELEV[key],ents=[],seen=new Set(),v=new THREE.
   if(hmin>hmax){hmin=0;hmax=10;}
   ents.push('0','LINE','8','GL','10',((hmin-5)*1000).toFixed(0),'20','0','30','0','11',((hmax+5)*1000).toFixed(0),'21','0','31','0');
   const txt=(x,y,h,t,ly='TEXT')=>ents.push('0','TEXT','8',ly,'7','CJK','10',(x*1000).toFixed(0),'20',(y*1000).toFixed(0),'30','0','40',(h*1000).toFixed(0),'1',dxfU(t));
-  txt(hmax+1,.3,.8,'GL ±0');txt(hmin,-4,1.6,($('xName').value||'預拌廠配置')+'　'+E.t);
+  txt(hmax+1,.3,.8,'GL ±0');txt(hmin,-4,1.6,($('xName').value||'預拌廠配置')+'　'+E.t);txt(hmin,-6.5,1.2,coName());
   S.items.forEach(i=>{if(['zone','parking','gate'].includes(i.type))return;const p=V(i.x,0,i.z);txt(E.h(p),labelY(i)+1,.9,labelText(i));});
   return dxfWrite({GL:7,MIXER:2,TOWER:5,SILO:1,BINS:4,HOPPER:8,BELT:3,YARD:140,PARK:8,SITE:7,ZONE:30,EQUIP:5,TEXT:7},ents);}
 $('xDxf').addEventListener('click',async()=>{const keys=[...document.querySelectorAll('[data-xd]')].filter(c=>c.checked).map(c=>c.dataset.xd);
