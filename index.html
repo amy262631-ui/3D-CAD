@@ -325,7 +325,7 @@ fieldset.must{border-color:var(--accent);background:var(--accent-soft)}
         <div class="iacts"><button class="hbtn" id="xDxf" type="button">下載 DXF</button></div>
         <div class="isect">3D 模型</div>
         <p class="note">.glb 檔，可用 Windows「3D 檢視器」、Blender、SketchUp（外掛）開啟，單位公尺。</p>
-        <div class="iacts"><button class="hbtn" id="x3d" type="button">下載 3D 模型 .glb</button></div>
+        <div class="iacts"><button class="hbtn" id="x3d" type="button">下載 3D 模型 .glb</button><button class="hbtn" id="x3dv" type="button">輸出 3D 唯讀預覽（.html）</button></div>
         <p class="note" id="xBusy" hidden></p>
       </div>
     </div>
@@ -6039,6 +6039,38 @@ function dxf(){const L=[],Y=z=>(S.L-z)*1000,X=x=>x*1000;const layers={SITE:7,EQU
   return head.concat(L,['0','ENDSEC','0','EOF']).join('\r\n');}
 $('x3d').addEventListener('click',async()=>{if(!THREE.GLTFExporter){toast('元件尚未載入，請稍候再試');return;}busy(true,'產生 3D 模型…');
   try{await saveFile(projName()+'_3D模型.glb',new Blob([await glb()]));}catch(e){toast('輸出失敗：'+e.message);}busy(false);});
+// 唯讀 3D 預覽：產生獨立 HTML（內嵌 GLB 模型），只能旋轉／縮放／平移，不能編輯
+function viewerHTML(b64,title){
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return '<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(title)+'</title><style>'+
+  'html,body{margin:0;height:100%;background:#1e2226;font-family:system-ui,"Microsoft JhengHei",sans-serif;color:#eee;overflow:hidden}'+
+  '#top{position:fixed;left:0;right:0;top:0;padding:10px 16px;background:rgba(0,0,0,.45);display:flex;gap:12px;align-items:center;z-index:2}'+
+  '#top b{font-size:15px}#top span{opacity:.7;font-size:12px}button{background:#e8642c;color:#fff;border:0;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13px}'+
+  '#hint{position:fixed;bottom:10px;left:16px;font-size:12px;opacity:.7}#msg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px}'+
+  '</style></head><body><div id="top"><b>'+esc(title)+'</b><span>唯讀 3D 預覽</span><button id="reset" type="button">重設視角</button></div><div id="msg">載入中…</div>'+
+  '<div id="hint">左鍵旋轉 ・ 滾輪縮放 ・ 右鍵平移（僅檢視，不能編輯）</div>'+
+  '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>'+
+  '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"><\/script>'+
+  '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>'+
+  '<script>(function(){var B64="'+b64+'";var bin=atob(B64);var u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);'+
+  'var scene=new THREE.Scene();scene.background=new THREE.Color(0x1e2226);'+
+  'var cam=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,0.1,5000);'+
+  'var r=new THREE.WebGLRenderer({antialias:true});r.setPixelRatio(devicePixelRatio);r.setSize(innerWidth,innerHeight);document.body.appendChild(r.domElement);'+
+  'scene.add(new THREE.HemisphereLight(0xffffff,0x556070,0.9));var d=new THREE.DirectionalLight(0xffffff,0.8);d.position.set(1,2,1.5);scene.add(d);'+
+  'var ctl=new THREE.OrbitControls(cam,r.domElement);ctl.enableDamping=true;ctl.screenSpacePanning=true;var home=null;'+
+  'new THREE.GLTFLoader().parse(u.buffer,"",function(g){scene.add(g.scene);var box=new THREE.Box3().setFromObject(g.scene);'+
+  'var c=box.getCenter(new THREE.Vector3()),s=box.getSize(new THREE.Vector3());var R=Math.max(s.x,s.y,s.z)||10;'+
+  'ctl.target.copy(c);cam.position.set(c.x+R*0.9,c.y+R*0.7,c.z+R*0.9);cam.near=R/500;cam.far=R*20;cam.updateProjectionMatrix();'+
+  'home={p:cam.position.clone(),t:c.clone()};document.getElementById("msg").style.display="none";},'+
+  'function(){document.getElementById("msg").textContent="載入失敗";});'+
+  'document.getElementById("reset").onclick=function(){if(home){cam.position.copy(home.p);ctl.target.copy(home.t);}};'+
+  'addEventListener("resize",function(){cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();r.setSize(innerWidth,innerHeight);});'+
+  '(function loop(){requestAnimationFrame(loop);ctl.update();r.render(scene,cam);})();})();<\/script></body></html>';
+}
+$('x3dv').addEventListener('click',async()=>{if(!THREE.GLTFExporter){toast('元件尚未載入，請稍候再試');return;}busy(true,'產生 3D 唯讀預覽…');
+  try{const buf=new Uint8Array(await glb());let bin='';for(let i=0;i<buf.length;i+=0x8000)bin+=String.fromCharCode.apply(null,buf.subarray(i,i+0x8000));
+    const html=viewerHTML(btoa(bin),projName()+' 3D 預覽');
+    await saveFile(projName()+'_3D唯讀預覽.html',new Blob([html],{type:'text/html'}));}catch(e){toast('輸出失敗：'+e.message);}busy(false);});
 /* ---- elevation DXF: project mesh feature edges onto the view plane ---- */
 const EDGE_CACHE=new Map();
 // detailed imported models (mixer): draw only the projected outline in elevations — rasterise the triangles at 2 cm,
